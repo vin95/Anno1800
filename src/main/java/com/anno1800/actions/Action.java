@@ -10,8 +10,14 @@ import com.anno1800.Boardtiles.Island;
 /**
  * Represents all possible player actions in the game.
  * Sealed interface ensures all action types are known at compile time.
+ * All permitted subtypes are defined as nested records within this interface.
  */
-public sealed interface Action {
+public sealed interface Action permits 
+    Action.BuildFactory, Action.BuildShipyard, Action.BuildShips,
+    Action.FulfillNeeds, Action.FulfillNeed, Action.UpgradeResident, 
+    Action.SettleResident, Action.DiscoverIsland, Action.Expedition, 
+    Action.Carneval, Action.AssignWorker, Action.ProduceGoods, 
+    Action.TradeGoods, Action.EndCurrentPhase, Action.DrawResidentCard {
     
     /**
      * Action: Build a factory

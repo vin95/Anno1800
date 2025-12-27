@@ -56,11 +56,11 @@ public class Board {
     // New World Islands
     private final Deque<NewWorldIsland> newWorldIslands;
 
-    private int farmers = 20;
-    private int workers = 15;
-    private int artisans = 10;
-    private int engineers = 7;
-    private int investors = 5;
+    private int farmers = 25;
+    private int workers = 40;
+    private int artisans = 25;
+    private int engineers = 20;
+    private int investors = 15;
 
     private int gold = 100;
 

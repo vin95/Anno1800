@@ -35,7 +35,7 @@ public class FactoryFactory {
                 Factory factoryTemplate = FactoryData.getFactory(factoryType);
                 // Create a new instance for each copy
                 Factory factoryCopy = new Factory(
-                    factoryTemplate.type(),
+                    factoryTemplate.getType(),
                     factoryTemplate.costs(),
                     factoryTemplate.produces(),
                     factoryTemplate.populationLevel()

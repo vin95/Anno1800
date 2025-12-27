@@ -1,6 +1,5 @@
 package com.anno1800.Boardtiles;
 
-import com.anno1800.data.Factories;
 import com.anno1800.data.Goods;
 import com.anno1800.residents.Resident;
 
@@ -9,25 +8,20 @@ import com.anno1800.residents.Resident;
  * Each factory type can exist twice in the game.
  * All factories have exactly 2 worker slots.
  */
-public class Factory {
-    private final Factories type;
+public class Factory extends Producer {
     private final Goods[] costs;
     private final Goods produces;
     private final int populationLevel;
-    private Resident slot1;  // nicht final - kann geändert werden
+    private Resident slot1;
     private Resident slot2;
 
-    public Factory(Factories type, Goods[] costs, Goods produces, int populationLevel) {
-        this.type = type;
+    public Factory(Producers type, Goods[] costs, Goods produces, int populationLevel) {
+        super(type);
         this.costs = costs;
         this.produces = produces;
         this.populationLevel = populationLevel;
         this.slot1 = null;
         this.slot2 = null;
-    }
-
-    public Factories type() {
-        return type;
     }
 
     public Goods[] costs() {

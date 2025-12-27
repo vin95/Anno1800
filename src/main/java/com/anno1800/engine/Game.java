@@ -1,5 +1,7 @@
 package com.anno1800.engine;
 
+import com.anno1800.actions.Action;
+import com.anno1800.actions.ActionHandler;
 import com.anno1800.board.Board;
 import com.anno1800.player.Player;
 
@@ -9,6 +11,7 @@ import com.anno1800.player.Player;
 public class Game {
     private final Board board;
     private Player[] players;
+    private final ActionHandler actionHandler;
     
     // Game state tracking
     private int currentRound;
@@ -17,12 +20,23 @@ public class Game {
     
     public Game(int numPlayers) {
         this.board = Board.initializeBoard(numPlayers);
-        this.players = Player.initializePlayers(numPlayers);
+        this.players = Player.initializePlayers(numPlayers, this.board);
+        this.actionHandler = new ActionHandler(this);
         
         // Initialize game state
         this.currentRound = 1;
         this.currentPhase = Phase.PRODUCTION;
         this.currentPlayerIndex = 0;
+    }
+    
+    /**
+     * Execute a player action.
+     * 
+     * @param action The action to execute
+     * @return true if action was successful
+     */
+    public boolean executeAction(Action action) {
+        return actionHandler.execute(action, getCurrentPlayer());
     }
     
     /**

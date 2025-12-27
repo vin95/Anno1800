@@ -1,7 +1,27 @@
-package com.anno1800.data;
+package com.anno1800.Boardtiles;
 
-public enum Factories {
+/**
+ * Unified enum containing all producer types from Factories, Plantations, and StartFactories.
+ * This enum combines all production buildings available in the game.
+ */
+public enum Producers {
     
+    // === START FACTORIES ===
+    // Green Materials - Basic Resources
+    SAWMILL_GREEN("Sawmill Green"),
+    GRAIN_FARM_GREEN("Grain Farm"),
+    POTATO_FARM_GREEN("Potato Farm"),
+    PIG_FARM_GREEN("Pig Farm"),
+    SHEEP_FARM_GREEN("Sheep Farm"),
+    
+    // Red Materials - Artisan Goods (Start)
+    COAL_MINE_RED("Coal Mine Red"),
+    BRICK_FACTORY_RED("Brick Factory Red"),
+    WAREHOUSE_RED("Warehouse Red"),
+    STEEL_WORKS_RED("Steel Works Red"),
+    SAILMAKERS_RED("Sailmakers Red"),
+    
+    // === FACTORIES ===
     // Blue Materials - Worker Goods
     SAWMILL_BLUE("Sawmill Blue"),
     COAL_MINE_BLUE("Coal Mine Blue"),
@@ -41,11 +61,20 @@ public enum Factories {
     BICYCLE_FACTORY_PURPLE("Bicycle Factory"),
     LIGHT_BULB_FACTORY_PURPLE("Light Bulb Factory"),
     GRAMOPHONE_FACTORY_PURPLE("Gramophone Factory"),
-    HEAVY_WEAPONS_FACTORY_PURPLE("Heavy Weapons Factory");
+    HEAVY_WEAPONS_FACTORY_PURPLE("Heavy Weapons Factory"),
+    
+    // === PLANTATIONS ===
+    // New World Materials
+    CACAO_PLANTATION("Cacao Plantation"),
+    SUGAR_PLANTATION("Sugar Plantation"),
+    TOBACCO_PLANTATION("Tobacco Plantation"),
+    COFFEE_PLANTATION("Coffee Plantation"),
+    COTTON_PLANTATION("Cotton Plantation"),
+    RUBBER_PLANTATION("Rubber Plantation");
 
     private final String displayName;
 
-    Factories(String displayName) {
+    Producers(String displayName) {
         this.displayName = displayName;
     }
 

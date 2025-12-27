@@ -1,11 +1,12 @@
 package com.anno1800.player;
 
-import static com.anno1800.data.Factories.*;
+import static com.anno1800.Boardtiles.Producers.*;
 
 import com.anno1800.Boardtiles.ExplorerShip;
 import com.anno1800.Boardtiles.Factory;
 import com.anno1800.Boardtiles.Shipyard;
 import com.anno1800.Boardtiles.TradeShip;
+import com.anno1800.board.Board;
 import com.anno1800.data.FactoryData;
 import com.anno1800.residents.Resident;
 import com.anno1800.residents.ResidentStatus;
@@ -14,6 +15,7 @@ public class PlayerBoard {
     int freeLandTiles = 0;
     int freeCoastTiles = 4;
     int freeSeaTiles = 2;
+    int gold = 0;
     
     Factory[] factories = new Factory[]{
         copyFactory(SAWMILL_GREEN),
@@ -56,7 +58,22 @@ public class PlayerBoard {
         new Resident(3, ResidentStatus.FIT)
     };
     
-    public PlayerBoard() {
+    public PlayerBoard(Board board) {
+        for (Resident resident : residents) {
+            switch (resident.getPopulationLevel()) {
+                case 1:
+                    board.takeFarmer();
+                    break;
+                case 2:
+                    board.takeWorker();
+                    break;
+                case 3:
+                    board.takeArtisan();
+                    break;
+                default:
+                    break;
+            }
+        }        
     }
 
     public Resident[] getResidents() {
@@ -90,15 +107,23 @@ public class PlayerBoard {
     public ExplorerShip[] getExplorerShips() {
         return explorerShips;
     }
+
+    public int getGold() {
+        return gold;
+    }
+
+    public void adGold(int gold) {
+        this.gold = this.gold + gold;
+    }
     
     /**
      * Creates a new Factory instance based on the template from FactoryData.
      * Each player gets their own Factory instances.
      */
-    private static Factory copyFactory(com.anno1800.data.Factories type) {
-        Factory template = FactoryData.getFactory(type);
+    private static Factory copyFactory(com.anno1800.Boardtiles.Producers type) {
+        Factory template = (Factory) FactoryData.getProducer(type);
         return new Factory(
-            template.type(),
+            template.getType(),
             template.costs(),
             template.produces(),
             template.populationLevel()

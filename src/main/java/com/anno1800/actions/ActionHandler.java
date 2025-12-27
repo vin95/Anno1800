@@ -53,7 +53,6 @@ public class ActionHandler {
      * Build a factory on a free land tile.
      */
     private boolean buildFactory(Player player, Factory factory) {
-        // TODO: Implement factory building logic
         // 1. Check if player has a free land tile
         // 2. Check if player has required resources (factory.costs())
         // 3. Deduct resources

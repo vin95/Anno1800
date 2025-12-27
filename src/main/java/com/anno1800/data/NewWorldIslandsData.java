@@ -3,9 +3,9 @@ package com.anno1800.data;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import com.anno1800.Boardtiles.Factory;
+import com.anno1800.Boardtiles.Plantation;
 import com.anno1800.Boardtiles.NewWorldIsland;
-import static com.anno1800.data.Factories.*;
+import static com.anno1800.Boardtiles.Producers.*;
 
 public class NewWorldIslandsData {
     public static Deque<NewWorldIsland> createNewWorldIslands() {
@@ -13,80 +13,80 @@ public class NewWorldIslandsData {
 
         islands.add(
             new NewWorldIsland(
-                new Factory[]{
-                    FactoryData.getFactory(COTTON_PLANTATION),
-                    FactoryData.getFactory(CACAO_PLANTATION),
-                    FactoryData.getFactory(TOBACCO_PLANTATION)
+                new Plantation[]{
+                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
+                    (Plantation) FactoryData.getProducer(CACAO_PLANTATION),
+                    (Plantation) FactoryData.getProducer(TOBACCO_PLANTATION)
                 }
             )
         );
 
         islands.add(
             new NewWorldIsland(
-                new Factory[]{
-                    FactoryData.getFactory(COTTON_PLANTATION),
-                    FactoryData.getFactory(COFFEE_PLANTATION),
-                    FactoryData.getFactory(RUBBER_PLANTATION)
+                new Plantation[]{
+                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
+                    (Plantation) FactoryData.getProducer(COFFEE_PLANTATION),
+                    (Plantation) FactoryData.getProducer(RUBBER_PLANTATION)
                 }
             )
         );
 
         islands.add(
             new NewWorldIsland(
-                new Factory[]{
-                    FactoryData.getFactory(COTTON_PLANTATION),
-                    FactoryData.getFactory(SUGAR_PLANTATION),
-                    FactoryData.getFactory(COFFEE_PLANTATION),
+                new Plantation[]{
+                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
+                    (Plantation) FactoryData.getProducer(SUGAR_PLANTATION),
+                    (Plantation) FactoryData.getProducer(COFFEE_PLANTATION)
                 }
             )
         );
 
         islands.add(
             new NewWorldIsland(
-                new Factory[]{
-                    FactoryData.getFactory(COTTON_PLANTATION),
-                    FactoryData.getFactory(CACAO_PLANTATION),
-                    FactoryData.getFactory(SUGAR_PLANTATION)
+                new Plantation[]{
+                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
+                    (Plantation) FactoryData.getProducer(CACAO_PLANTATION),
+                    (Plantation) FactoryData.getProducer(SUGAR_PLANTATION)
                 }
             )
         );
 
         islands.add(
             new NewWorldIsland(
-                new Factory[]{
-                    FactoryData.getFactory(COTTON_PLANTATION),
-                    FactoryData.getFactory(TOBACCO_PLANTATION),
-                    FactoryData.getFactory(RUBBER_PLANTATION)
+                new Plantation[]{
+                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
+                    (Plantation) FactoryData.getProducer(TOBACCO_PLANTATION),
+                    (Plantation) FactoryData.getProducer(RUBBER_PLANTATION)
                 }
             )
         );
 
         islands.add(
             new NewWorldIsland(
-                new Factory[]{
-                    FactoryData.getFactory(COTTON_PLANTATION),
-                    FactoryData.getFactory(COFFEE_PLANTATION),
-                    FactoryData.getFactory(TOBACCO_PLANTATION)
+                new Plantation[]{
+                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
+                    (Plantation) FactoryData.getProducer(COFFEE_PLANTATION),
+                    (Plantation) FactoryData.getProducer(TOBACCO_PLANTATION)
                 }
             )
         );
 
         islands.add(
             new NewWorldIsland(
-                new Factory[]{
-                    FactoryData.getFactory(COTTON_PLANTATION),
-                    FactoryData.getFactory(RUBBER_PLANTATION),
-                    FactoryData.getFactory(SUGAR_PLANTATION)
+                new Plantation[]{
+                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
+                    (Plantation) FactoryData.getProducer(RUBBER_PLANTATION),
+                    (Plantation) FactoryData.getProducer(SUGAR_PLANTATION)
                 }
             )
         );
 
         islands.add(
             new NewWorldIsland(
-                new Factory[]{
-                    FactoryData.getFactory(COTTON_PLANTATION),
-                    FactoryData.getFactory(CACAO_PLANTATION),
-                    FactoryData.getFactory(RUBBER_PLANTATION)
+                new Plantation[]{
+                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
+                    (Plantation) FactoryData.getProducer(CACAO_PLANTATION),
+                    (Plantation) FactoryData.getProducer(RUBBER_PLANTATION)
                 }
             )
         );
