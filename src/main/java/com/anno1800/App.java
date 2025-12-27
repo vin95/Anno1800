@@ -1,18 +1,11 @@
 package com.anno1800;
 
+import com.anno1800.engine.Game;
+
 public class App {
-    private final String name;
-
-    public App(String name) {
-        this.name = name;
-    }
-
-    public String greet() {
-        return "Hello from Java, " + name + "!";
-    }
-
     public static void main(String[] args) {
-        App example = new App("Anno 1800");
-        System.out.println(example.greet());
+        int numPlayers = 2;
+        Game game = new Game(numPlayers);
+        game.start();
     }
 }

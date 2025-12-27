@@ -1,20 +1,68 @@
 package com.anno1800.Boardtiles;
 
+import com.anno1800.data.Factories;
 import com.anno1800.data.Goods;
+import com.anno1800.residents.Resident;
 
 /**
  * Represents a production facility.
  * Each factory type can exist twice in the game.
- * 
- * @param costs Input goods required for building this factory
- * @param produces Output good produced by this factory
- * @param workspaces Number of worker slots
- * @param populationLevel Required population level to use this factory
+ * All factories have exactly 2 worker slots.
  */
-public record Factory(
-    Goods[] costs,
-    Goods produces,
-    int workspaces,
-    int populationLevel
-) {
+public class Factory {
+    private final Factories type;
+    private final Goods[] costs;
+    private final Goods produces;
+    private final int populationLevel;
+    private Resident slot1;  // nicht final - kann geändert werden
+    private Resident slot2;
+
+    public Factory(Factories type, Goods[] costs, Goods produces, int populationLevel) {
+        this.type = type;
+        this.costs = costs;
+        this.produces = produces;
+        this.populationLevel = populationLevel;
+        this.slot1 = null;
+        this.slot2 = null;
+    }
+
+    public Factories type() {
+        return type;
+    }
+
+    public Goods[] costs() {
+        return costs;
+    }
+
+    public Goods produces() {
+        return produces;
+    }
+
+    public int populationLevel() {
+        return populationLevel;
+    }
+
+    public Resident getSlot1() {
+        return slot1;
+    }
+
+    public void setSlot1(Resident slot1) {
+        this.slot1 = slot1;
+    }
+
+    public Resident getSlot2() {
+        return slot2;
+    }
+
+    public void setSlot2(Resident slot2) {
+        this.slot2 = slot2;
+    }
+
+    /**
+     * @return Number of worker slots (always 2 for all factories)
+     */
+    public int workspaces() {
+        return 2;
+    }
 }
+

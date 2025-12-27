@@ -1,5 +1,6 @@
-package com.anno1800.cards;
+package com.anno1800.Rewards;
 
+import com.anno1800.Boardtiles.Factory;
 import com.anno1800.data.Goods;
 
 /**
@@ -12,11 +13,21 @@ public sealed interface Reward {
      * Reward: Additional residents
      */
     record NewResidents(int amount, int populationLevel) implements Reward { }
+
+    /**
+     * Reward: Additional residents
+     */
+    record UpgradeResidents(int amount, int populationLevel1, int populationLevel2) implements Reward { }
     
     /**
      * Reward: Extra action in this turn
      */
     record ExtraAction() implements Reward { }
+
+    /**
+     * Reward: 2 ExpeditionCards
+     */
+    record ExpeditionCards() implements Reward { }
     
     /**
      * Reward: Free goods
@@ -24,6 +35,19 @@ public sealed interface Reward {
     record FreeGoods(Goods good, int amount) implements Reward {
         public FreeGoods(Goods good) {
             this(good, 1);
+        }
+    }
+    
+    /**
+     * Reward: Free goods - player can choose 1 out of N options
+     * The actual choice is made when the reward is executed.
+     * 
+     * @param options Array of goods to choose from
+     * @param amount Number of units of the chosen good to receive
+     */
+    record FreeGoodsChoice(Goods[] options, int amount) implements Reward {
+        public FreeGoodsChoice(Goods[] options) {
+            this(options, 1);
         }
     }
     
@@ -55,4 +79,13 @@ public sealed interface Reward {
             this(2);
         }
     }
+
+    /**
+     * Reward: build a factory on a free land tile.
+     * This reward only occurs when a player has drawn an "Alte Welt Tile" card immediately before.
+     * The factory will be built on one of the player's free land tiles.
+     * 
+     * @param factoryType The type of factory to build (null if player can choose)
+     */
+    record BuildFactory(Factory factoryType) implements Reward { }
 }

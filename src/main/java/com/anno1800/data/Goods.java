@@ -7,7 +7,7 @@ package com.anno1800.data;
 public enum Goods {
     // green Materials
     PLANKS("Planks"),
-    CORN("Corn"),
+    GRAIN("Grain"),
     POTATOES("Potatoes"),
     PIGS("Pigs"),
     WOOL("Wool"),
@@ -49,7 +49,7 @@ public enum Goods {
     CARS("Cars"),
     HIGHBIKES("Highbikes"),
     LIGHT_BULBS("Light Bulbs"),
-    PHONOGRAPHS("Phonographs"),
+    GRAMOPHONES("Gramophones"),
     BIG_BERTA("Big Berta"),
     WORKFORCE_4("Workforce Level 4"),
 
@@ -62,7 +62,12 @@ public enum Goods {
     TOBACCO("Tobacco"),
     COFFEE_BEANS("Coffee Beans"),
     COTTON("Cotton"),
-    RUBBER("Rubber");
+    RUBBER("Rubber"),
+
+    // Shipgoods
+
+    EXPLORATIONCHIP("Exploration Chip"),
+    TRADECHIP("Trade Chip");
 
     private final String displayName;
 

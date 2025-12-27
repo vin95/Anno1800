@@ -1,72 +1,152 @@
 package com.anno1800.engine;
 
 import com.anno1800.board.Board;
-import com.anno1800.Boardtiles.ExplorerShip;
-import com.anno1800.Boardtiles.Factory;
-import com.anno1800.Boardtiles.Shipyard;
-import com.anno1800.Boardtiles.TradeShip;
-import com.anno1800.cards.ResidentCard;
-import com.anno1800.cards.RelictCard;
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import com.anno1800.player.Player;
 
 /**
  * Main game controller that manages the board and game state
  */
 public class Game {
     private final Board board;
+    private Player[] players;
     
-    public Game() {
-        this.board = initializeBoard();
+    // Game state tracking
+    private int currentRound;
+    private Phase currentPhase;
+    private int currentPlayerIndex;
+    
+    public Game(int numPlayers) {
+        this.board = Board.initializeBoard(numPlayers);
+        this.players = Player.initializePlayers(numPlayers);
+        
+        // Initialize game state
+        this.currentRound = 1;
+        this.currentPhase = Phase.PRODUCTION;
+        this.currentPlayerIndex = 0;
     }
     
     /**
-     * Initializes the game board with all card stacks
+     * Advance to the next round.
+     * Called when all players have completed their turns.
      */
-    private Board initializeBoard() {
-        // 35 Factory stacks (each with 2 factories)
-        List<Deque<Factory>> factoryStacks = new ArrayList<>(35);
-        for (int i = 0; i < 35; i++) {
-            factoryStacks.add(new ArrayDeque<>());
+    public void nextRound() {
+        currentRound++;
+        currentPlayerIndex = 0;  // Reset to first player
+        currentPhase = Phase.PRODUCTION;  // Reset to first phase
+        
+        System.out.println("=== Round " + currentRound + " begins ===");
+    }
+    
+    /**
+     * Advance to the next phase for the current player.
+     */
+    public void nextPhase() {
+        Phase[] phases = Phase.values();
+        int currentPhaseIndex = currentPhase.ordinal();
+        
+        if (currentPhaseIndex < phases.length - 1) {
+            // Move to next phase
+            currentPhase = phases[currentPhaseIndex + 1];
+        } else {
+            // End of turn - move to next player
+            nextPlayer();
         }
+    }
+    
+    /**
+     * Advance to the next player.
+     * If it was the last player, advance to the next round.
+     */
+    private void nextPlayer() {
+        currentPlayerIndex++;
         
-        // 3 Resident card stacks
-        Deque<ResidentCard> residentStack1 = new ArrayDeque<>();
-        Deque<ResidentCard> residentStack2 = new ArrayDeque<>();
-        Deque<ResidentCard> residentStack3 = new ArrayDeque<>();
-        
-        // 1 Relict card stack
-        Deque<RelictCard> relictStack = new ArrayDeque<>();
-        
-        // 3 Shipyard stacks (Level 1-3)
-        Deque<Shipyard> shipyardLevel1 = new ArrayDeque<>();
-        Deque<Shipyard> shipyardLevel2 = new ArrayDeque<>();
-        Deque<Shipyard> shipyardLevel3 = new ArrayDeque<>();
-        
-        // 3 Trade ship stacks (Level 1-3)
-        Deque<TradeShip> tradeShipLevel1 = new ArrayDeque<>();
-        Deque<TradeShip> tradeShipLevel2 = new ArrayDeque<>();
-        Deque<TradeShip> tradeShipLevel3 = new ArrayDeque<>();
-        
-        // 3 Explorer ship stacks (Level 1-3)
-        Deque<ExplorerShip> explorerShipLevel1 = new ArrayDeque<>();
-        Deque<ExplorerShip> explorerShipLevel2 = new ArrayDeque<>();
-        Deque<ExplorerShip> explorerShipLevel3 = new ArrayDeque<>();
-        
-        return new Board(
-            factoryStacks,
-            residentStack1, residentStack2, residentStack3,
-            relictStack,
-            shipyardLevel1, shipyardLevel2, shipyardLevel3,
-            tradeShipLevel1, tradeShipLevel2, tradeShipLevel3,
-            explorerShipLevel1, explorerShipLevel2, explorerShipLevel3
+        if (currentPlayerIndex >= players.length) {
+            // All players have finished - start new round
+            nextRound();
+        } else {
+            // Next player starts with first phase
+            currentPhase = Phase.PRODUCTION;
+        }
+    }
+    
+    /**
+     * Get the current round number.
+     * 
+     * @return Current round (starts at 1)
+     */
+    public int getCurrentRound() {
+        return currentRound;
+    }
+    
+    /**
+     * Get the current game phase.
+     * 
+     * @return Current phase
+     */
+    public Phase getCurrentPhase() {
+        return currentPhase;
+    }
+    
+    /**
+     * Get the index of the current player.
+     * 
+     * @return Current player index (0-based)
+     */
+    public int getCurrentPlayerIndex() {
+        return currentPlayerIndex;
+    }
+    
+    /**
+     * Get the current player.
+     * 
+     * @return Current player
+     */
+    public Player getCurrentPlayer() {
+        return players[currentPlayerIndex];
+    }
+    
+    /**
+     * Create a snapshot of the current game state.
+     * 
+     * @return Immutable GameState snapshot
+     */
+    public GameState getState() {
+        return GameState.createSnapshot(
+            board,
+            players,
+            currentRound,
+            currentPhase,
+            currentPlayerIndex
         );
+    }
+    
+    /**
+     * Check if the game has ended.
+     * Override this method with your game's end condition.
+     * 
+     * @return true if game is over
+     */
+    public boolean isGameOver() {
+        // TODO: Implement game end condition (e.g., max rounds, victory points)
+        return false;
+    }
+
+    public void start() {
+        System.out.println("=== Game Start ===");
+        System.out.println("Players: " + players.length);
+        System.out.println("Starting Round: " + currentRound);
+        
+        // TODO: Implement game loop
+        // while (!isGameOver()) {
+        //     playTurn();
+        // }
     }
     
     public Board getBoard() {
         return board;
+    }
+    
+    public Player[] getPlayers() {
+        return players;
     }
 }

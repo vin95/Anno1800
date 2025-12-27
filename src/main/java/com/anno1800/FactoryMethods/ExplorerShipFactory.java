@@ -2,8 +2,8 @@ package com.anno1800.FactoryMethods;
 
 import com.anno1800.Boardtiles.ExplorerShip;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 /**
  * Factory class for creating predefined ExplorerShip instances
@@ -13,8 +13,8 @@ public class ExplorerShipFactory {
     /**
      * Creates explorer ships for Level 1
      */
-    public static List<ExplorerShip> createLevel1Ships(int count) {
-        List<ExplorerShip> ships = new ArrayList<>();
+    public static Deque<ExplorerShip> createLevel1Ships(int count) {
+        Deque<ExplorerShip> ships = new ArrayDeque<>();
         for (int i = 0; i < count; i++) {
             ships.add(new ExplorerShip(1));
         }
@@ -24,8 +24,8 @@ public class ExplorerShipFactory {
     /**
      * Creates explorer ships for Level 2
      */
-    public static List<ExplorerShip> createLevel2Ships(int count) {
-        List<ExplorerShip> ships = new ArrayList<>();
+    public static Deque<ExplorerShip> createLevel2Ships(int count) {
+        Deque<ExplorerShip> ships = new ArrayDeque<>();
         for (int i = 0; i < count; i++) {
             ships.add(new ExplorerShip(2));
         }
@@ -35,8 +35,8 @@ public class ExplorerShipFactory {
     /**
      * Creates explorer ships for Level 3
      */
-    public static List<ExplorerShip> createLevel3Ships(int count) {
-        List<ExplorerShip> ships = new ArrayList<>();
+    public static Deque<ExplorerShip> createLevel3Ships(int count) {
+        Deque<ExplorerShip> ships = new ArrayDeque<>();
         for (int i = 0; i < count; i++) {
             ships.add(new ExplorerShip(3));
         }

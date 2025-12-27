@@ -3,10 +3,10 @@ package com.anno1800.cards;
 import com.anno1800.residents.Resident;
 
 /**
- * Relict card with two slots for residents.
+ * Expedition card (also known as Relict card) with two slots for residents.
  * Grants points when residents with matching population level are placed.
  */
-public class RelictCard {
+public class ExpeditionCard {
     private final int requiredPopulationLevel1;
     private final int requiredPopulationLevel2;
     private final int pointsForSlot1;
@@ -14,7 +14,7 @@ public class RelictCard {
     private Resident slot1;  // nicht final - kann geändert werden
     private Resident slot2;  // nicht final - kann geändert werden
 
-    public RelictCard(int requiredPopulationLevel1, int requiredPopulationLevel2, 
+    public ExpeditionCard(int requiredPopulationLevel1, int requiredPopulationLevel2, 
                      int pointsForSlot1, int pointsForSlot2) {
         this.requiredPopulationLevel1 = requiredPopulationLevel1;
         this.requiredPopulationLevel2 = requiredPopulationLevel2;

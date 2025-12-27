@@ -1,5 +1,6 @@
 package com.anno1800.cards;
 
+import com.anno1800.Rewards.Reward;
 import com.anno1800.data.Goods;
 
 public record ResidentCard(
