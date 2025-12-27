@@ -1,111 +1,81 @@
 package com.anno1800.player;
 
-import static com.anno1800.Boardtiles.Producers.*;
-
 import com.anno1800.Boardtiles.ExplorerShip;
 import com.anno1800.Boardtiles.Factory;
 import com.anno1800.Boardtiles.Shipyard;
 import com.anno1800.Boardtiles.TradeShip;
-import com.anno1800.board.Board;
+import com.anno1800.Boardtiles.shipType;
 import com.anno1800.data.FactoryData;
 import com.anno1800.residents.Resident;
-import com.anno1800.residents.ResidentStatus;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class PlayerBoard {
-    int freeLandTiles = 0;
-    int freeCoastTiles = 4;
-    int freeSeaTiles = 2;
+    
+    public enum ShipType {
+        ExplorerShip,
+        TradeShip
+    }
+    
+    int landTiles = 10;
+    int coastTiles = 5;
+    int seaTiles = 5;
+    int numShips = 0;
+    int numFactories = 0;
+    int numFactoriesOnCoast = 0;
+    int numShipyards = 0;
     int gold = 0;
     
-    Factory[] factories = new Factory[]{
-        copyFactory(SAWMILL_GREEN),
-        copyFactory(GRAIN_FARM_GREEN),
-        copyFactory(POTATO_FARM_GREEN),
-        copyFactory(PIG_FARM_GREEN),
-        copyFactory(SHEEP_FARM_GREEN),
-        copyFactory(COAL_MINE_RED),
-        copyFactory(BRICK_FACTORY_RED),
-        copyFactory(WAREHOUSE_RED),
-        copyFactory(STEEL_WORKS_RED),
-        copyFactory(SAILMAKERS_RED)
-    };
+    Factory[] factories = new Factory[15];
     
-    Shipyard[] shipyards = new Shipyard[]{
-        new Shipyard(1)
-    };
+    ArrayList<Shipyard> shipyards = new ArrayList<>();
 
-    TradeShip[] tradeShips = new TradeShip[]{
-        new TradeShip(1), 
-        new TradeShip(1)
-    };
+    ArrayList<TradeShip> tradeShips = new ArrayList<>();
 
-    ExplorerShip[] explorerShips = new ExplorerShip[]{
-        new ExplorerShip(1)
-    };
+    ArrayList<ExplorerShip> explorerShips = new ArrayList<>();
     
-    Resident[] residents = new Resident[]{
-        // 4 Level 1 residents
-        new Resident(1, ResidentStatus.FIT),
-        new Resident(1, ResidentStatus.FIT),
-        new Resident(1, ResidentStatus.FIT),
-        new Resident(1, ResidentStatus.FIT),
-        // 3 Level 2 residents
-        new Resident(2, ResidentStatus.FIT),
-        new Resident(2, ResidentStatus.FIT),
-        new Resident(2, ResidentStatus.FIT),
-        // 2 Level 3 residents
-        new Resident(3, ResidentStatus.FIT),
-        new Resident(3, ResidentStatus.FIT)
-    };
+    ArrayList<Resident> residents = new ArrayList<>();
     
-    public PlayerBoard(Board board) {
-        for (Resident resident : residents) {
-            switch (resident.getPopulationLevel()) {
-                case 1:
-                    board.takeFarmer();
-                    break;
-                case 2:
-                    board.takeWorker();
-                    break;
-                case 3:
-                    board.takeArtisan();
-                    break;
-                default:
-                    break;
-            }
-        }        
-    }
+    public PlayerBoard() {}
 
-    public Resident[] getResidents() {
+    public ArrayList<Resident> getResidents() {
         return residents;
     }
 
     public int getFreeLandTiles() {
-        return freeLandTiles;
+        return landTiles - factories.length - numFactoriesOnCoast;
     }
 
     public int getFreeCoastTiles() {
-        return freeCoastTiles;
+        return coastTiles - shipyards.size() - numFactoriesOnCoast;
     }
 
     public int getFreeSeaTiles() {
-        return freeSeaTiles;
+        return seaTiles - explorerShips.size() - tradeShips.size();
     }
 
     public Factory[] getFactories() {
         return factories;
     }
 
-    public Shipyard[] getShipyards() {
+    public ArrayList<Shipyard> getShipyards() {
         return shipyards;
     }
 
-    public TradeShip[] getTradeShips() {
+    public ArrayList<TradeShip> getTradeShips() {
         return tradeShips;
     }
 
-    public ExplorerShip[] getExplorerShips() {
+    public ArrayList<ExplorerShip> getExplorerShips() {
         return explorerShips;
+    }
+
+    public void adShip(int level, ShipType type) {
+        switch (type) {
+            case ExplorerShip -> explorerShips.add(new ExplorerShip(level));
+            case TradeShip -> tradeShips.add(new TradeShip(level));
+        }
     }
 
     public int getGold() {
@@ -114,6 +84,14 @@ public class PlayerBoard {
 
     public void adGold(int gold) {
         this.gold = this.gold + gold;
+    }
+
+    public void initializePlayerBoard(Player player) {
+        PlayerBoard board = player.getPlayerBoard();
+        board.adShip(1, ShipType.ExplorerShip);
+        board.adShip(1, ShipType.ExplorerShip);
+        board.adShip(1, ShipType.TradeShip);
+
     }
     
     /**

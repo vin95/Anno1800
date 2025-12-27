@@ -19,7 +19,6 @@ public record GameState(
     // Game metadata
     Instant timestamp,
     int round,
-    Phase currentPhase,
     int currentPlayerIndex,
     
     // Shared game board state
@@ -35,7 +34,6 @@ public record GameState(
      * @param board The shared game board
      * @param players Array of all players
      * @param round Current round number
-     * @param phase Current game phase
      * @param currentPlayerIndex Index of the current player
      * @return Immutable GameState snapshot
      */
@@ -43,13 +41,11 @@ public record GameState(
         Board board, 
         Player[] players, 
         int round, 
-        Phase phase, 
         int currentPlayerIndex
     ) {
         return new GameState(
             Instant.now(),
             round,
-            phase,
             currentPlayerIndex,
             BoardState.fromBoard(board),
             PlayerState.fromPlayers(players)
@@ -177,7 +173,7 @@ public record GameState(
             var board = player.getPlayerBoard();
             
             // Count residents
-            var residents = java.util.Arrays.stream(board.getResidents())
+            var residents = board.getResidents().stream()
                 .map(r -> new ResidentSummary(
                     r.getPopulationLevel(),
                     r.getStatus().name()
@@ -190,10 +186,10 @@ public record GameState(
                 board.getFreeCoastTiles(),
                 board.getFreeSeaTiles(),
                 board.getFactories().length,
-                board.getShipyards().length,
-                board.getTradeShips().length,
-                board.getExplorerShips().length,
-                board.getResidents().length,
+                board.getShipyards().size(),
+                board.getTradeShips().size(),
+                board.getExplorerShips().size(),
+                board.getResidents().size(),
                 residents
             );
         }

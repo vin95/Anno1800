@@ -41,8 +41,6 @@ public class ActionHandler {
                 upgradeResident(player, amount, residentLevel);
             case Action.FulfillNeeds(ResidentCard residentCard, Goods[] good) -> 
                 fulfillNeeds(player, residentCard, good);
-            case Action.EndCurrentPhase() -> 
-                endCurrentPhase(player);
             case Action.DrawResidentCard() -> 
                 drawResidentCard(player);
             default -> throw new IllegalArgumentException("Unknown action type: " + action);
@@ -137,18 +135,6 @@ public class ActionHandler {
         // 2. Check if player has the required good
         // 3. Deduct good from inventory
         // 4. Grant reward based on resident level and good type
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
-    
-    /**
-     * End the current game phase.
-     */
-    private boolean endCurrentPhase(Player player) {
-        // TODO: Implement phase ending logic
-        // 1. Validate that player can end the phase
-        // 2. Trigger end-of-phase actions
-        // 3. Reset workers to FIT status
-        // 4. Move to next phase or next player
         throw new UnsupportedOperationException("Not implemented yet");
     }
     

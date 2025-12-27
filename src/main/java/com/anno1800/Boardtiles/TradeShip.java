@@ -1,6 +1,6 @@
 package com.anno1800.Boardtiles;
 
-public class TradeShip {
+public class TradeShip implements shipType {
     private int level;
     private int activeTradeChips;
 

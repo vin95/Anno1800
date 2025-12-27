@@ -35,7 +35,6 @@ public class ActionValidator {
             case Action.DiscoverIsland discoverIsland -> canDiscoverIsland(discoverIsland, player);
             case Action.Expedition expedition -> canExpedition(expedition, player);
             case Action.Carneval carneval -> canCarneval(carneval, player);
-            case Action.EndCurrentPhase endPhase -> true; // Always possible
         };
     }
     

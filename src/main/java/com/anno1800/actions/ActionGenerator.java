@@ -33,9 +33,6 @@ public class ActionGenerator {
         // actions.addAll(generateSettleResidentActions(player, game));
         // etc.
         
-        // Always possible: End current phase
-        actions.add(new Action.EndCurrentPhase());
-        
         return actions;
     }
     

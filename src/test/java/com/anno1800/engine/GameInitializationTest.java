@@ -118,8 +118,8 @@ class GameInitializationTest {
             Player[] players = game.getPlayers();
             for (Player player : players) {
                 assertNotNull(player.getPlayerBoard().getResidents(),
-                    player.getName() + " should have residents array");
-                assertTrue(player.getPlayerBoard().getResidents().length > 0,
+                    player.getName() + " should have residents list");
+                assertTrue(player.getPlayerBoard().getResidents().size() > 0,
                     player.getName() + " should have at least one resident");
             }
         }
@@ -130,9 +130,9 @@ class GameInitializationTest {
             Player[] players = game.getPlayers();
             for (Player player : players) {
                 assertNotNull(player.getPlayerBoard().getTradeShips(),
-                    player.getName() + " should have trade ships");
+                    player.getName() + " should have trade ships list");
                 assertNotNull(player.getPlayerBoard().getExplorerShips(),
-                    player.getName() + " should have explorer ships");
+                    player.getName() + " should have explorer ships list");
             }
         }
 
@@ -142,8 +142,8 @@ class GameInitializationTest {
             Player[] players = game.getPlayers();
             for (Player player : players) {
                 assertNotNull(player.getPlayerBoard().getShipyards(),
-                    player.getName() + " should have shipyards");
-                assertTrue(player.getPlayerBoard().getShipyards().length > 0,
+                    player.getName() + " should have shipyards list");
+                assertTrue(player.getPlayerBoard().getShipyards().size() > 0,
                     player.getName() + " should have at least one shipyard");
             }
         }

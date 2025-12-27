@@ -38,9 +38,8 @@ public class GameStatePrinter {
      * @param state The game state to print
      */
     public void printSummary(GameState state) {
-        System.out.printf("Round %d | Phase: %s | Current Player: %s%n",
+        System.out.printf("Round %d | Current Player: %s%n",
             state.round(),
-            state.currentPhase().getDisplayName(),
             state.players().get(state.currentPlayerIndex()).name()
         );
     }
@@ -54,7 +53,6 @@ public class GameStatePrinter {
         System.out.println("{");
         System.out.printf("  \"timestamp\": \"%s\",%n", state.timestamp());
         System.out.printf("  \"round\": %d,%n", state.round());
-        System.out.printf("  \"phase\": \"%s\",%n", state.currentPhase());
         System.out.printf("  \"currentPlayer\": %d,%n", state.currentPlayerIndex());
         System.out.println("  \"players\": [");
         
@@ -80,7 +78,6 @@ public class GameStatePrinter {
         System.out.println("+- Game Information ----------------------------------------+");
         System.out.printf("| Timestamp:       %s%n", state.timestamp());
         System.out.printf("| Round:           %d%n", state.round());
-        System.out.printf("| Phase:           %s%n", state.currentPhase().getDisplayName());
         System.out.printf("| Current Player:  %s (Player %d)%n",
             state.players().get(state.currentPlayerIndex()).name(),
             state.currentPlayerIndex() + 1

@@ -15,8 +15,8 @@ public class Game {
     
     // Game state tracking
     private int currentRound;
-    private Phase currentPhase;
-    private int currentPlayerIndex;
+    private final int startPlayer;
+    private int currentPlayer;
     
     public Game(int numPlayers) {
         this.board = Board.initializeBoard(numPlayers);
@@ -25,8 +25,12 @@ public class Game {
         
         // Initialize game state
         this.currentRound = 1;
-        this.currentPhase = Phase.PRODUCTION;
-        this.currentPlayerIndex = 0;
+        this.startPlayer = (int) (Math.random() * numPlayers);
+        for (int i = 0; i < players.length; i++) {
+            int position = ((i - startPlayer + numPlayers) % numPlayers) + 1;
+            players[i].setPosition(position);
+        }
+        this.currentPlayer = this.startPlayer;
     }
     
     /**
@@ -45,41 +49,21 @@ public class Game {
      */
     public void nextRound() {
         currentRound++;
-        currentPlayerIndex = 0;  // Reset to first player
-        currentPhase = Phase.PRODUCTION;  // Reset to first phase
+        currentPlayer = 0;  // Reset to first player
         
         System.out.println("=== Round " + currentRound + " begins ===");
-    }
-    
-    /**
-     * Advance to the next phase for the current player.
-     */
-    public void nextPhase() {
-        Phase[] phases = Phase.values();
-        int currentPhaseIndex = currentPhase.ordinal();
-        
-        if (currentPhaseIndex < phases.length - 1) {
-            // Move to next phase
-            currentPhase = phases[currentPhaseIndex + 1];
-        } else {
-            // End of turn - move to next player
-            nextPlayer();
-        }
     }
     
     /**
      * Advance to the next player.
      * If it was the last player, advance to the next round.
      */
-    private void nextPlayer() {
-        currentPlayerIndex++;
+    public void nextPlayer() {
+        currentPlayer++;
         
-        if (currentPlayerIndex >= players.length) {
+        if (currentPlayer >= players.length) {
             // All players have finished - start new round
             nextRound();
-        } else {
-            // Next player starts with first phase
-            currentPhase = Phase.PRODUCTION;
         }
     }
     
@@ -93,21 +77,12 @@ public class Game {
     }
     
     /**
-     * Get the current game phase.
-     * 
-     * @return Current phase
-     */
-    public Phase getCurrentPhase() {
-        return currentPhase;
-    }
-    
-    /**
      * Get the index of the current player.
      * 
      * @return Current player index (0-based)
      */
     public int getCurrentPlayerIndex() {
-        return currentPlayerIndex;
+        return currentPlayer;
     }
     
     /**
@@ -116,7 +91,7 @@ public class Game {
      * @return Current player
      */
     public Player getCurrentPlayer() {
-        return players[currentPlayerIndex];
+        return players[currentPlayer];
     }
     
     /**
@@ -129,8 +104,7 @@ public class Game {
             board,
             players,
             currentRound,
-            currentPhase,
-            currentPlayerIndex
+            currentPlayer
         );
     }
     
@@ -146,6 +120,7 @@ public class Game {
     }
 
     public void start() {
+        inicializeGame();
         System.out.println("=== Game Start ===");
         System.out.println("Players: " + players.length);
         System.out.println("Starting Round: " + currentRound);
@@ -155,9 +130,19 @@ public class Game {
         //     playTurn();
         // }
     }
+
+    private void inicializeGame() {
+        for (Player player : players) {
+            player.getPlayerBoard().initializePlayerBoard(player);
+        }
+    }
     
     public Board getBoard() {
         return board;
+    }
+
+    public int getStartPlayer() {
+        return startPlayer;
     }
     
     public Player[] getPlayers() {

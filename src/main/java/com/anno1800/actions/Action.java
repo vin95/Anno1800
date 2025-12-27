@@ -17,7 +17,7 @@ public sealed interface Action permits
     Action.FulfillNeeds, Action.FulfillNeed, Action.UpgradeResident, 
     Action.SettleResident, Action.DiscoverIsland, Action.Expedition, 
     Action.Carneval, Action.AssignWorker, Action.ProduceGoods, 
-    Action.TradeGoods, Action.EndCurrentPhase, Action.DrawResidentCard {
+    Action.TradeGoods, Action.DrawResidentCard {
     
     /**
      * Action: Build a factory

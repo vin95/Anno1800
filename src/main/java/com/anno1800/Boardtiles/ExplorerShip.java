@@ -1,6 +1,6 @@
 package com.anno1800.Boardtiles;
 
-public class ExplorerShip {
+public class ExplorerShip implements shipType{
     private int level;
     private int activeExplorerChips;
 

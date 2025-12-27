@@ -1,20 +1,35 @@
 package com.anno1800.player;
 
 import com.anno1800.board.Board;
+import com.anno1800.engine.Game;
 
 public class Player {
     private final String name;
     private final PlayerBoard playerBoard;
     private final int id;
+    private int position;
 
     public Player(String name, PlayerBoard playerBoard, int id) {
         this.name = name;
         this.playerBoard = playerBoard;
         this.id = id;
+        this.position = 0;
     }
 
     public String getName() {
         return name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     public PlayerBoard getPlayerBoard() {
@@ -30,7 +45,8 @@ public class Player {
         }
         Player[] players = new Player[numPlayers];
         for (int i = 0; i < numPlayers; i++) {
-            players[i] = new Player("Player " + (i + 1), new PlayerBoard(board, i));
+            int id = i;
+            players[i] = new Player("Player " + (i + 1), new PlayerBoard(), id);
         }
         return players;
     }
