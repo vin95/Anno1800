@@ -1,0 +1,75 @@
+
+------------------------------------------ANNO 1800 - GAME STATE-------------------------------------------
+
+
++- Game Information ----------------------------------------+
+| Timestamp:       2025-12-28T16:34:26.749520300Z
+| Round:           1
+| Current Player:  Player 2 (Player 2)
++-------------------------------------------------------------+
+
++- Shared Board ----------------------------------------------+
+| Factories & Buildings:
+|   Available Factories:     35
+|   Shipyard Level 1:         4
+|   Shipyard Level 2:         6
+|   Shipyard Level 3:         4
+|
+| Ships:
+|   Trade Ship Level 1:       6
+|   Trade Ship Level 2:       6
+|   Trade Ship Level 3:       6
+|   Explorer Ship Level 1:    6
+|   Explorer Ship Level 2:    6
+|   Explorer Ship Level 3:    6
+|
+| Cards:
+|   Resident Stack 1:        32
+|   Resident Stack 2:        28
+|   Resident Stack 3:        24
+|   Total Resident Cards:    84
+|   Expedition Cards:        22
+|
+| Islands:
+|   Old World Islands:       12
+|   New World Islands:        8
+|
+| Population Pool:
+|   Farmers:                 17
+|   Workers:                 34
+|   Artisans:                21
+|   Engineers:               20
+|   Investors:               15
+|
+| Resources:
+|   Gold Pool:               83
+|   Trade Chips:             73
+|   Explorer Chips:          51
++-------------------------------------------------------------------------+
+
+  +- Player 1: Player 1                                                  -+
+  | Position:  2                                                          |
+  | Free Tiles:      Land:  0 | Coast:  4 | Sea:  2                       |
+  | Buildings:  Factories: 15 | Shipyards:  1                             |
+  | Ships:      Trade:  2 | Explorer:  1                                  |
+  | Resources:      Gold:  2                                              |
+  |   Trade Chips:     2 | Explorer Chips:  1                             |
+  | Cards:   Resident Cards:  9                                           |
+  | Residents:  Total:  9                                                 |
+  |   Level 1:  4 | Level 2:  3 | Level 3:  2 | Level 4:  0 | Level 5:  0 |
+  |   On Board:  0 | Working:  0 | Fit:  9 | Exhausted:  0                |
+  +-----------------------------------------------------------------------+
+
+> +- Player 2: Player 2                                                  -+
+> | Position:  1                                                          |
+> | Free Tiles:      Land:  0 | Coast:  4 | Sea:  2                       |
+> | Buildings:  Factories: 15 | Shipyards:  1                             |
+> | Ships:      Trade:  2 | Explorer:  1                                  |
+> | Resources:      Gold:  1                                              |
+> |   Trade Chips:     2 | Explorer Chips:  1                             |
+> | Cards:   Resident Cards:  9                                           |
+> | Residents:  Total:  9                                                 |
+> |   Level 1:  4 | Level 2:  3 | Level 3:  2 | Level 4:  0 | Level 5:  0 |
+> |   On Board:  0 | Working:  0 | Fit:  9 | Exhausted:  0                |
+> +-----------------------------------------------------------------------+
+------------------------------------------------END OF STATE------------------------------------------------

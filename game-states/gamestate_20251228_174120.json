@@ -1,0 +1,50 @@
+{
+  "timestamp": "2025-12-28T16:41:20.823637800Z",
+  "round": 1,
+  "currentPlayerIndex": 0,
+  "boardState": {
+    "availableFactories": 70,
+    "availableResidentCards": 75,
+    "farmers": 13,
+    "workers": 31,
+    "artisans": 19,
+    "engineers": 20,
+    "investors": 15,
+    "gold": 80
+  },
+  "players": [
+    {
+      "name": "Player 1",
+      "freeLandTiles": 0,
+      "freeCoastTiles": 4,
+      "freeSeaTiles": 2,
+      "factoryCount": 15,
+      "residentCount": 9,
+      "shipyardCount": 1,
+      "tradeShipCount": 2,
+      "explorerShipCount": 1
+    },
+    {
+      "name": "Player 2",
+      "freeLandTiles": 0,
+      "freeCoastTiles": 4,
+      "freeSeaTiles": 2,
+      "factoryCount": 15,
+      "residentCount": 9,
+      "shipyardCount": 1,
+      "tradeShipCount": 2,
+      "explorerShipCount": 1
+    },
+    {
+      "name": "Player 3",
+      "freeLandTiles": 0,
+      "freeCoastTiles": 4,
+      "freeSeaTiles": 2,
+      "factoryCount": 15,
+      "residentCount": 9,
+      "shipyardCount": 1,
+      "tradeShipCount": 2,
+      "explorerShipCount": 1
+    }
+  ]
+}

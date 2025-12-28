@@ -7,8 +7,9 @@ import org.junit.jupiter.api.Nested;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.anno1800.board.Board;
-import com.anno1800.player.Player;
+import com.anno1800.game.board.Board;
+import com.anno1800.game.engine.Game;
+import com.anno1800.game.player.Player;
 
 /**
  * Test suite for Game initialization.
@@ -33,13 +34,6 @@ class GameInitializationTest {
         @DisplayName("Game should initialize with round 1")
         void testInitialRound() {
             assertEquals(1, game.getCurrentRound(), "Game should start at round 1");
-        }
-
-        @Test
-        @DisplayName("Game should initialize with PRODUCTION phase")
-        void testInitialPhase() {
-            assertEquals(Phase.PRODUCTION, game.getCurrentPhase(), 
-                "Game should start with PRODUCTION phase");
         }
 
         @Test

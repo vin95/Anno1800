@@ -1,6 +1,7 @@
 package com.anno1800.engine;
 
-import com.anno1800.player.Player;
+import com.anno1800.game.engine.Game;
+import com.anno1800.game.player.Player;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.RepeatedTest;

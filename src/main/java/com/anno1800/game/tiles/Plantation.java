@@ -1,0 +1,20 @@
+package com.anno1800.game.tiles;
+
+import com.anno1800.data.gamedata.Goods;
+
+/**
+ * Represents a plantation in the New World.
+ * All plantations have exactly 2 worker slots.
+ */
+public class Plantation extends Producer {
+    private final Goods produces;
+
+    public Plantation(Producers type, Goods[] costs, Goods produces, int populationLevel) {
+        super(type);
+        this.produces = produces;
+    }
+
+    public Goods produces() {
+        return produces;
+    }
+}

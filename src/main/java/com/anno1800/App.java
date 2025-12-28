@@ -1,6 +1,6 @@
 package com.anno1800;
 
-import com.anno1800.engine.Game;
+import com.anno1800.game.engine.Game;
 
 public class App {
     public static void main(String[] args) {
