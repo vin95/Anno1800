@@ -1,0 +1,38 @@
+
+------------------------------------------ANNO 1800 - GAME STATE-------------------------------------------
+
+
++- Game Information ----------------------------------------+
+| Timestamp:       2025-12-28T13:17:35.138827700Z
+| Round:           1
+| Current Player:  Player 2 (Player 2)
++-------------------------------------------------------------+
+
++- Shared Board ----------------------------------------------+
+| Available Factories:       35
+| Available Resident Cards: 102
+|
+| Population Pool:
+|   Farmers:      25
+|   Workers:      40
+|   Artisans:     25
+|   Engineers:    20
+|   Investors:    15
+|
+| Gold Pool:      86
++-------------------------------------------------------------+
+
+  +- Player 1: Player 1                                      -+
+  | Tiles:      Land: -5 | Coast:  5 | Sea:  5                 |
+  | Buildings:  Factories: 15 | Shipyards:  0                  |
+  | Ships:      Trade:  0 | Explorer:  0                       |
+  | Residents:  Total:  0                                      |
+  +------------------------------------------------------------+
+
+> +- Player 2: Player 2                                      -+
+> | Tiles:      Land: -5 | Coast:  5 | Sea:  5                 |
+> | Buildings:  Factories: 15 | Shipyards:  0                  |
+> | Ships:      Trade:  0 | Explorer:  0                       |
+> | Residents:  Total:  0                                      |
+> +------------------------------------------------------------+
+------------------------------------------------END OF STATE------------------------------------------------

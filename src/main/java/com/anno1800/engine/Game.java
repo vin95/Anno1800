@@ -21,7 +21,6 @@ public class Game {
     public Game(int numPlayers) {
         this.board = Board.initializeBoard(numPlayers);
         this.players = Player.initializePlayers(numPlayers, this.board);
-        this.actionHandler = new ActionHandler(this);
         
         // Initialize game state
         this.currentRound = 1;
@@ -31,6 +30,11 @@ public class Game {
             players[i].setPosition(position);
         }
         this.currentPlayer = this.startPlayer;
+        
+        // Initialize player boards after positions are set
+        inicializeGame();
+        
+        this.actionHandler = new ActionHandler(this);
     }
     
     /**
@@ -120,7 +124,6 @@ public class Game {
     }
 
     public void start() {
-        inicializeGame();
         System.out.println("=== Game Start ===");
         System.out.println("Players: " + players.length);
         System.out.println("Starting Round: " + currentRound);
@@ -133,7 +136,7 @@ public class Game {
 
     private void inicializeGame() {
         for (Player player : players) {
-            player.getPlayerBoard().initializePlayerBoard(player);
+            player.getPlayerBoard().initializePlayerBoard(player, board);
         }
     }
     

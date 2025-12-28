@@ -1,7 +1,6 @@
 package com.anno1800.player;
 
 import com.anno1800.board.Board;
-import com.anno1800.engine.Game;
 
 public class Player {
     private final String name;

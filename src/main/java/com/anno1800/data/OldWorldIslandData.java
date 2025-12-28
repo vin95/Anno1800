@@ -12,6 +12,7 @@ import com.anno1800.Rewards.Reward;
 import static com.anno1800.data.Factories.*;
 
 public class OldWorldIslandData {
+    @SuppressWarnings("deprecation")
     public static Deque<OldWorldIsland> createOldWorldIslands() {
         Deque<OldWorldIsland> islands = new ArrayDeque<>();
 

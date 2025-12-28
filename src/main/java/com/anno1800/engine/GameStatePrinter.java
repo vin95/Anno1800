@@ -108,7 +108,7 @@ public class GameStatePrinter {
             
             String marker = isCurrentPlayer ? "> " : "  ";
             System.out.printf("%s+- Player %d: %-45s -+%n", marker, i + 1, player.name());
-            System.out.printf("%s| Tiles:      Land: %2d | Coast: %2d | Sea: %2d                 |%n",
+            System.out.printf("%s| Free Tiles:      Land: %2d | Coast: %2d | Sea: %2d                 |%n",
                 marker, player.freeLandTiles(), player.freeCoastTiles(), player.freeSeaTiles());
             System.out.printf("%s| Buildings:  Factories: %2d | Shipyards: %2d                  |%n",
                 marker, player.factoryCount(), player.shipyardCount());

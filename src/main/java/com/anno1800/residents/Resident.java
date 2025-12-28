@@ -1,12 +1,14 @@
 package com.anno1800.residents;
 
-public class Resident {
+import static com.anno1800.residents.ResidentStatus.*;
+
+public abstract class Resident {
     private final int populationLevel;
     private ResidentStatus status;
 
-    public Resident(int populationLevel, ResidentStatus status) {
+    protected Resident(int populationLevel) {
         this.populationLevel = populationLevel;
-        this.status = status;
+        this.status = ON_BOARD;
     }
 
     public int getPopulationLevel() {

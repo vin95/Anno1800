@@ -113,7 +113,6 @@ public class InitialGameStateExample {
             writer.printf("ANNO 1800 - Game State Summary%n");
             writer.printf("Generated: %s%n%n", state.timestamp());
             writer.printf("Round: %d%n", state.round());
-            writer.printf("Phase: %s%n", state.currentPhase().getDisplayName());
             writer.printf("Current Player: %s%n", 
                 state.players().get(state.currentPlayerIndex()).name());
             writer.printf("%nPlayers: %d%n", state.players().size());
@@ -138,7 +137,6 @@ public class InitialGameStateExample {
             writer.println("{");
             writer.printf("  \"timestamp\": \"%s\",%n", state.timestamp());
             writer.printf("  \"round\": %d,%n", state.round());
-            writer.printf("  \"phase\": \"%s\",%n", state.currentPhase());
             writer.printf("  \"currentPlayerIndex\": %d,%n", state.currentPlayerIndex());
             writer.printf("  \"boardState\": {%n");
             writer.printf("    \"availableFactories\": %d,%n", state.boardState().availableFactories());

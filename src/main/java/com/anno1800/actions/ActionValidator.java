@@ -68,9 +68,64 @@ public class ActionValidator {
         return false;
     }
     
+    /**
+     * Validates BuildShips action.
+     * Requirements:
+     * - Must have free sea tiles
+     * - Ship must be available on the board (deque not empty)
+     * - Required chips must be available on the board
+     * - Ship level must be valid (1-3)
+     */
     private static boolean canBuildShips(Action.BuildShips action, Player player) {
-        // TODO: Implement validation
-        return false;
+        PlayerBoard playerBoard = player.getPlayerBoard();
+        
+        // Check if player has enough free sea tiles for the amount of ships
+        if (playerBoard.getFreeSeaTiles() < action.amount()) {
+            return false;
+        }
+        
+        // Validate level
+        if (action.level() < 1 || action.level() > 3) {
+            return false;
+        }
+        
+        // Note: Actual board availability check should be done by passing the Game/Board
+        // For now, this validates player-side constraints
+        // The full check including board state would need: game.getBoard().canTakeShip()
+        
+        return true;
+    }
+    
+    /**
+     * Validates BuildShips action with full game state.
+     * This version checks both player and board constraints.
+     * 
+     * @param action The BuildShips action
+     * @param player The player attempting to build
+     * @param board The game board
+     * @return true if the ship can be built
+     */
+    public static boolean canBuildShips(Action.BuildShips action, Player player, com.anno1800.board.Board board) {
+        PlayerBoard playerBoard = player.getPlayerBoard();
+        
+        // Check player-side constraints
+        if (playerBoard.getFreeSeaTiles() < action.amount()) {
+            return false;
+        }
+        
+        // Validate level
+        if (action.level() < 1 || action.level() > 3) {
+            return false;
+        }
+        
+        // Check board-side constraints for each ship
+        for (int i = 0; i < action.amount(); i++) {
+            if (!board.canTakeShip(action.shipType(), action.level())) {
+                return false;
+            }
+        }
+        
+        return true;
     }
     
     private static boolean canSettleResident(Action.SettleResident action, Player player) {

@@ -36,10 +36,12 @@ public sealed interface Action permits
     /**
      * Action: Build ships
      * 
+     * @param shipType The type of ship to build (ExplorerShip or TradeShip)
+     * @param level The level of the ship to build (1-3)
      * @param amount The number of ships to build
      * Für jede Werft kann ein Schiff gebaut werden, welches jeweils <= der Stufe der Werft ist.
     */
-   record BuildShips(int amount) implements Action { }
+   record BuildShips(com.anno1800.player.PlayerBoard.ShipType shipType, int level, int amount) implements Action { }
    
    /**
     * Action: Fulfill a resident needs

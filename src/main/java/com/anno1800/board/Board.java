@@ -16,6 +16,15 @@ import com.anno1800.data.ExpeditionCardData;
 import com.anno1800.data.NewWorldIslandsData;
 import com.anno1800.data.OldWorldIslandData;
 import com.anno1800.data.ResidentCardData;
+import com.anno1800.player.PlayerBoard.ShipType;
+import com.anno1800.residents.Farmer;
+import com.anno1800.residents.Resident;
+import com.anno1800.residents.Worker;
+import com.anno1800.residents.Artisan;
+import com.anno1800.residents.Engineer;
+import com.anno1800.residents.Investor;
+import com.anno1800.FactoryMethods.createResidents;
+import static com.anno1800.FactoryMethods.createResidents.*;
 
 import java.util.Deque;
 import java.util.List;
@@ -56,13 +65,22 @@ public class Board {
     // New World Islands
     private final Deque<NewWorldIsland> newWorldIslands;
 
+    // Resident lists
+    private final List<Farmer> residents_farmers;
+    private final List<Worker> residents_workers;
+    private final List<Artisan> residents_artisans;
+    private final List<Engineer> residents_engineers;
+    private final List<Investor> residents_investors;
+
     private int farmers = 25;
     private int workers = 40;
     private int artisans = 25;
     private int engineers = 20;
     private int investors = 15;
 
-    private int gold = 100;
+    private int gold = 86;
+    private int tradeChips = 77;
+    private int explorerChips = 53;
 
     public Board(
         List<Deque<Factory>> factoryStacks,
@@ -80,7 +98,12 @@ public class Board {
         Deque<ExplorerShip> explorerShipLevel2,
         Deque<ExplorerShip> explorerShipLevel3,
         Deque<OldWorldIsland> oldWorldIslands,
-        Deque<NewWorldIsland> newWorldIslands
+        Deque<NewWorldIsland> newWorldIslands,
+        List<Farmer> residents_farmers,
+        List<Worker> residents_workers,
+        List<Artisan> residents_artisans,
+        List<Engineer> residents_engineers,
+        List<Investor> residents_investors
     ) {
         if (factoryStacks.size() != 35) {
             throw new IllegalArgumentException("Board requires exactly 35 factory stacks");
@@ -102,6 +125,11 @@ public class Board {
         this.explorerShipLevel3 = explorerShipLevel3;
         this.oldWorldIslands = oldWorldIslands;
         this.newWorldIslands = newWorldIslands;
+        this.residents_farmers = residents_farmers;
+        this.residents_workers = residents_workers;
+        this.residents_artisans = residents_artisans;
+        this.residents_engineers = residents_engineers;
+        this.residents_investors = residents_investors;
     }
 
     // Getter methods
@@ -131,8 +159,8 @@ public class Board {
         
         // 3 Trade ship stacks (Level 1-3)
         Deque<TradeShip> tradeShipLevel1 = TradeShipFactory.createLevel1Ships(6);
-        Deque<TradeShip> tradeShipLevel2 = TradeShipFactory.createLevel2Ships(5);
-        Deque<TradeShip> tradeShipLevel3 = TradeShipFactory.createLevel3Ships(5);
+        Deque<TradeShip> tradeShipLevel2 = TradeShipFactory.createLevel2Ships(6);
+        Deque<TradeShip> tradeShipLevel3 = TradeShipFactory.createLevel3Ships(6);
         
         // 3 Explorer ship stacks (Level 1-3)
         Deque<ExplorerShip> explorerShipLevel1 = ExplorerShipFactory.createLevel1Ships(6);
@@ -144,6 +172,13 @@ public class Board {
 
         // New World Islands
         Deque<NewWorldIsland> newWorldIslands = NewWorldIslandsData.createNewWorldIslands();
+
+        // Residents
+        List<Farmer> residents_farmers = createFarmers();
+        List<Worker> residents_workers = createWorkers();
+        List<Artisan> residents_artisans = createArtisans();
+        List<Engineer> residents_engineers = createEngineers();
+        List<Investor> residents_investors = createInvestors();
         
         return new Board(
             factoryStacks,
@@ -152,7 +187,8 @@ public class Board {
             shipyardLevel1, shipyardLevel2, shipyardLevel3,
             tradeShipLevel1, tradeShipLevel2, tradeShipLevel3,
             explorerShipLevel1, explorerShipLevel2, explorerShipLevel3,
-            oldWorldIslands, newWorldIslands
+            oldWorldIslands, newWorldIslands,
+            residents_farmers, residents_workers, residents_artisans, residents_engineers, residents_investors
         );
     }
 
@@ -247,59 +283,118 @@ public class Board {
         return gold;
     }
 
-    public void takeFarmer() {
-        if (farmers > 0) {
-            farmers--;
+    public int getTradeChips() {
+        return tradeChips;
+    }
+
+    public int getExplorerChips() {
+        return explorerChips;
+    }
+
+    /**
+     * Takes a resident of the specified population level from the board.
+     * 
+     * @param populationLevel The population level (1=Farmer, 2=Worker, 3=Artisan, 4=Engineer, 5=Investor)
+     * @return The resident of the requested type
+     * @throws IllegalArgumentException if populationLevel is invalid
+     * @throws IllegalStateException if no residents of that type are available
+     */
+    public Resident takeResident(int populationLevel) {
+        return switch (populationLevel) {
+            case 1 -> {
+                if (farmers > 0) {
+                    farmers--;
+                    yield residents_farmers.remove(0);
+                }
+                throw new IllegalStateException("No farmers left on the board");
+            }
+            case 2 -> {
+                if (workers > 0) {
+                    workers--;
+                    yield residents_workers.remove(0);
+                }
+                throw new IllegalStateException("No workers left on the board");
+            }
+            case 3 -> {
+                if (artisans > 0) {
+                    artisans--;
+                    yield residents_artisans.remove(0);
+                }
+                throw new IllegalStateException("No artisans left on the board");
+            }
+            case 4 -> {
+                if (engineers > 0) {
+                    engineers--;
+                    yield residents_engineers.remove(0);
+                }
+                throw new IllegalStateException("No engineers left on the board");
+            }
+            case 5 -> {
+                if (investors > 0) {
+                    investors--;
+                    yield residents_investors.remove(0);
+                }
+                throw new IllegalStateException("No investors left on the board");
+            }
+            default -> throw new IllegalArgumentException("Invalid population level: " + populationLevel + ". Must be 1-5.");
+        };
+    }
+
+    /**
+     * Returns a resident of the specified population level to the board.
+     * 
+     * @param populationLevel The population level (1=Farmer, 2=Worker, 3=Artisan, 4=Engineer, 5=Investor)
+     * @param resident The resident to return
+     * @throws IllegalArgumentException if populationLevel is invalid or doesn't match resident's level
+     */
+    public void returnResident(int populationLevel, Resident resident) {
+        // Validate that the resident's level matches the parameter
+        if (resident.getPopulationLevel() != populationLevel) {
+            throw new IllegalArgumentException(
+                "Resident population level mismatch: expected " + populationLevel + 
+                ", but resident has level " + resident.getPopulationLevel()
+            );
+        }
+        
+        switch (populationLevel) {
+            case 1 -> {
+                farmers++;
+                residents_farmers.add((Farmer) resident);
+            }
+            case 2 -> {
+                workers++;
+                residents_workers.add((Worker) resident);
+            }
+            case 3 -> {
+                artisans++;
+                residents_artisans.add((Artisan) resident);
+            }
+            case 4 -> {
+                engineers++;
+                residents_engineers.add((Engineer) resident);
+            }
+            case 5 -> {
+                investors++;
+                residents_investors.add((Investor) resident);
+            }
+            default -> throw new IllegalArgumentException("Invalid population level: " + populationLevel + ". Must be 1-5.");
         }
     }
 
-    public int returnFarmer() {
-        farmers++;
-        return farmers;
-    }
-
-    public void takeWorker() {
-        if (workers > 0) {
-            workers--;
+    public ResidentCard drawResidentCard(int populationLevel) {
+        Deque<ResidentCard> stack;
+        if (populationLevel <= 2) {
+            stack = residentStack1;
+        } else if (populationLevel <= 5) {
+            stack = residentStack2;
+        } else {
+            stack = residentStack3;
         }
-    }
 
-    public int returnWorker() {
-        workers++;
-        return workers;
-    }
-
-    public void takeArtisan() {
-        if (artisans > 0) {
-            artisans--;
+        if (stack.isEmpty()) {
+            throw new IllegalStateException("No resident cards left in the stack for population level " + populationLevel);
         }
-    }
-
-    public int returnArtisan() {
-        artisans++;
-        return artisans;
-    }
-
-    public void takeEngineer() {
-        if (engineers > 0) {
-            engineers--;
-        }
-    }
-
-    public int returnEngineer() {
-        engineers++;
-        return engineers;
-    }
-
-    public void takeInvestor() {
-        if (investors > 0) {
-            investors--;
-        }
-    }
-
-    public int returnInvestor() {
-        investors++;
-        return investors;
+        return stack.pop();
     }
 
     public int takeGold(int amount) {
@@ -315,4 +410,105 @@ public class Board {
     public void returnGold(int amount) {
         gold += amount;
     }
+
+    /**
+     * Checks if a ship of the given type and level can be taken from the board.
+     * Validates both ship availability and required chips.
+     * @return true if the ship can be taken, false otherwise
+     */
+    public boolean canTakeShip(ShipType type, int level) {
+        // Check if enough chips are available
+        boolean hasChips = switch (type) {
+            case ExplorerShip -> explorerChips >= level;
+            case TradeShip -> tradeChips >= level;
+        };
+        
+        if (!hasChips) {
+            return false;
+        }
+        
+        // Check if ship is available in the deque
+        Deque<?> shipDeque = getShipDeque(type, level);
+        return shipDeque != null && !shipDeque.isEmpty();
+    }
+
+    /**
+     * Takes a ship from the board and the corresponding chips.
+     * @return the ship object (ExplorerShip or TradeShip)
+     * @throws IllegalStateException if ship or chips are not available
+     */
+    public Object takeShip(ShipType type, int level) {
+        if (!canTakeShip(type, level)) {
+            throw new IllegalStateException("Cannot take ship of type " + type + " level " + level + ": not enough ships or chips available");
+        }
+        
+        // Take the chips
+        switch (type) {
+            case ExplorerShip -> takeExplorerChip(level);
+            case TradeShip -> takeTradeChip(level);
+        }
+        
+        // Take and return the ship
+        return switch (type) {
+            case ExplorerShip -> switch (level) {
+                case 1 -> explorerShipLevel1.poll();
+                case 2 -> explorerShipLevel2.poll();
+                case 3 -> explorerShipLevel3.poll();
+                default -> throw new IllegalArgumentException("Invalid explorer ship level: " + level);
+            };
+            case TradeShip -> switch (level) {
+                case 1 -> tradeShipLevel1.poll();
+                case 2 -> tradeShipLevel2.poll();
+                case 3 -> tradeShipLevel3.poll();
+                default -> throw new IllegalArgumentException("Invalid trade ship level: " + level);
+            };
+        };
+    }
+
+    /**
+     * Helper method to get the appropriate ship deque based on type and level.
+     */
+    private Deque<?> getShipDeque(ShipType type, int level) {
+        return switch (type) {
+            case ExplorerShip -> switch (level) {
+                case 1 -> explorerShipLevel1;
+                case 2 -> explorerShipLevel2;
+                case 3 -> explorerShipLevel3;
+                default -> null;
+            };
+            case TradeShip -> switch (level) {
+                case 1 -> tradeShipLevel1;
+                case 2 -> tradeShipLevel2;
+                case 3 -> tradeShipLevel3;
+                default -> null;
+            };
+        };
+    }
+
+    public int takeTradeChip(int amount) {
+        if (amount > tradeChips) {
+            System.out.println("Not enough trade ships available");
+            return amount - tradeChips;
+        }
+        tradeChips -= amount;
+        return amount;
+    }
+
+    public void returnTradeChip(int amount) {
+        tradeChips += amount;
+    }
+
+    public int takeExplorerChip(int amount) {
+        if (amount > explorerChips) {
+            System.out.println("Not enough explorer ships available");
+            return amount - explorerChips;
+        }
+        explorerChips -= amount;
+        return amount;
+    }
+
+    public void returnExplorerChip(int amount) {
+        explorerChips += amount;
+    }
+
 }
