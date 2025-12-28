@@ -22,6 +22,7 @@ public class FactoryFactory {
      * @param numPlayers The number of players in the game
      * @return List of factory stacks, one for each factory type
      */
+    @SuppressWarnings("deprecation")
     public static List<Deque<Factory>> createFactoryStacks(int numPlayers) {
         List<Deque<Factory>> factoryStacks = new ArrayList<>();
         int numFactories = (numPlayers <= 2) ? 1 : 2;
@@ -55,6 +56,7 @@ public class FactoryFactory {
      * @param factoryType The factory type enum
      * @return A new factory instance of the specified type
      */
+    @SuppressWarnings("deprecation")
     public static Factory getFactory(Factories factoryType) {
         return FactoryData.getFactory(factoryType);
     }

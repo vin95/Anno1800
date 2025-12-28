@@ -23,7 +23,6 @@ import com.anno1800.residents.Worker;
 import com.anno1800.residents.Artisan;
 import com.anno1800.residents.Engineer;
 import com.anno1800.residents.Investor;
-import com.anno1800.FactoryMethods.createResidents;
 import static com.anno1800.FactoryMethods.createResidents.*;
 
 import java.util.Deque;
@@ -158,7 +157,7 @@ public class Board {
         Deque<Shipyard> shipyardLevel3 = ShipyardFactory.createLevel3Shipyards(4);
         
         // 3 Trade ship stacks (Level 1-3)
-        Deque<TradeShip> tradeShipLevel1 = TradeShipFactory.createLevel1Ships(6);
+        Deque<TradeShip> tradeShipLevel1 = TradeShipFactory.createLevel1Ships(6 );
         Deque<TradeShip> tradeShipLevel2 = TradeShipFactory.createLevel2Ships(6);
         Deque<TradeShip> tradeShipLevel3 = TradeShipFactory.createLevel3Ships(6);
         

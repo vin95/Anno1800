@@ -93,7 +93,9 @@ public record GameState(
         int artisans,
         int engineers,
         int investors,
-        int gold
+        int gold,
+        int tradeChips,
+        int explorerChips
     ) {
         /**
          * Creates a BoardState from the actual Board object.
@@ -131,7 +133,9 @@ public record GameState(
                 board.getArtisans(),
                 board.getEngineers(),
                 board.getInvestors(),
-                board.getGold()
+                board.getGold(),
+                board.getTradeChips(),
+                board.getExplorerChips()
             );
         }
     }
@@ -141,6 +145,7 @@ public record GameState(
      */
     public record PlayerState(
         String name,
+        int position,
         
         // Board tiles
         int freeLandTiles,
@@ -153,9 +158,17 @@ public record GameState(
         int tradeShipCount,
         int explorerShipCount,
         
+        // Resources
+        int gold,
+        int availableTradeChips,
+        int availableExplorerChips,
+        
         // Residents
         int residentCount,
-        List<ResidentSummary> residents
+        List<ResidentSummary> residents,
+        
+        // Cards
+        int residentCardCount
     ) {
         /**
          * Creates PlayerState list from Player array.
@@ -182,6 +195,7 @@ public record GameState(
             
             return new PlayerState(
                 player.getName(),
+                player.getPosition(),
                 board.getFreeLandTiles(),
                 board.getFreeCoastTiles(),
                 board.getFreeSeaTiles(),
@@ -189,8 +203,12 @@ public record GameState(
                 board.getShipyards().size(),
                 board.getTradeShips().size(),
                 board.getExplorerShips().size(),
+                board.getGold(),
+                board.getAvailableTradeChips(),
+                board.getAvailableExplorerChips(),
                 board.getResidents().size(),
-                residents
+                residents,
+                board.getResidentCards().size()
             );
         }
     }

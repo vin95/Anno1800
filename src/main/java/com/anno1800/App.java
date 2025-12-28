@@ -4,7 +4,7 @@ import com.anno1800.engine.Game;
 
 public class App {
     public static void main(String[] args) {
-        int numPlayers = 2;
+        int numPlayers = 3;
         Game game = new Game(numPlayers);
         game.start();
     }

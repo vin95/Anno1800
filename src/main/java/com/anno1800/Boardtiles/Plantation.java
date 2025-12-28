@@ -1,7 +1,6 @@
 package com.anno1800.Boardtiles;
 
 import com.anno1800.data.Goods;
-import com.anno1800.residents.Resident;
 
 /**
  * Represents a plantation in the New World.

@@ -1,9 +1,0 @@
-ANNO 1800 - Game State Summary
-Generated: 2025-12-28T13:17:35.138827700Z
-
-Round: 1
-Current Player: Player 2
-
-Players: 2
-  1. Player 1 - Factories: 15, Residents: 0
-  2. Player 2 - Factories: 15, Residents: 0

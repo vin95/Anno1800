@@ -8,9 +8,9 @@ import com.anno1800.data.FactoryData;
 import com.anno1800.residents.Resident;
 import com.anno1800.Boardtiles.Producers;
 import static com.anno1800.Boardtiles.Producers.*;
+import static com.anno1800.residents.ResidentStatus.*;
 import com.anno1800.board.Board;
 import com.anno1800.cards.ResidentCard;
-
 import java.util.ArrayList;
 
 public class PlayerBoard {
@@ -25,6 +25,7 @@ public class PlayerBoard {
     int seaTiles = 5;
     int numShips = 0;
     int numFactories = 0;
+    int numFactoriesOnLand = 0;
     int numFactoriesOnCoast = 0;
     int numShipyards = 0;
     int gold = 0;
@@ -55,7 +56,7 @@ public class PlayerBoard {
     }
 
     public int getFreeLandTiles() {
-        return landTiles - factories.length - numFactoriesOnCoast;
+        return landTiles - numFactoriesOnLand;
     }
 
     public int getFreeCoastTiles() {
@@ -86,29 +87,36 @@ public class PlayerBoard {
         return gold;
     }
     
+    public int getAvailableTradeChips() {
+        return availableTradeChips;
+    }
+    
+    public int getAvailableExplorerChips() {
+        return availableExplorerChips;
+    }
+    
     public void initializePlayerBoard(Player player, Board gameBoard) {
         PlayerBoard board = player.getPlayerBoard();
         
-        board.adGold(player.getPosition());
+        board.adGold(player.getPosition(), gameBoard);
 
         // Take farmer from board and add to player board
-        gameBoard.takeResident(1);
         
         for (int i = 0; i < 4; i++) {
-            buildResident(gameBoard, board, 1);
+            adResident(gameBoard, board, 1);
         }
         
         for (int i = 0; i < 3; i++) {
-            buildResident(gameBoard, board, 2);
+            adResident(gameBoard, board, 2);
         }
 
         for (int i = 0; i < 2; i++) {
-            buildResident(gameBoard, board, 3);
+            adResident(gameBoard, board, 3);
         }
 
-        board.adShip(1, ShipType.ExplorerShip, gameBoard);
-        board.adShip(1, ShipType.ExplorerShip, gameBoard);
         board.adShip(1, ShipType.TradeShip, gameBoard);
+        board.adShip(1, ShipType.TradeShip, gameBoard);
+        board.adShip(1, ShipType.ExplorerShip, gameBoard);
 
         board.adFactory(SAWMILL_GREEN);
         board.adFactory(GRAIN_FARM_GREEN);
@@ -122,16 +130,12 @@ public class PlayerBoard {
         board.adFactory(SAILMAKERS_RED);
 
         board.adShipyard(1);
-
-
     }
+
+    // Die nachfolgenden Methoden fügen dem PlayerBoard entsprechende Objekte hinzu und werden nur bei der Initialisierung verwendet.
     
-    private void adGold(int gold) {
-        this.gold = this.gold + gold;
-    }
-
-    private void adResident(Resident resident) {
-        this.residents.add(resident);
+    private void adGold(int gold, Board gameBoard) {
+        this.gold = this.gold + gameBoard.takeGold(gold);
     }
 
     /**
@@ -141,23 +145,17 @@ public class PlayerBoard {
      * @throws IllegalStateException if ship cannot be built (rules violation)
      */
     private void adShip(int level, ShipType type, Board gameBoard) {
-        // Validation is now centralized in Rules class
-        // Note: In a full implementation, this would be called from GameEngine
-        // which would check Rules before executing the action
-        if (!gameBoard.canTakeShip(type, level)) {
-            throw new IllegalStateException("Cannot add ship: not enough ships or chips available on board");
-        }
         
         switch (type) {
             case ExplorerShip -> {
-                ExplorerShip ship = (ExplorerShip) gameBoard.takeShip(type, level);
+                ExplorerShip ship = new ExplorerShip(level);
                 explorerShips.add(ship);
-                availableExplorerChips += level;
+                availableExplorerChips += gameBoard.takeExplorerChip(level);
             }
             case TradeShip -> {
-                TradeShip ship = (TradeShip) gameBoard.takeShip(type, level);
+                TradeShip ship = new TradeShip(level);
                 tradeShips.add(ship);
-                availableTradeChips += level;
+                availableTradeChips += gameBoard.takeTradeChip(level);
             }
         }
     }
@@ -165,6 +163,7 @@ public class PlayerBoard {
     private void adFactory(Producers type) {
         Factory newFactory = copyFactory(type);
         factories[numFactories] = newFactory;
+        numFactoriesOnLand++;
         numFactories++;
     }
 
@@ -174,12 +173,13 @@ public class PlayerBoard {
         numShipyards++;
     }
 
-    private void buildResident(Board gameBoard, PlayerBoard playerBoard, int populationLevel) {
+    private void adResident(Board gameBoard, PlayerBoard playerBoard, int populationLevel) {
         // Use the new unified takeResident method
         Resident resident = gameBoard.takeResident(populationLevel);
-        playerBoard.adResident(resident);
+        resident.setStatus(FIT);
+        this.residents.add(resident);
         ResidentCard residentCard = gameBoard.drawResidentCard(resident.getPopulationLevel());
-        playerBoard.getResidentCards().add(residentCard);
+        this.residentCards.add(residentCard);
     }
     
     /**

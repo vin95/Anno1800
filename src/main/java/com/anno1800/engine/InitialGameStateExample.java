@@ -87,8 +87,7 @@ public class InitialGameStateExample {
     private static void saveDetailedState(GameState state, GameStatePrinter printer, String filename) 
             throws IOException {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
-            // Redirect System.out temporarily
-            PrintWriter originalOut = new PrintWriter(System.out);
+            
             System.setOut(new java.io.PrintStream(new java.io.OutputStream() {
                 @Override
                 public void write(int b) throws IOException {
