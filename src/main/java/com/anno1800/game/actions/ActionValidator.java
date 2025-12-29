@@ -6,7 +6,12 @@ import com.anno1800.game.player.Player;
 import com.anno1800.game.player.PlayerBoard;
 import com.anno1800.game.residents.Resident;
 import com.anno1800.game.tiles.Factory;
+import com.anno1800.game.tiles.Plantation;
+import com.anno1800.game.tiles.Producer;
 import com.anno1800.data.gamedata.Goods;
+import static com.anno1800.game.residents.ResidentStatus.FIT;
+import static com.anno1800.game.residents.ResidentStatus.AT_WORK;
+import static com.anno1800.game.residents.ResidentStatus.EXHAUSTED;
 
 /**
  * Validates whether actions can be executed according to game rules.
@@ -27,8 +32,8 @@ public class ActionValidator {
             case Action.BuildFactory buildFactory -> canBuildFactory(buildFactory, player, game);
             case Action.BuildShipyard buildShipyard -> canBuildShipyard(buildShipyard, player, game);
             case Action.BuildShips buildShips -> canBuildShips(buildShips, player, game);
-            case Action.FulfillNeeds fulfillNeeds -> canFulfillNeeds(fulfillNeeds, player, game);
-            case Action.SwapResidentCards swapResidentCards -> canSwapResidentCards(swapResidentCards, player, game);
+            case Action.FulfillNeeds fulfillNeeds -> canFulfillNeeds(fulfillNeeds, player, fulfillNeeds.residentCard(), game);
+            case Action.SwapResidentCards swapResidentCards -> canSwapResidentCards(swapResidentCards, swapResidentCards.cardsToSwap(), player, game);
             case Action.SettleResident settleResident -> canSettleResident(settleResident, player, game);
             case Action.UpgradeResident upgradeResident -> canUpgradeResident(upgradeResident, player, game);
             case Action.DiscoverOldWorldIsland discoverOldWorldIsland ->
@@ -147,7 +152,7 @@ public class ActionValidator {
      * - The provided goods array must match or cover the card's needs
      * - All goods must be either producible or tradeable
      */
-    private static boolean canFulfillNeeds(Action.FulfillNeeds action, Player player, ResidentCard residentCard) {
+    private static boolean canFulfillNeeds(Action.FulfillNeeds action, Player player, ResidentCard residentCard, Game game) {
         // Check if player owns the resident card
         if (!player.getPlayerBoard().getResidentCards().contains(residentCard)) {
             return false;
@@ -166,19 +171,21 @@ public class ActionValidator {
             boolean canFulfill = false;
             
             // Check if player can produce this good
-            for (Factory factory : player.getPlayerBoard().getFactories()) {
-                if (factory != null && factory.produces() == good) {
-                    // Check if this factory can produce (has empty slot and FIT resident)
-                    if (factory.getSlot1() == null || factory.getSlot2() == null) {
-                        for (Resident resident : player.getPlayerBoard().getResidents()) {
-                            if (resident.getPopulationLevel() == factory.populationLevel() &&
-                                resident.getStatus() == com.anno1800.game.residents.ResidentStatus.FIT) {
-                                canFulfill = true;
-                                break;
+            for (Producer producer : player.getPlayerBoard().getFactories()) {
+                if (producer instanceof Factory factory) {
+                    if (factory != null && factory.produces() == good) {
+                        // Check if this factory can produce (has empty slot and FIT resident)
+                        if (factory.getSlot1() == null || factory.getSlot2() == null) {
+                            for (Resident resident : player.getPlayerBoard().getResidents()) {
+                                if (resident.getPopulationLevel() == factory.populationLevel() &&
+                                    resident.getStatus() == com.anno1800.game.residents.ResidentStatus.FIT) {
+                                    canFulfill = true;
+                                    break;
+                                }
                             }
                         }
+                        if (canFulfill) break;
                     }
-                    if (canFulfill) break;
                 }
             }
             
@@ -188,12 +195,14 @@ public class ActionValidator {
                 for (Player otherPlayer : game.getPlayers()) {
                     if (otherPlayer == player) continue;
                     
-                    for (Factory factory : otherPlayer.getPlayerBoard().getFactories()) {
-                        if (factory != null && factory.produces() == good) {
-                            // Check if player has enough trade chips
-                            if (player.getPlayerBoard().getAvailableTradeChips() >= factory.getTradeCosts()) {
-                                canFulfill = true;
-                                break;
+                    for (Producer producer : otherPlayer.getPlayerBoard().getFactories()) {
+                        if (producer instanceof Factory factory) {
+                            if (factory != null && factory.produces() == good) {
+                                // Check if player has enough trade chips
+                                if (player.getPlayerBoard().getAvailableTradeChips() >= factory.getTradeCosts()) {
+                                    canFulfill = true;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -209,9 +218,8 @@ public class ActionValidator {
         
         return true;
     }
-    }
 
-    private static boolean canSwapResidentCards(Action.SwapResidentCards action, Player player, Game game) {
+    private static boolean canSwapResidentCards(Action.SwapResidentCards action, ResidentCard[] residentCards, Player player, Game game) {
         // TODO: Implement validation
         return false;
     }
@@ -324,7 +332,7 @@ public class ActionValidator {
 
         // Check if factory belongs to player
         boolean factoryBelongsToPlayer = false;
-        for (Factory f : player.getPlayerBoard().getFactories()) {
+        for (Producer f : player.getPlayerBoard().getFactories()) {
             if (f == factory) {
                 factoryBelongsToPlayer = true;
                 break;
@@ -362,9 +370,10 @@ public class ActionValidator {
      */
 
     private static boolean canTradeGoods(Action.TradeGoods action, Player player, Game game) {
-        // Check all other players to find one with a factory that produces the
+        // Check all other players to find the one with the cheapest factory that produces the
         // requested good
-        Factory producingFactory = null;
+        Factory cheapestFactory = null;
+        int lowestTradeCosts = Integer.MAX_VALUE;
 
         for (Player otherPlayer : game.getPlayers()) {
             // Skip the current player (cannot trade with yourself)
@@ -373,27 +382,27 @@ public class ActionValidator {
             }
 
             // Check if this player has a factory that produces the requested good
-            for (Factory factory : otherPlayer.getPlayerBoard().getFactories()) {
-                if (factory != null && factory.produces() == action.good()) {
-                    producingFactory = factory;
-                    break;
+            for (Producer producer : otherPlayer.getPlayerBoard().getFactories()) {
+                if (producer instanceof Factory factory) {
+                    if (factory != null && factory.produces() == action.good()) {
+                        int tradeCosts = factory.getTradeCosts();
+                        // Keep track of the cheapest factory
+                        if (tradeCosts < lowestTradeCosts) {
+                            cheapestFactory = factory;
+                            lowestTradeCosts = tradeCosts;
+                        }
+                    }
                 }
-            }
-
-            // If we found a factory, no need to check other players
-            if (producingFactory != null) {
-                break;
             }
         }
 
         // At least one other player must have a factory that produces this good
-        if (producingFactory == null) {
+        if (cheapestFactory == null) {
             return false;
         }
 
-        // Check if player has enough trade chips to cover the trade costs
-        int tradeCosts = producingFactory.getTradeCosts();
-        if (player.getPlayerBoard().getAvailableTradeChips() < tradeCosts) {
+        // Check if player has enough trade chips to cover the trade costs of the cheapest option
+        if (player.getPlayerBoard().getAvailableTradeChips() < lowestTradeCosts) {
             return false;
         }
 
@@ -406,23 +415,123 @@ public class ActionValidator {
     }
 
     private static boolean canAssignWorker(Action.AssignWorker action, Player player, Game game) {
-        // TODO: Implement validation
-        return false;
+        if ( action.slot() != 1 && action.slot() != 2) {
+            return false; // Invalid slot number
+        }
+        if (action.factory() == null || action.resident() == null) {
+            return false; // Factory or resident is null
+        }
+        
+        // Validate slot number
+        if (action.slot() != 1 && action.slot() != 2) {
+            return false; // Invalid slot number (must be 1 or 2)
+        }
+        
+        if (action.resident().getPopulationLevel() != action.factory().populationLevel()) {
+            return false; // Resident population level does not match factory requirement
+        }
+        if (action.resident().getStatus() != FIT) {
+            return false; // Resident is not FIT
+        }
+        if (!player.getPlayerBoard().getResidents().contains(action.resident())) {
+            return false; // Resident does not belong to the player
+        }
+        
+        // Check if factory belongs to player (search through array)
+        boolean factoryFound = false;
+        for (Producer factory : player.getPlayerBoard().getFactories()) {
+            if (factory == action.factory()) {
+                factoryFound = true;
+                break;
+            }
+        }
+        if (!factoryFound) {
+            return false; // Factory does not belong to the player
+        }
+        
+        // Check if the requested slot is available
+        if (action.slot() == 1 && action.factory().getSlot1() != null) {
+            return false; // Slot 1 is already occupied
+        }
+        if (action.slot() == 2 && action.factory().getSlot2() != null) {
+            return false; // Slot 2 is already occupied
+        }
+
+        return true;
     }
 
     private static boolean canExhaustWorker(Action.ExhaustWorker action, Player player, Game game) {
-        // TODO: Implement validation
-        return false;
+        // Validate resident is not null
+        if (action.resident() == null) {
+            return false;
+        }
+        
+        // Check if resident belongs to player
+        if (!player.getPlayerBoard().getResidents().contains(action.resident())) {
+            return false; // Resident does not belong to the player
+        }
+        
+        // Resident must have status AT_WORK or EXHAUSTED
+        if (action.resident().getStatus() != AT_WORK && action.resident().getStatus() != EXHAUSTED) {
+            return false; // Resident is not AT_WORK or EXHAUSTED
+        }
+        
+        // Player must have enough gold (1 gold per population level)
+        int requiredGold = action.resident().getPopulationLevel();
+        if (player.getPlayerBoard().getGold() < requiredGold) {
+            return false; // Not enough gold
+        }
+        
+        return true;
     }
 
     private static boolean canDrawResidentCard(Action.DrawResidentCard action, Player player, Game game) {
-        // TODO: Implement validation
-        return false;
+        // Validate population level
+        int populationLevel = action.populationLevel();
+        
+        // Check if board has available resident cards for this population level
+        // Population levels 1-2 use residentStack1
+        // Population levels 3-5 use residentStack2
+        // Population levels 6-7 use residentStack3
+        boolean hasCards = switch (populationLevel) {
+            case 1, 2 -> !game.getBoard().getResidentStack1().isEmpty();
+            case 3, 4, 5 -> !game.getBoard().getResidentStack2().isEmpty();
+            case 6, 7 -> !game.getBoard().getResidentStack3().isEmpty();
+            default -> false; // Invalid population level
+        };
+        
+        return hasCards;
     }
 
     private static boolean canImportGood(Action.ImportGood action, Player player, Game game) {
-        // TODO: Implement validation
-        return false;
+        // Player must have at least one New World Island
+        if (player.getPlayerBoard().getNumNewWorldIslands() <= 0) {
+            return false;
+        }
+        
+        // Player must have more than 1 available trade chip
+        if (player.getPlayerBoard().getAvailableTradeChips() <= 1) {
+            return false;
+        }
+        
+        // Check if player has a plantation that produces the requested good
+        Producer[] factories = player.getPlayerBoard().getFactories();
+        boolean hasPlantation = false;
+        
+        for (Producer factory : factories) {
+            // Check if this is a Plantation that produces the requested good
+            if (factory instanceof Plantation plantation) {
+                if (plantation.produces() == action.good()) {
+                    hasPlantation = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!hasPlantation) {
+            return false; // Player doesn't have a plantation that produces this good
+        }
+        
+        return true;
     }
-
 }

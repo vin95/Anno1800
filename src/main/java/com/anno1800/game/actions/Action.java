@@ -157,7 +157,7 @@ public sealed interface Action permits
     /**
      * Action: Draw a resident card
      */
-    record DrawResidentCard() implements Action {
+    record DrawResidentCard(int populationLevel) implements Action {
     }
 
     /**

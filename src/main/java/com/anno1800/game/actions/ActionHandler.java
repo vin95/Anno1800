@@ -1,12 +1,14 @@
 package com.anno1800.game.actions;
 
 import com.anno1800.game.tiles.Factory;
+import com.anno1800.game.tiles.Producer;
 import com.anno1800.game.cards.ResidentCard;
 import com.anno1800.data.gamedata.Goods;
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.residents.Resident;
 import com.anno1800.game.rewards.Reward;
+import com.anno1800.game.player.PlayerBoard.ShipType;
 
 import static com.anno1800.game.residents.ResidentStatus.*;
 
@@ -26,48 +28,78 @@ public class ActionHandler {
      * 
      * @param action The action to execute
      * @param player The player performing the action
-     * @return true if the action was executed successfully, false otherwise
+     * @return ActionResult containing the result of the action execution
      */
-    public boolean execute(Action action, Player player) {
+    public ActionResult execute(Action action, Player player) {
         return switch (action) {
-            case Action.BuildFactory(Factory factory) ->
+            case Action.BuildFactory(Factory factory) -> {
                 buildFactory(player, factory);
-            case Action.BuildShipyard(int level) ->
+                yield new ActionResult.NoResult();
+            }
+            case Action.BuildShipyard(int level) -> {
                 buildShipyard(player, level);
-            case Action.BuildShips(com.anno1800.game.player.PlayerBoard.ShipType shipType, int level, int amount) ->
+                yield new ActionResult.NoResult();
+            }
+            case Action.BuildShips(ShipType shipType, int level, int amount) -> {
                 buildShips(player, shipType, level, amount);
-            case Action.FulfillNeeds(ResidentCard residentCard, Goods[] good) ->
+                yield new ActionResult.NoResult();
+            }
+            case Action.FulfillNeeds(ResidentCard residentCard, Goods[] good) -> {
                 fulfillNeeds(player, residentCard, good);
-            case Action.SwapResidentCards(ResidentCard[] cardsToSwap) ->
+                yield new ActionResult.NoResult();
+            }
+            case Action.SwapResidentCards(ResidentCard[] cardsToSwap) -> {
                 swapResidentCards(player, cardsToSwap);
-            case Action.SettleResident(int level) ->
+                yield new ActionResult.NoResult();
+            }
+            case Action.SettleResident(int level) -> {
                 settleResident(player, level);
-            case Action.UpgradeResident(int[] amount, int[] residentLevel) ->
+                yield new ActionResult.NoResult();
+            }
+            case Action.UpgradeResident(int[] amount, int[] residentLevel) -> {
                 upgradeResident(player, amount, residentLevel);
-            case Action.DiscoverOldWorldIsland() ->
+                yield new ActionResult.NoResult();
+            }
+            case Action.DiscoverOldWorldIsland() -> {
                 discoverOldWorldIsland(player);
-            case Action.DiscoverNewWorldIsland() ->
+                yield new ActionResult.NoResult();
+            }
+            case Action.DiscoverNewWorldIsland() -> {
                 discoverNewWorldIsland(player);
-            case Action.Expedition() ->
+                yield new ActionResult.NoResult();
+            }
+            case Action.Expedition() -> {
                 expedition(player);
-            case Action.Carneval() ->
+                yield new ActionResult.NoResult();
+            }
+            case Action.Carneval() -> {
                 carneval();
-            case Action.DoOvertime(int populationLevel) ->
+                yield new ActionResult.NoResult();
+            }
+            case Action.DoOvertime(int populationLevel) -> {
                 doOvertime(player, populationLevel);
+                yield new ActionResult.NoResult();
+            }
             case Action.ProduceGoods(Factory factory) ->
-                produceGoods(player, factory);
+                new ActionResult.GoodsResult(produceGoods(player, factory));
             case Action.TradeGoods(Goods good, int playerId) ->
-                tradeGoods(player, good, playerId);
-            case Action.ActivateReward(Reward reward) ->
+                new ActionResult.GoodsResult(tradeGoods(player, good, playerId));
+            case Action.ActivateReward(Reward reward) -> {
                 activateReward(player, reward);
-            case Action.AssignWorker(Factory factory, Resident resident, int slot) ->
+                yield new ActionResult.NoResult();
+            }
+            case Action.AssignWorker(Factory factory, Resident resident, int slot) -> {
                 assignWorker(player, factory, resident, slot);
-            case Action.ExhaustWorker(Resident resident) ->
+                yield new ActionResult.NoResult();
+            }
+            case Action.ExhaustWorker(Resident resident) -> {
                 exhaustWorker(player, resident);
+                yield new ActionResult.NoResult();
+            }
             case Action.DrawResidentCard() ->
-                drawResidentCard(player);
+                new ActionResult.CardResult(drawResidentCard(player));
             case Action.ImportGood(Goods good) ->
-                importGood(player, good);
+                new ActionResult.GoodsResult(importGood(player, good));
             default -> throw new IllegalArgumentException("Unknown action type: " + action);
         };
     }
@@ -78,7 +110,7 @@ public class ActionHandler {
      * PRECONDITION: ActionValidator has verified all requirements.
      * All required goods must have been produced in previous actions.
      */
-    private boolean buildFactory(Player player, Factory factory) {
+    private void buildFactory(Player player, Factory factory) {
         // Goods verification (informational only)
         Goods[] costs = factory.costs();
         if (costs != null && costs.length > 0) {
@@ -90,10 +122,9 @@ public class ActionHandler {
         Factory factoryFromBoard = game.getBoard().takeFactory(factory.getType());
 
         // Add factory to player's board
-        player.getPlayerBoard().addFactory(factoryFromBoard);
+        player.getPlayerBoard().buildFactory(factoryFromBoard);
 
         System.out.println("Successfully built factory: " + factory.getType());
-        return true;
     }
 
     /**
@@ -101,15 +132,14 @@ public class ActionHandler {
      * 
      * PRECONDITION: ActionValidator has verified all requirements.
      */
-    private boolean buildShipyard(Player player, int level) {
+    private void buildShipyard(Player player, int level) {
         // Take shipyard from board
         var shipyard = game.getBoard().takeShipyard(level);
 
         // Add shipyard to player's board
-        player.getPlayerBoard().addShipyard(shipyard);
+        player.getPlayerBoard().buildShipyard(shipyard);
 
         System.out.println("Successfully built shipyard level " + level);
-        return true;
     }
 
     /**
@@ -120,7 +150,7 @@ public class ActionHandler {
      * 
      * PRECONDITION: ActionValidator has verified all requirements.
      */
-    private boolean buildShips(Player player, com.anno1800.game.player.PlayerBoard.ShipType shipType, int level,
+    private void buildShips(Player player, com.anno1800.game.player.PlayerBoard.ShipType shipType, int level,
             int amount) {
         // Build ships sequentially
         // Important: Ships are built one by one, so chips from previous ships
@@ -130,19 +160,18 @@ public class ActionHandler {
             Object ship = game.getBoard().takeShip(shipType, level);
 
             // Add ship to player's board (also adds the chips to player's available chips)
-            player.getPlayerBoard().addShip(ship, shipType, level);
+            player.getPlayerBoard().buildShip(ship, shipType, level);
 
             System.out.println("Built ship " + (i + 1) + "/" + amount + ": " + shipType + " level " + level);
         }
 
         System.out.println("Successfully built " + amount + " " + shipType + "(s) of level " + level);
-        return true;
     }
 
     /**
      * Fulfill a resident's need with a specific good.
      */
-    private boolean fulfillNeeds(Player player, ResidentCard residentCard, Goods[] goods) {
+    private void fulfillNeeds(Player player, ResidentCard residentCard, Goods[] goods) {
         // TODO: Implement need fulfillment logic
         // 1. Check if resident belongs to player
         // 2. Check if player has the required good
@@ -154,7 +183,7 @@ public class ActionHandler {
     /**
      * Swap resident cards.
      */
-    private boolean swapResidentCards(Player player, ResidentCard[] cardsToSwap) {
+    private void swapResidentCards(Player player, ResidentCard[] cardsToSwap) {
         // TODO: Implement resident card swapping logic
         // 1. Check if player has the cards to swap
         // 2. Remove old cards
@@ -165,7 +194,7 @@ public class ActionHandler {
     /**
      * Settle a new resident or recover an exhausted one.
      */
-    private boolean settleResident(Player player, int level) {
+    private void settleResident(Player player, int level) {
         // TODO: Implement resident settlement logic
         // 1. Get settlement cost for the level (ResidentCosts.getSettlementCost(level))
         // 2. Check if player has required resources
@@ -177,7 +206,7 @@ public class ActionHandler {
     /**
      * Upgrade a resident to the next population level.
      */
-    private boolean upgradeResident(Player player, int[] amount, int[] residentLevel) {
+    private void upgradeResident(Player player, int[] amount, int[] residentLevel) {
         // TODO: Implement resident upgrade logic
         // 1. Check if resident belongs to player
         // 2. Check if resident can be upgraded (level < 5)
@@ -192,7 +221,7 @@ public class ActionHandler {
     /**
      * Discover an Old World Island.
      */
-    private boolean discoverOldWorldIsland(Player player) {
+    private void discoverOldWorldIsland(Player player) {
         // TODO: Implement Old World island discovery logic
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -200,7 +229,7 @@ public class ActionHandler {
     /**
      * Discover a New World Island.
      */
-    private boolean discoverNewWorldIsland(Player player) {
+    private void discoverNewWorldIsland(Player player) {
         // TODO: Implement New World island discovery logic
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -208,7 +237,7 @@ public class ActionHandler {
     /**
      * Go on an expedition.
      */
-    private boolean expedition(Player player) {
+    private void expedition(Player player) {
         // TODO: Implement expedition logic
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -216,7 +245,7 @@ public class ActionHandler {
     /**
      * Celebrate carnival.
      */
-    private boolean carneval() {
+    private void carneval() {
         // TODO: Implement carnival logic
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -231,7 +260,7 @@ public class ActionHandler {
      * or AT_WORK
      * - Player has enough gold
      */
-    private boolean doOvertime(Player player, int populationLevel) {
+    private void doOvertime(Player player, int populationLevel) {
         // Find the first resident with the given population level and status EXHAUSTED
         // or AT_WORK
         Resident targetResident = null;
@@ -248,8 +277,6 @@ public class ActionHandler {
 
         // Deduct gold (1 gold per population level)
         // TODO: Implement gold deduction when PlayerBoard has a method for this
-
-        return true;
     }
 
     /**
@@ -264,7 +291,7 @@ public class ActionHandler {
      * the goods.
      * It cannot be executed standalone - the goods must be consumed immediately.
      */
-    private boolean produceGoods(Player player, Factory factory) {
+    private Goods produceGoods(Player player, Factory factory) {
         // Find a FIT resident with the correct population level
         Resident residentToAssign = null;
         for (Resident resident : player.getPlayerBoard().getResidents()) {
@@ -289,26 +316,48 @@ public class ActionHandler {
                 ") assigned to factory " + factory.getType() +
                 ". Produced: " + factory.produces());
 
-        return true;
+        return factory.produces();
     }
 
     /**
      * Trade goods: export one good and import another.
      */
-    private boolean tradeGoods(Player player, Goods good, int playerId) {
-        // TODO: Implement trading logic
-        // 1. Check if player has trade ship available
-        // 2. Check if player has the export good
-        // 3. Check trade point costs
-        // 4. Deduct export good and trade points
-        // 5. Add import good to inventory
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
+    private Goods tradeGoods(Player player, Goods good, int playerId) {
+        // Check all other players to find the one with the cheapest factory that produces the
+        // requested good
+        Factory cheapestFactory = null;
+        int lowestTradeCosts = Integer.MAX_VALUE;
+        Player tradePartner = game.getPlayers()[0]; // Placeholder initialization
 
+        for (Player otherPlayer : game.getPlayers()) {
+            // Skip the current player (cannot trade with yourself)
+            if (otherPlayer == player) {
+                continue;
+            }
+
+            // Check if this player has a factory that produces the requested good
+            for (Producer producer : otherPlayer.getPlayerBoard().getFactories()) {
+                if (producer instanceof Factory factory) {
+                    if (factory != null && factory.produces() == good) {
+                        int tradeCosts = factory.getTradeCosts();
+                        // Keep track of the cheapest factory
+                        if (tradeCosts < lowestTradeCosts) {
+                            cheapestFactory = factory;
+                            lowestTradeCosts = tradeCosts;
+                            tradePartner = otherPlayer;
+                        }
+                    }
+                }
+            }
+        }
+        tradePartner.getPlayerBoard().earnGold(lowestTradeCosts);
+        player.getPlayerBoard().reduceAvailableTradeChips(lowestTradeCosts);
+        return cheapestFactory.produces();
+    }
     /**
      * Activate a reward.
      */
-    private boolean activateReward(Player player, Reward reward) {
+    private void activateReward(Player player, Reward reward) {
         // TODO: Implement reward activation logic
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -316,7 +365,7 @@ public class ActionHandler {
     /**
      * Assign a resident worker to a factory slot.
      */
-    private boolean assignWorker(Player player, Factory factory, Resident resident, int slot) {
+    private void assignWorker(Player player, Factory factory, Resident resident, int slot) {
         // TODO: Implement worker assignment logic
         // 1. Check if resident belongs to player
         // 2. Check if resident has correct population level for factory
@@ -330,7 +379,7 @@ public class ActionHandler {
     /**
      * Exhaust a worker resident.
      */
-    private boolean exhaustWorker(Player player, Resident resident) {
+    private void exhaustWorker(Player player, Resident resident) {
         // TODO: Implement worker exhaustion logic
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -338,7 +387,7 @@ public class ActionHandler {
     /**
      * Draw a resident card from the deck.
      */
-    private boolean drawResidentCard(Player player) {
+    private ResidentCard drawResidentCard(Player player) {
         // TODO: Implement card drawing logic
         // 1. Check if there are cards in the deck
         // 2. Draw top card
@@ -349,7 +398,7 @@ public class ActionHandler {
     /**
      * Import a good.
      */
-    private boolean importGood(Player player, Goods good) {
+    private Goods importGood(Player player, Goods good) {
         // TODO: Implement import logic
         throw new UnsupportedOperationException("Not implemented yet");
     }
