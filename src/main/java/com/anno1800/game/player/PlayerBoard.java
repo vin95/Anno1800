@@ -6,14 +6,18 @@ import com.anno1800.game.tiles.Plantation;
 import com.anno1800.game.tiles.Shipyard;
 import com.anno1800.game.tiles.TradeShip;
 import com.anno1800.data.gamedata.FactoryData;
-import com.anno1800.data.gamedata.Producers;
+import com.anno1800.data.gamedata.Goods;
 import com.anno1800.game.residents.Resident;
 
 import static com.anno1800.data.gamedata.Producers.*;
 import static com.anno1800.game.residents.ResidentStatus.*;
 import com.anno1800.game.board.Board;
+import com.anno1800.game.cards.ExpeditionCard;
 import com.anno1800.game.cards.ResidentCard;
+
 import java.util.ArrayList;
+import java.util.List;
+
 import com.anno1800.data.gamedata.ShipType;
 
 public class PlayerBoard {
@@ -33,6 +37,8 @@ public class PlayerBoard {
     int availableTradeChips = 0;
     int availableExplorerChips = 0;
 
+    boolean extraActionThisTurn = false;
+
     Plantation[] plantations = new Plantation[6];
 
     Factory[] factories = new Factory[15]; // listet nur alle Factories eines Spielers auf. Nicht für Logik zu benutzen,
@@ -48,6 +54,10 @@ public class PlayerBoard {
     ArrayList<Resident> residents = new ArrayList<>();
 
     ArrayList<ResidentCard> residentCards = new ArrayList<>();
+
+    ArrayList<ExpeditionCard> expeditionCards = new ArrayList<>();
+
+    List<Goods> storedGoods;
 
     public PlayerBoard() {
     }
@@ -345,19 +355,23 @@ public class PlayerBoard {
      * @param type The Producers enum value for the factory
      * @return a new Factory instance
      */
-    private static Factory copyFactory(Producers type) {
-        Factory template = FactoryData.getFactory(type);
-        return new Factory(
-                template.getType(),
-                template.costs(),
-                template.produces(),
-                template.populationLevel(),
-                template.getTradeCosts() // Always read from FactoryData
-        );
-    }
+    // private static Factory copyFactory(Producers type) {
+    //     Factory template = FactoryData.getFactory(type);
+    //     return new Factory(
+    //             template.getType(),
+    //             template.costs(),
+    //             template.produces(),
+    //             template.populationLevel(),
+    //             template.getTradeCosts() // Always read from FactoryData
+    //     );
+    // }
 
     public void earnGold(int amount) {
         this.gold += amount;
+    }
+
+    public void earnExpeditionCard(int amount, Board gameBoard) {
+        this.expeditionCards.add(gameBoard.drawExpeditionCard());
     }
 
     public void spendGold(int amount) {
@@ -425,5 +439,13 @@ public class PlayerBoard {
 
     public void buildFactoryAsReward(Factory factory) {
         addFactory(factory);
+    }
+
+    public void addGoodToStoredGoods(Goods good) {
+            storedGoods.add(good);
+    }
+
+    public void setExtraActionThisTurn() {
+        extraActionThisTurn = true;
     }
 }

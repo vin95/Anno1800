@@ -6,6 +6,10 @@ import com.anno1800.game.player.Player;
 import com.anno1800.game.player.PlayerBoard;
 import com.anno1800.game.rewards.Reward;
 
+import static com.anno1800.data.gamedata.Goods.POTATOES;
+
+import com.anno1800.data.gamedata.Goods;
+
 /**
  * Activate a reward.
  */
@@ -19,13 +23,14 @@ public class ActivateReward {
                 // TODO: Residents upgraden
             }
             case Reward.ExtraAction r -> {
-                // TODO: Extra Aktion gewähren
+                player.getPlayerBoard().setExtraActionThisTurn();
             }
             case Reward.ExpeditionCards r -> {
-                // TODO: ExpeditionCards geben
+                player.getPlayerBoard().earnExpeditionCard(2, game.getBoard());
             }
             case Reward.FreeGoodsChoice r -> {
-                // TODO: Spieler wählt ein Good aus r.options(), erhält r.amount()
+                // Füge die gewählte Ware dem PlayerBoard hinzu
+                player.getPlayerBoard().addGoodToStoredGoods(r.chosenGood());
             }
             case Reward.TradePoints r -> {
                 game.getBoard().takeTradeChip(r.points());

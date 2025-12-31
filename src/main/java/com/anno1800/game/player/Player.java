@@ -1,5 +1,8 @@
 package com.anno1800.game.player;
 
+import java.util.List;
+
+import com.anno1800.data.gamedata.Goods;
 import com.anno1800.game.board.Board;
 
 public class Player {

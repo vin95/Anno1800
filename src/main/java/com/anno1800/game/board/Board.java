@@ -141,6 +141,7 @@ public class Board {
     /**
      * Initializes the game board with all card stacks
      */
+    @SuppressWarnings("unchecked")
     public static Board initializeBoard(int numPlayers) {
         // 35 Factory stacks
         List<Deque<Factory>> factoryStacks = createFactoryStacks(numPlayers);
@@ -159,14 +160,14 @@ public class Board {
         Deque<Shipyard> shipyardLevel3 = createLevel3Shipyards(numPlayers);
 
         // Trade ship stacks
-        Deque<TradeShip> tradeShipLevel1 = (Deque<TradeShip>) createShips(com.anno1800.game.factories.ShipFactory.ShipType.TRADE, 1, numPlayers);
-        Deque<TradeShip> tradeShipLevel2 = (Deque<TradeShip>) createShips(com.anno1800.game.factories.ShipFactory.ShipType.TRADE, 2, numPlayers);
-        Deque<TradeShip> tradeShipLevel3 = (Deque<TradeShip>) createShips(com.anno1800.game.factories.ShipFactory.ShipType.TRADE, 3, numPlayers);
+        Deque<TradeShip> tradeShipLevel1 = (Deque<TradeShip>) createShips(ShipType.TradeShip, 1, numPlayers);
+        Deque<TradeShip> tradeShipLevel2 = (Deque<TradeShip>) createShips(ShipType.TradeShip, 2, numPlayers);
+        Deque<TradeShip> tradeShipLevel3 = (Deque<TradeShip>) createShips(ShipType.TradeShip, 3, numPlayers);
 
         // Explorer ship stacks
-        Deque<ExplorerShip> explorerShipLevel1 = (Deque<ExplorerShip>) createShips(com.anno1800.game.factories.ShipFactory.ShipType.EXPLORER, 1, numPlayers);
-        Deque<ExplorerShip> explorerShipLevel2 = (Deque<ExplorerShip>) createShips(com.anno1800.game.factories.ShipFactory.ShipType.EXPLORER, 2, numPlayers);
-        Deque<ExplorerShip> explorerShipLevel3 = (Deque<ExplorerShip>) createShips(com.anno1800.game.factories.ShipFactory.ShipType.EXPLORER, 3, numPlayers);
+        Deque<ExplorerShip> explorerShipLevel1 = (Deque<ExplorerShip>) createShips(ShipType.ExplorerShip, 1, numPlayers);
+        Deque<ExplorerShip> explorerShipLevel2 = (Deque<ExplorerShip>) createShips(ShipType.ExplorerShip, 2, numPlayers);
+        Deque<ExplorerShip> explorerShipLevel3 = (Deque<ExplorerShip>) createShips(ShipType.ExplorerShip, 3, numPlayers);
 
         // Old World Islands
         Deque<OldWorldIsland> oldWorldIslands = createOldWorldIslands();
@@ -447,6 +448,14 @@ public class Board {
         return stack.pop();
     }
 
+    public ExpeditionCard drawExpeditionCard() {
+
+        if (expeditionStack.isEmpty()) {
+            throw new IllegalStateException("No expedition cards left in the stack");
+        }
+        return expeditionStack.pop();
+    }
+
     public int takeGold(int amount) {
         if (amount > gold) {
             System.out.println("Not enough gold available");
@@ -668,5 +677,7 @@ public class Board {
             default -> null;
         };
     }
+
+
 
 }

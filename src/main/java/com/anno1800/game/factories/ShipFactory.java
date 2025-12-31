@@ -4,18 +4,15 @@ import com.anno1800.game.tiles.ExplorerShip;
 import com.anno1800.game.tiles.TradeShip;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import com.anno1800.data.gamedata.ShipType;
 
 public class ShipFactory {
-    public enum ShipType {
-        EXPLORER,
-        TRADE
-    }
 
     public static Deque<?> createShips(ShipType type, int level, int count) {
         switch (type) {
-            case EXPLORER:
+            case ExplorerShip:
                 return createExplorerShips(level, count);
-            case TRADE:
+            case TradeShip:
                 return createTradeShips(level, count);
             default:
                 throw new IllegalArgumentException("Unknown ship type: " + type);

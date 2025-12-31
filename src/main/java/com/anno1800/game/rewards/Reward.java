@@ -34,13 +34,8 @@ public sealed interface Reward {
      * The actual choice is made when the reward is executed.
      * 
      * @param options Array of goods to choose from
-     * @param amount Number of units of the chosen good to receive
      */
-    record FreeGoodsChoice(Goods[] options, int amount) implements Reward {
-        public FreeGoodsChoice(Goods[] options) {
-            this(options, 1);
-        }
-    }
+    record FreeGoodsChoice(Goods[] options) implements Reward {}
     
     /**
      * Reward: Trade points

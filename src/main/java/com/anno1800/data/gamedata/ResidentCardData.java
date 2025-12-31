@@ -128,8 +128,8 @@ public class ResidentCardData {
             new ResidentCard(5, new Goods[]{BREAD, CIGARS, CHAMPAGNE}, new Reward.UpgradeResidents(3, 2, 3)),
             new ResidentCard(5, new Goods[]{SAUSAGE, CHAMPAGNE, CHOCOLATE}, new Reward.UpgradeResidents(3, 2, 3)),
 
-            new ResidentCard(5, new Goods[]{EXPLORATIONCHIP, EXPLORATIONCHIP, EXPLORATIONCHIP, EXPLORATIONCHIP, EXPLORATIONCHIP, EXPLORATIONCHIP}, new Reward.FreeGoodsChoice(new Goods[]{CACAO, COFFEE_BEANS, RUBBER, SUGARCANE, TOBACCO}, 1)),
-            new ResidentCard(5, new Goods[]{COAL, CHAMPAGNE, LIGHT_BULBS}, new Reward.FreeGoodsChoice(new Goods[]{CACAO, COFFEE_BEANS, RUBBER, SUGARCANE, TOBACCO}, 1)),
+            new ResidentCard(5, new Goods[]{EXPLORATIONCHIP, EXPLORATIONCHIP, EXPLORATIONCHIP, EXPLORATIONCHIP, EXPLORATIONCHIP, EXPLORATIONCHIP}, new Reward.FreeGoodsChoice(new Goods[]{CACAO, COFFEE_BEANS, RUBBER, SUGARCANE, TOBACCO})),
+            new ResidentCard(5, new Goods[]{COAL, CHAMPAGNE, LIGHT_BULBS}, new Reward.FreeGoodsChoice(new Goods[]{CACAO, COFFEE_BEANS, RUBBER, SUGARCANE, TOBACCO})),
 
             new ResidentCard(5, new Goods[]{SAUSAGE, COFFEE, COATS}, new Reward.TradePoints(6)),
             new ResidentCard(5, new Goods[]{BRICKS, GRAMOPHONES, COFFEE}, new Reward.TradePoints(6)),
