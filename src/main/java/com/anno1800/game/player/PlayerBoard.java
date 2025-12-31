@@ -2,24 +2,21 @@ package com.anno1800.game.player;
 
 import com.anno1800.game.tiles.ExplorerShip;
 import com.anno1800.game.tiles.Factory;
-import com.anno1800.game.tiles.Producer;
+import com.anno1800.game.tiles.Plantation;
 import com.anno1800.game.tiles.Shipyard;
 import com.anno1800.game.tiles.TradeShip;
 import com.anno1800.data.gamedata.FactoryData;
+import com.anno1800.data.gamedata.Producers;
 import com.anno1800.game.residents.Resident;
-import com.anno1800.game.tiles.Producers;
-import static com.anno1800.game.tiles.Producers.*;
+
+import static com.anno1800.data.gamedata.Producers.*;
 import static com.anno1800.game.residents.ResidentStatus.*;
 import com.anno1800.game.board.Board;
 import com.anno1800.game.cards.ResidentCard;
 import java.util.ArrayList;
+import com.anno1800.data.gamedata.ShipType;
 
 public class PlayerBoard {
-
-    public enum ShipType {
-        ExplorerShip,
-        TradeShip
-    }
 
     int landTiles = 10;
     int coastTiles = 5;
@@ -36,8 +33,10 @@ public class PlayerBoard {
     int availableTradeChips = 0;
     int availableExplorerChips = 0;
 
-    Producer[] factories = new Producer[15]; // listet nur alle Factories eines Spielers auf. Nicht für Logik zu benutzen,
-                                           // da die SHipyards nicht berücksichtigt werden. Besser getFreeLandTiles etc.
+    Plantation[] plantations = new Plantation[6];
+
+    Factory[] factories = new Factory[15]; // listet nur alle Factories eines Spielers auf. Nicht für Logik zu benutzen,
+                                           // da die Shipyards nicht berücksichtigt werden. Besser getFreeLandTiles etc.
                                            // benutzen.
 
     ArrayList<Shipyard> shipyards = new ArrayList<>();
@@ -105,8 +104,12 @@ public class PlayerBoard {
         return availableExplorerChips;
     }
 
-    public Producer[] getFactories() {
+    public Factory[] getFactories() {
         return factories;
+    }
+
+    public Plantation[] getPlantations() {
+        return plantations;
     }
 
     public ArrayList<Shipyard> getShipyards() {
@@ -129,6 +132,21 @@ public class PlayerBoard {
         return residentCards;
     }
 
+    /**
+     * Entfernt eine ResidentCard vom Spieler und legt sie auf den passenden Stack des Boards zurück.
+     */
+    public void discardResidentCard(ResidentCard card, Board board) {
+        residentCards.remove(card);
+        int level = card.populationLevel();
+        if (level <= 2) {
+            board.getResidentStack1().push(card);
+        } else if (level <= 5) {
+            board.getResidentStack2().push(card);
+        } else {
+            board.getResidentStack3().push(card);
+        }
+    }   
+
     public int getFreeLandTiles() {
         return landTiles - numFactoriesOnLand;
     }
@@ -147,15 +165,12 @@ public class PlayerBoard {
         board.addGold(player.getPosition(), gameBoard);
 
         // Take farmer from board and add to player board
-
         for (int i = 0; i < 4; i++) {
             addResident(gameBoard, board, 1);
         }
-
         for (int i = 0; i < 3; i++) {
             addResident(gameBoard, board, 2);
         }
-
         for (int i = 0; i < 2; i++) {
             addResident(gameBoard, board, 3);
         }
@@ -164,16 +179,25 @@ public class PlayerBoard {
         board.addShip(1, ShipType.TradeShip, gameBoard);
         board.addShip(1, ShipType.ExplorerShip, gameBoard);
 
-        board.addFactory(SAWMILL_GREEN);
-        board.addFactory(GRAIN_FARM_GREEN);
-        board.addFactory(POTATO_FARM_GREEN);
-        board.addFactory(PIG_FARM_GREEN);
-        board.addFactory(SHEEP_FARM_GREEN);
-        board.addFactory(COAL_MINE_RED);
-        board.addFactory(BRICK_FACTORY_RED);
-        board.addFactory(WAREHOUSE_RED);
-        board.addFactory(STEEL_WORKS_RED);
-        board.addFactory(SAILMAKERS_RED);
+        // Factories initialisieren
+        board.addFactory(FactoryData.getFactory(SAWMILL_GREEN));
+        board.addFactory(FactoryData.getFactory(GRAIN_FARM_GREEN));
+        board.addFactory(FactoryData.getFactory(POTATO_FARM_GREEN));
+        board.addFactory(FactoryData.getFactory(PIG_FARM_GREEN));
+        board.addFactory(FactoryData.getFactory(SHEEP_FARM_GREEN));
+        board.addFactory(FactoryData.getFactory(COAL_MINE_RED));
+        board.addFactory(FactoryData.getFactory(BRICK_FACTORY_RED));
+        board.addFactory(FactoryData.getFactory(WAREHOUSE_RED));
+        board.addFactory(FactoryData.getFactory(STEEL_WORKS_RED));
+        board.addFactory(FactoryData.getFactory(SAILMAKERS_RED));
+
+        // Plantations initialisieren (Beispiel, ggf. anpassen)
+        board.addPlantation(FactoryData.getPlantation(CACAO_PLANTATION));
+        board.addPlantation(FactoryData.getPlantation(SUGAR_PLANTATION));
+        board.addPlantation(FactoryData.getPlantation(TOBACCO_PLANTATION));
+        board.addPlantation(FactoryData.getPlantation(COFFEE_PLANTATION));
+        board.addPlantation(FactoryData.getPlantation(COTTON_PLANTATION));
+        board.addPlantation(FactoryData.getPlantation(RUBBER_PLANTATION));
 
         board.addShipyard(1);
     }
@@ -184,11 +208,17 @@ public class PlayerBoard {
         this.gold = this.gold + gameBoard.takeGold(gold);
     }
 
-    private void addFactory(Producers type) {
-        Factory newFactory = copyFactory(type);
-        factories[numFactories] = newFactory;
+
+    private void addFactory(Factory factory) {
+        factories[numFactories] = factory;
         numFactoriesOnLand++;
         numFactories++;
+    }
+
+    private int numPlantations = 0;
+    private void addPlantation(Plantation plantation) {
+        plantations[numPlantations] = plantation;
+        numPlantations++;
     }
 
     private void addShipyard(int level) {
@@ -312,9 +342,11 @@ public class PlayerBoard {
     /**
      * Creates a new Factory instance based on the template from FactoryData.
      * Each player gets their own Factory instances.
+     * @param type The Producers enum value for the factory
+     * @return a new Factory instance
      */
     private static Factory copyFactory(Producers type) {
-        Factory template = (Factory) FactoryData.getProducer(type);
+        Factory template = FactoryData.getFactory(type);
         return new Factory(
                 template.getType(),
                 template.costs(),
@@ -349,7 +381,49 @@ public class PlayerBoard {
         availableExplorerChips -= amount;
     }
 
+    public void increaseAvailableTradeChips(int amount) {
+        if( amount < 0) {
+            throw new IllegalArgumentException("Cannot increase trade chips by negative amount");
+        }
+        availableTradeChips += amount;
+    }
+
+    public void increaseAvailableExplorerChips(int amount) {
+        if( amount < 0) {
+            throw new IllegalArgumentException("Cannot increase explorer chips by negative amount");
+        }
+        availableExplorerChips += amount;
+    }
+
+    public void resetAvailableTradeChips() {
+        this.availableTradeChips = 0;
+    }
+
+    public void resetAvailableExplorerChips() {
+        this.availableExplorerChips = 0;
+    }
+
+    public int getPlayersTradeChips() {
+        int ownedTradeChips = 0;
+        for (TradeShip ship : this.tradeShips) {
+            ownedTradeChips += ship.getLevel();
+        }
+        return ownedTradeChips;
+    }
+
+    public int getPlayersExplorerChips() {
+        int ownedExplorerChips = 0;
+        for (ExplorerShip ship : this.explorerShips) {
+            ownedExplorerChips += ship.getLevel();
+        }
+        return ownedExplorerChips;
+    }
+
     private void buildResident(Board gameBoard, PlayerBoard playerBoard, int populationLevel) {
         addResident(gameBoard, playerBoard, populationLevel);
+    }
+
+    public void buildFactoryAsReward(Factory factory) {
+        addFactory(factory);
     }
 }

@@ -15,28 +15,19 @@ public sealed interface Reward {
     record NewResidents(int amount, int populationLevel) implements Reward { }
 
     /**
-     * Reward: Additional residents
+     * Reward: Upgrade residents
      */
     record UpgradeResidents(int amount, int populationLevel1, int populationLevel2) implements Reward { }
     
     /**
      * Reward: Extra action in this turn
      */
-    record ExtraAction() implements Reward { }
+    record ExtraAction(RewardType type) implements Reward { }
 
     /**
      * Reward: 2 ExpeditionCards
      */
-    record ExpeditionCards() implements Reward { }
-    
-    /**
-     * Reward: Free goods
-     */
-    record FreeGoods(Goods good, int amount) implements Reward {
-        public FreeGoods(Goods good) {
-            this(good, 1);
-        }
-    }
+    record ExpeditionCards(RewardType type) implements Reward { }
     
     /**
      * Reward: Free goods - player can choose 1 out of N options
@@ -59,7 +50,7 @@ public sealed interface Reward {
     /**
      * Reward: Expedition points
      */
-    record ExpeditionPoints(int points) implements Reward { }
+    record ExplorationPoints(int points) implements Reward { }
 
     /**
      * Reward: Gold

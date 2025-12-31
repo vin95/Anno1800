@@ -1,6 +1,7 @@
 package com.anno1800.game.tiles;
 
 import com.anno1800.data.gamedata.Goods;
+import com.anno1800.data.gamedata.Producers;
 
 /**
  * Represents a starting factory.

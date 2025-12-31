@@ -8,7 +8,7 @@ import com.anno1800.game.cards.ExpeditionCard;
 
 public class ExpeditionCardData {
     
-    public static Deque<ExpeditionCard> getExpeditionCards() {
+    public static Deque<ExpeditionCard> createExpeditionCards() {
         return new ArrayDeque<>(List.of(
             new ExpeditionCard(5, 5, 3, 3),
 

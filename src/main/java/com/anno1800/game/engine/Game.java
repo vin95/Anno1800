@@ -2,6 +2,7 @@ package com.anno1800.game.engine;
 
 import com.anno1800.game.actions.Action;
 import com.anno1800.game.actions.ActionHandler;
+import com.anno1800.game.actions.ActionResult;
 import com.anno1800.game.board.Board;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.state.GameState;
@@ -44,7 +45,7 @@ public class Game {
      * @param action The action to execute
      * @return true if action was successful
      */
-    public boolean executeAction(Action action) {
+    public ActionResult executeAction(Action action) {
         return actionHandler.execute(action, getCurrentPlayer());
     }
     

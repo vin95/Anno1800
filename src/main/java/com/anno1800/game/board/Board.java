@@ -1,31 +1,28 @@
 package com.anno1800.game.board;
 
+import static com.anno1800.data.gamedata.ResidentCardData.*;
+import static com.anno1800.data.gamedata.ExpeditionCardData.*;
+import static com.anno1800.game.factories.ShipyardFactory.*;
+import static com.anno1800.game.factories.ShipFactory.*;
+import static com.anno1800.game.factories.createResidents.*;
+import static com.anno1800.data.gamedata.OldWorldIslandData.createOldWorldIslands;
+import static com.anno1800.data.gamedata.NewWorldIslandsData.createNewWorldIslands;
 import com.anno1800.game.cards.ResidentCard;
 import com.anno1800.game.tiles.ExplorerShip;
 import com.anno1800.game.tiles.Factory;
 import com.anno1800.game.tiles.NewWorldIsland;
 import com.anno1800.game.tiles.OldWorldIsland;
-import com.anno1800.game.tiles.Producers;
 import com.anno1800.game.tiles.Shipyard;
 import com.anno1800.game.tiles.TradeShip;
-import com.anno1800.game.factories.ExplorerShipFactory;
-import com.anno1800.game.factories.FactoryFactory;
-import com.anno1800.game.factories.ShipyardFactory;
-import com.anno1800.game.factories.TradeShipFactory;
 import com.anno1800.game.cards.ExpeditionCard;
-import com.anno1800.data.gamedata.ExpeditionCardData;
-import com.anno1800.data.gamedata.NewWorldIslandsData;
-import com.anno1800.data.gamedata.OldWorldIslandData;
-import com.anno1800.data.gamedata.ResidentCardData;
-import com.anno1800.game.player.PlayerBoard.ShipType;
+import com.anno1800.data.gamedata.Producers;
+import com.anno1800.data.gamedata.ShipType;
 import com.anno1800.game.residents.Farmer;
 import com.anno1800.game.residents.Resident;
 import com.anno1800.game.residents.Worker;
 import com.anno1800.game.residents.Artisan;
 import com.anno1800.game.residents.Engineer;
 import com.anno1800.game.residents.Investor;
-import static com.anno1800.game.factories.createResidents.*;
-
 import java.util.Deque;
 import java.util.List;
 
@@ -34,6 +31,7 @@ import java.util.List;
  */
 public class Board {
     // 35 Factory stacks with 2 factories each
+
     private final List<Deque<Factory>> factoryStacks;
     
     // 3 Resident card stacks
@@ -60,6 +58,7 @@ public class Board {
     private final Deque<ExplorerShip> explorerShipLevel3;
 
     // Old World Islands
+    // Old World Islands
     private final Deque<OldWorldIsland> oldWorldIslands;
 
     // New World Islands
@@ -80,9 +79,9 @@ public class Board {
 
     private boolean endPhase = false;
 
-    private int gold = 86;
-    private int tradeChips = 77;
-    private int explorerChips = 53;
+    private int gold = 1000;
+    private int tradeChips = 1000;
+    private int explorerChips = 1000;
 
     public Board(
         List<Deque<Factory>> factoryStacks,
@@ -99,8 +98,8 @@ public class Board {
         Deque<ExplorerShip> explorerShipLevel1,
         Deque<ExplorerShip> explorerShipLevel2,
         Deque<ExplorerShip> explorerShipLevel3,
-        Deque<OldWorldIsland> oldWorldIslands,
-        Deque<NewWorldIsland> newWorldIslands,
+        Deque<OldWorldIsland> oldWorldIslands, // Removed duplicate declaration
+        Deque<NewWorldIsland> newWorldIslands, // Removed duplicate declaration
         List<Farmer> residents_farmers,
         List<Worker> residents_workers,
         List<Artisan> residents_artisans,
@@ -144,54 +143,99 @@ public class Board {
      */
     public static Board initializeBoard(int numPlayers) {
         // 35 Factory stacks
-        List<Deque<Factory>> factoryStacks = FactoryFactory.createFactoryStacks(numPlayers);
-        
-        // 3 Resident card stacks
-        Deque<ResidentCard> residentStack1 = ResidentCardData.getCardsForLevel(2);
-        Deque<ResidentCard> residentStack2 = ResidentCardData.getCardsForLevel(5);
-        Deque<ResidentCard> residentStack3 = ResidentCardData.getCardsForLevel(7);
-        
-        // Expedition card stack (also called Relict cards)
-        Deque<ExpeditionCard> expeditionStack = ExpeditionCardData.getExpeditionCards();
-        
-        // 3 Shipyard stacks (Level 1-3)
-        Deque<Shipyard> shipyardLevel1 = ShipyardFactory.createLevel1Shipyards(4);
-        Deque<Shipyard> shipyardLevel2 = ShipyardFactory.createLevel2Shipyards(6);
-        Deque<Shipyard> shipyardLevel3 = ShipyardFactory.createLevel3Shipyards(4);
-        
-        // 3 Trade ship stacks (Level 1-3)
-        Deque<TradeShip> tradeShipLevel1 = TradeShipFactory.createLevel1Ships(6 );
-        Deque<TradeShip> tradeShipLevel2 = TradeShipFactory.createLevel2Ships(6);
-        Deque<TradeShip> tradeShipLevel3 = TradeShipFactory.createLevel3Ships(6);
-        
-        // 3 Explorer ship stacks (Level 1-3)
-        Deque<ExplorerShip> explorerShipLevel1 = ExplorerShipFactory.createLevel1Ships(6);
-        Deque<ExplorerShip> explorerShipLevel2 = ExplorerShipFactory.createLevel2Ships(6);
-        Deque<ExplorerShip> explorerShipLevel3 = ExplorerShipFactory.createLevel3Ships(6);
+        List<Deque<Factory>> factoryStacks = createFactoryStacks(numPlayers);
+
+        // Resident card stacks (levels 2, 5, 7)
+        Deque<ResidentCard> residentStack1 = getCardsForLevel(2);
+        Deque<ResidentCard> residentStack2 = getCardsForLevel(5);
+        Deque<ResidentCard> residentStack3 = getCardsForLevel(7);
+
+        // Expedition card stack
+        Deque<ExpeditionCard> expeditionStack = createExpeditionCards();
+
+        // Shipyard stacks
+        Deque<Shipyard> shipyardLevel1 = createLevel1Shipyards(numPlayers);
+        Deque<Shipyard> shipyardLevel2 = createLevel2Shipyards(numPlayers);
+        Deque<Shipyard> shipyardLevel3 = createLevel3Shipyards(numPlayers);
+
+        // Trade ship stacks
+        Deque<TradeShip> tradeShipLevel1 = (Deque<TradeShip>) createShips(com.anno1800.game.factories.ShipFactory.ShipType.TRADE, 1, numPlayers);
+        Deque<TradeShip> tradeShipLevel2 = (Deque<TradeShip>) createShips(com.anno1800.game.factories.ShipFactory.ShipType.TRADE, 2, numPlayers);
+        Deque<TradeShip> tradeShipLevel3 = (Deque<TradeShip>) createShips(com.anno1800.game.factories.ShipFactory.ShipType.TRADE, 3, numPlayers);
+
+        // Explorer ship stacks
+        Deque<ExplorerShip> explorerShipLevel1 = (Deque<ExplorerShip>) createShips(com.anno1800.game.factories.ShipFactory.ShipType.EXPLORER, 1, numPlayers);
+        Deque<ExplorerShip> explorerShipLevel2 = (Deque<ExplorerShip>) createShips(com.anno1800.game.factories.ShipFactory.ShipType.EXPLORER, 2, numPlayers);
+        Deque<ExplorerShip> explorerShipLevel3 = (Deque<ExplorerShip>) createShips(com.anno1800.game.factories.ShipFactory.ShipType.EXPLORER, 3, numPlayers);
 
         // Old World Islands
-        Deque<OldWorldIsland> oldWorldIslands = OldWorldIslandData.createOldWorldIslands();
+        Deque<OldWorldIsland> oldWorldIslands = createOldWorldIslands();
 
         // New World Islands
-        Deque<NewWorldIsland> newWorldIslands = NewWorldIslandsData.createNewWorldIslands();
+        Deque<NewWorldIsland> newWorldIslands = createNewWorldIslands();
 
-        // Residents
+        // Resident lists
         List<Farmer> residents_farmers = createFarmers();
         List<Worker> residents_workers = createWorkers();
         List<Artisan> residents_artisans = createArtisans();
         List<Engineer> residents_engineers = createEngineers();
         List<Investor> residents_investors = createInvestors();
-        
+
         return new Board(
             factoryStacks,
-            residentStack1, residentStack2, residentStack3,
+            residentStack1,
+            residentStack2,
+            residentStack3,
             expeditionStack,
-            shipyardLevel1, shipyardLevel2, shipyardLevel3,
-            tradeShipLevel1, tradeShipLevel2, tradeShipLevel3,
-            explorerShipLevel1, explorerShipLevel2, explorerShipLevel3,
-            oldWorldIslands, newWorldIslands,
-            residents_farmers, residents_workers, residents_artisans, residents_engineers, residents_investors
+            shipyardLevel1,
+            shipyardLevel2,
+            shipyardLevel3,
+            tradeShipLevel1,
+            tradeShipLevel2,
+            tradeShipLevel3,
+            explorerShipLevel1,
+            explorerShipLevel2,
+            explorerShipLevel3,
+            oldWorldIslands,
+            newWorldIslands,
+            residents_farmers,
+            residents_workers,
+            residents_artisans,
+            residents_engineers,
+            residents_investors
         );
+    }
+
+    /**
+     * Creates all factory stacks from FactoryData using Producers enum.
+     * Each factory type gets a stack with numPlayers copies.
+     * @param numPlayers The number of players in the game
+     * @return List of factory stacks, one for each factory type
+     */
+    private static List<Deque<Factory>> createFactoryStacks(int numPlayers) {
+        List<Deque<Factory>> factoryStacks = new java.util.ArrayList<>();
+        int numFactories = (numPlayers <= 2) ? 1 : 2;
+        for (com.anno1800.data.gamedata.Producers producer : com.anno1800.data.gamedata.Producers.values()) {
+            // Only add if this producer is a Factory (not Plantation)
+            try {
+                com.anno1800.game.tiles.Factory template = com.anno1800.data.gamedata.FactoryData.getFactory(producer);
+                java.util.Deque<com.anno1800.game.tiles.Factory> stack = new java.util.ArrayDeque<>();
+                for (int i = 0; i < numFactories; i++) {
+                    com.anno1800.game.tiles.Factory factoryCopy = new com.anno1800.game.tiles.Factory(
+                        template.getType(),
+                        template.costs(),
+                        template.produces(),
+                        template.populationLevel(),
+                        template.getTradeCosts()
+                    );
+                    stack.addLast(factoryCopy);
+                }
+                factoryStacks.add(stack);
+            } catch (IllegalArgumentException e) {
+                // Not a Factory, skip
+            }
+        }
+        return factoryStacks;
     }
 
     public Deque<Factory> getFactoryStacks(int index) {

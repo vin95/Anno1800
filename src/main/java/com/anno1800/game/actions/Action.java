@@ -5,7 +5,7 @@ import com.anno1800.game.rewards.Reward;
 import com.anno1800.game.cards.ResidentCard;
 import com.anno1800.data.gamedata.Goods;
 import com.anno1800.game.residents.Resident;
-import com.anno1800.game.player.PlayerBoard.ShipType;
+import com.anno1800.data.gamedata.ShipType;
 
 /**
  * Represents all possible player actions in the game.

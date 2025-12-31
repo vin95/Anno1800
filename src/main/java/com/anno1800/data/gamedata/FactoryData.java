@@ -4,9 +4,9 @@ import com.anno1800.game.tiles.Factory;
 import com.anno1800.game.tiles.StartFactory;
 import com.anno1800.game.tiles.Plantation;
 import com.anno1800.game.tiles.Producer;
-import com.anno1800.game.tiles.Producers;
+
 import static com.anno1800.data.gamedata.Goods.*;
-import static com.anno1800.game.tiles.Producers.*;
+import static com.anno1800.data.gamedata.Producers.*;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -25,7 +25,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(SAWMILL_GREEN, new StartFactory(
             SAWMILL_GREEN,
             new Goods[]{},
-            PLANKS,
+            Producers.SAWMILL_GREEN.getProduces(),
             1,
             1
         ));
@@ -33,7 +33,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(GRAIN_FARM_GREEN, new StartFactory(
             GRAIN_FARM_GREEN,
             new Goods[]{},
-            GRAIN,
+            Producers.GRAIN_FARM_GREEN.getProduces(),
             1,
             1
         ));
@@ -41,7 +41,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(POTATO_FARM_GREEN, new StartFactory(
             POTATO_FARM_GREEN,
             new Goods[]{},
-            POTATOES,
+            Producers.POTATO_FARM_GREEN.getProduces(),
             1,
             1
         ));
@@ -49,7 +49,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(PIG_FARM_GREEN, new StartFactory(
             PIG_FARM_GREEN,
             new Goods[]{},
-            PIGS,
+            Producers.PIG_FARM_GREEN.getProduces(),
             1,
             1
         ));
@@ -57,7 +57,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(SHEEP_FARM_GREEN, new StartFactory(
             SHEEP_FARM_GREEN,
             new Goods[]{},
-            WOOL,
+            Producers.SHEEP_FARM_GREEN.getProduces(),
             1,
             1
         ));
@@ -65,7 +65,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(COAL_MINE_RED, new StartFactory(
             COAL_MINE_RED,
             new Goods[]{PLANKS},
-            COAL,
+            Producers.COAL_MINE_RED.getProduces(),
             1,
             2
         ));
@@ -73,7 +73,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(BRICK_FACTORY_RED, new StartFactory(
             BRICK_FACTORY_RED,
             new Goods[]{COAL},
-            BRICKS,
+            Producers.BRICK_FACTORY_RED.getProduces(),
             1,
             2
         ));
@@ -81,7 +81,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(WAREHOUSE_RED, new StartFactory(
             WAREHOUSE_RED,
             new Goods[]{BRICKS, WORKFORCE_3},
-            GOODS,
+            Producers.WAREHOUSE_RED.getProduces(),
             1,
             2
         ));
@@ -89,7 +89,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(STEEL_WORKS_RED, new StartFactory(
             STEEL_WORKS_RED,
             new Goods[]{BRICKS, COAL},
-            STEELBARS,
+            Producers.STEEL_WORKS_RED.getProduces(),
             1,
             2
         ));
@@ -97,7 +97,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(SAILMAKERS_RED, new StartFactory(
             SAILMAKERS_RED,
             new Goods[]{PLANKS, WOOL},
-            SAILS,
+            Producers.SAILMAKERS_RED.getProduces(),
             1,
             2
         ));
@@ -107,7 +107,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(SAWMILL_BLUE, new Factory(
             SAWMILL_BLUE,
             new Goods[]{},
-            PLANKS,
+            Producers.SAWMILL_BLUE.getProduces(),
             2,
             1
         ));
@@ -115,7 +115,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(COAL_MINE_BLUE, new Factory(
             COAL_MINE_BLUE,
             new Goods[]{PLANKS},
-            COAL,
+            Producers.COAL_MINE_BLUE.getProduces(),
             2,
             1
         ));
@@ -123,7 +123,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(BRICK_FACTORY_BLUE, new Factory(
             BRICK_FACTORY_BLUE,
             new Goods[]{COAL},
-            BRICKS,
+            Producers.BRICK_FACTORY_BLUE.getProduces(),
             2,
             1
         ));
@@ -131,7 +131,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(BREWERY_BLUE, new Factory(
             BREWERY_BLUE,
             new Goods[]{GRAIN, COAL},
-            BEER,
+            Producers.BREWERY_BLUE.getProduces(),
             2,
             1
         ));
@@ -139,7 +139,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(BAKERY_BLUE, new Factory(
             BAKERY_BLUE,
             new Goods[]{GRAIN, COAL},
-            BREAD,
+            Producers.BAKERY_BLUE.getProduces(),
             2,
             1
         ));
@@ -147,7 +147,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(WAREHOUSE_BLUE, new Factory(
             WAREHOUSE_BLUE,
             new Goods[]{BRICKS, WORKFORCE_3},
-            GOODS,
+            Producers.WAREHOUSE_BLUE.getProduces(),
             2,
             1
         ));
@@ -155,7 +155,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(STEEL_WORKS_BLUE, new Factory(
             STEEL_WORKS_BLUE,
             new Goods[]{BRICKS, COAL},
-            STEELBARS,
+            Producers.STEEL_WORKS_BLUE.getProduces(),
             2,
             1
         ));
@@ -163,7 +163,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(SAILMAKERS_BLUE, new Factory(
             SAILMAKERS_BLUE,
             new Goods[]{PLANKS, WOOL},
-            SAILS,
+            Producers.SAILMAKERS_BLUE.getProduces(),
             2,
             1
         ));
@@ -171,7 +171,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(DISTILLERY_BLUE, new Factory(
             DISTILLERY_BLUE,
             new Goods[]{POTATOES, COAL},
-            SNAPS,
+            Producers.DISTILLERY_BLUE.getProduces(),
             2,
             1
         ));
@@ -179,7 +179,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(GLASS_MAKER_BLUE, new Factory(
             GLASS_MAKER_BLUE,
             new Goods[]{GOODS, COAL},
-            GLASS,
+            Producers.GLASS_MAKER_BLUE.getProduces(),
             2,
             1
         ));
@@ -187,7 +187,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(COTTON_MILL_BLUE, new Factory(
             COTTON_MILL_BLUE,
             new Goods[]{COTTON, STEAM_GEARS},
-            COTTON_FABRIC,
+            Producers.COTTON_MILL_BLUE.getProduces(),
             2,
             1
         ));
@@ -195,7 +195,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(SLAUGHTERHOUSE_BLUE, new Factory(
             SLAUGHTERHOUSE_BLUE,
             new Goods[]{PIGS, COAL},
-            SAUSAGE,
+            Producers.SLAUGHTERHOUSE_BLUE.getProduces(),
             2,
             1
         ));
@@ -203,7 +203,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(SOAP_FACTORY_BLUE, new Factory(
             SOAP_FACTORY_BLUE,
             new Goods[]{PIGS, COAL},
-            SOAP,
+            Producers.SOAP_FACTORY_BLUE.getProduces(),
             2,
             1
         ));
@@ -211,7 +211,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(CANNERY_BLUE, new Factory(
             CANNERY_BLUE,
             new Goods[]{PIGS, STEELBARS},
-            CANNED_MEAT,
+            Producers.CANNERY_BLUE.getProduces(),
             2,
             1
         ));
@@ -219,7 +219,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(FRAMEWORK_KNITTERS_BLUE, new Factory(
             FRAMEWORK_KNITTERS_BLUE,
             new Goods[]{WOOL, COAL},
-            WORK_CLOTHES,
+            Producers.FRAMEWORK_KNITTERS_BLUE.getProduces(),
             2,
             1
         ));
@@ -228,7 +228,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(BRASS_FOUNDRY_RED, new Factory(
             BRASS_FOUNDRY_RED,
             new Goods[]{GOODS, COAL},
-            BRASS,
+            Producers.BRASS_FOUNDRY_RED.getProduces(),
             3,
             2
         ));
@@ -236,7 +236,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(WINDOW_MAKER_RED, new Factory(
             WINDOW_MAKER_RED,
             new Goods[]{PLANKS, GLASS},
-            WINDOWS,
+            Producers.WINDOW_MAKER_RED.getProduces(),
             3,
             2
         ));
@@ -244,7 +244,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(CHAMPAGNE_CELLAR_RED, new Factory(
             CHAMPAGNE_CELLAR_RED,
             new Goods[]{GOODS, GLASS, WORKFORCE_4},
-            CHAMPAGNE,
+            Producers.CHAMPAGNE_CELLAR_RED.getProduces(),
             3,
             2
         ));
@@ -252,7 +252,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(SPECTACLE_FACTORY_RED, new Factory(
             SPECTACLE_FACTORY_RED,
             new Goods[]{GLASS, BRASS, WORKFORCE_4},
-            GLASSES,
+            Producers.SPECTACLE_FACTORY_RED.getProduces(),
             3,
             2
         ));
@@ -260,7 +260,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(CLOCKMAKERS_RED, new Factory(
             CLOCKMAKERS_RED,
             new Goods[]{GLASS, BRASS, WORKFORCE_4},
-            POCKETWATCHES,
+            Producers.CLOCKMAKERS_RED.getProduces(),
             3,
             2
         ));
@@ -268,7 +268,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(SEWING_MACHINE_FACTORY_RED, new Factory(
             SEWING_MACHINE_FACTORY_RED,
             new Goods[]{STEELBARS, BRASS, WORKFORCE_4},
-            SEWING_MACHINES,
+            Producers.SEWING_MACHINE_FACTORY_RED.getProduces(),
             3,
             2
         ));
@@ -276,7 +276,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(COTTON_MILL_RED, new Factory(
             COTTON_MILL_RED,
             new Goods[]{COTTON, PLANKS},
-            COTTON_FABRIC,
+            Producers.COTTON_MILL_RED.getProduces(),
             3,
             2
         ));
@@ -284,7 +284,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(COFFEE_ROASTERS_RED, new Factory(
             COFFEE_ROASTERS_RED,
             new Goods[]{COFFEE_BEANS, COAL},
-            COFFEE,
+            Producers.COFFEE_ROASTERS_RED.getProduces(),
             3,
             2
         ));
@@ -292,7 +292,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(FUR_DEALER_RED, new Factory(
             FUR_DEALER_RED,
             new Goods[]{SEWING_MACHINES, COTTON_FABRIC, GOODS},
-            COATS,
+            Producers.FUR_DEALER_RED.getProduces(),
             3,
             2
         ));
@@ -300,7 +300,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(DYNAMITE_FACTORY_RED, new Factory(
             DYNAMITE_FACTORY_RED,
             new Goods[]{PIGS, BRICKS, GOODS},
-            DYNAMITE,
+            Producers.DYNAMITE_FACTORY_RED.getProduces(),
             3,
             2
         ));
@@ -308,7 +308,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(CANNONS_FACTORY_RED, new Factory(
             CANNONS_FACTORY_RED,
             new Goods[]{GOODS, STEELBARS, WORKFORCE_4},
-            CANNONS,
+            Producers.CANNONS_FACTORY_RED.getProduces(),
             3,
             2
         ));
@@ -316,7 +316,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(RUM_DISTILLERY_RED, new Factory(
             RUM_DISTILLERY_RED,
             new Goods[]{PLANKS, SUGARCANE},
-            RUM,
+            Producers.RUM_DISTILLERY_RED.getProduces(),
             3,
             2
         ));
@@ -324,7 +324,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(CIGAR_FACTORY_RED, new Factory(
             CIGAR_FACTORY_RED,
             new Goods[]{PLANKS, TOBACCO},
-            CIGARS,
+            Producers.CIGAR_FACTORY_RED.getProduces(),
             3,
             2
         ));
@@ -332,7 +332,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(CHOCOLATE_FACTORY_RED, new Factory(
             CHOCOLATE_FACTORY_RED,
             new Goods[]{PIGS, CACAO},
-            CHOCOLATE,
+            Producers.CHOCOLATE_FACTORY_RED.getProduces(),
             3,
             2
         ));
@@ -341,7 +341,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(MOTOR_ASSEMBLY_PURPLE, new Factory(
             MOTOR_ASSEMBLY_PURPLE,
             new Goods[]{BRASS, STEELBARS, WORKFORCE_5},
-            STEAM_GEARS,
+            Producers.MOTOR_ASSEMBLY_PURPLE.getProduces(),
             4,
             3
         ));
@@ -349,7 +349,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(CAR_FACTORY_PURPLE, new Factory(
             CAR_FACTORY_PURPLE,
             new Goods[]{RUBBER, STEAM_GEARS, WORKFORCE_5},
-            CARS,
+            Producers.CAR_FACTORY_PURPLE.getProduces(),
             4,
             3
         ));
@@ -357,7 +357,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(BICYCLE_FACTORY_PURPLE, new Factory(
             BICYCLE_FACTORY_PURPLE,
             new Goods[]{WORKFORCE_5, RUBBER, WORKFORCE_5},
-            HIGHBIKES,
+            Producers.BICYCLE_FACTORY_PURPLE.getProduces(),
             4,
             3
         ));
@@ -365,7 +365,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(LIGHT_BULB_FACTORY_PURPLE, new Factory(
             LIGHT_BULB_FACTORY_PURPLE,
             new Goods[]{COAL, GLASS, WORKFORCE_5},
-            LIGHT_BULBS,
+            Producers.LIGHT_BULB_FACTORY_PURPLE.getProduces(),
             4,
             3
         ));
@@ -373,7 +373,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(GRAMOPHONE_FACTORY_PURPLE, new Factory(
             GRAMOPHONE_FACTORY_PURPLE,
             new Goods[]{BRASS, PLANKS, WORKFORCE_5},
-            GRAMOPHONES,
+            Producers.GRAMOPHONE_FACTORY_PURPLE.getProduces(),
             4,
             3
         ));
@@ -381,7 +381,7 @@ public class FactoryData {
         PRODUCER_CONFIGS.put(HEAVY_WEAPONS_FACTORY_PURPLE, new Factory(
             HEAVY_WEAPONS_FACTORY_PURPLE,
             new Goods[]{DYNAMITE, STEELBARS, WORKFORCE_5},
-            BIG_BERTA,
+            Producers.HEAVY_WEAPONS_FACTORY_PURPLE.getProduces(),
             4,
             3
         ));
@@ -390,54 +390,40 @@ public class FactoryData {
         // New World Materials (Population Level 7)
         PRODUCER_CONFIGS.put(CACAO_PLANTATION, new Plantation(
             CACAO_PLANTATION,
-            new Goods[]{},  // TODO: Add costs
-            CACAO,
+            new Goods[]{},
+            Producers.CACAO_PLANTATION.getProduces(),
             7
         ));
         PRODUCER_CONFIGS.put(SUGAR_PLANTATION, new Plantation(
             SUGAR_PLANTATION,
-            new Goods[]{},  // TODO: Add costs
-            SUGARCANE,
+            new Goods[]{},
+            Producers.SUGAR_PLANTATION.getProduces(),
             7
         ));
         PRODUCER_CONFIGS.put(TOBACCO_PLANTATION, new Plantation(
             TOBACCO_PLANTATION,
-            new Goods[]{},  // TODO: Add costs
-            TOBACCO,
+            new Goods[]{},
+            Producers.TOBACCO_PLANTATION.getProduces(),
             7
         ));
         PRODUCER_CONFIGS.put(COFFEE_PLANTATION, new Plantation(
             COFFEE_PLANTATION,
-            new Goods[]{},  // TODO: Add costs
-            COFFEE_BEANS,
+            new Goods[]{},
+            Producers.COFFEE_PLANTATION.getProduces(),
             7
         ));
         PRODUCER_CONFIGS.put(COTTON_PLANTATION, new Plantation(
             COTTON_PLANTATION,
-            new Goods[]{},  // TODO: Add costs
-            COTTON,
+            new Goods[]{},
+            Producers.COTTON_PLANTATION.getProduces(),
             7
         ));
         PRODUCER_CONFIGS.put(RUBBER_PLANTATION, new Plantation(
             RUBBER_PLANTATION,
-            new Goods[]{},  // TODO: Add costs
-            RUBBER,
+            new Goods[]{},
+            Producers.RUBBER_PLANTATION.getProduces(),
             7
         ));
-    }
-    
-    /**producer configuration for a specific producer type.
-     * 
-     * @param type The producer type
-     * @return The producer configuration with costs, production, and requirements
-     * @throws IllegalArgumentException if the producer type is not configured
-     */
-    public static Producer getProducer(Producers type) {
-        Producer producer = PRODUCER_CONFIGS.get(type);
-        if (producer == null) {
-            throw new IllegalArgumentException("No configuration found for producer: " + type);
-        }
-        return producer;
     }
     
     /**
@@ -449,17 +435,40 @@ public class FactoryData {
         return Map.copyOf(PRODUCER_CONFIGS);
     }
     
-    /**
-     * @deprecated Use {@link #getProducer(Producers)} instead
-     */
-    @Deprecated
-    public static Factory getFactory(Factories type) {
-        // For backwards compatibility - convert old Factories enum to new Producers enum
-        Producers producerType = Producers.valueOf(type.name());
-        Producer producer = getProducer(producerType);
-        if (producer instanceof Factory) {
-            return (Factory) producer;
+    
+    public static Factory getFactory(Producers type) {
+        Producer producer = getProducer(type);
+        if (producer instanceof Factory factory) {
+            return factory;
         }
         throw new IllegalArgumentException("Producer " + type + " is not a Factory");
+    }
+
+    /**
+     * Returns the Plantation instance for the given Producers enum, if it is a Plantation.
+     * @param type The Producers enum value
+     * @return Plantation instance
+     * @throws IllegalArgumentException if the producer is not a Plantation
+     */
+    public static Plantation getPlantation(Producers type) {
+        Producer producer = getProducer(type);
+        if (producer instanceof Plantation plantation) {
+            return plantation;
+        }
+        throw new IllegalArgumentException("Producer " + type + " is not a Plantation");
+    }
+
+    /**
+     * Returns the Producer instance for the given Producers enum.
+     * @param type The Producers enum value
+     * @return Producer instance
+     * @throws IllegalArgumentException if the producer is not found
+     */
+    public static Producer getProducer(Producers type) {
+        Producer producer = PRODUCER_CONFIGS.get(type);
+        if (producer != null) {
+            return producer;
+        }
+        throw new IllegalArgumentException("No producer found for type: " + type);
     }
 }

@@ -1,6 +1,7 @@
 package com.anno1800.game.tiles;
 
 import com.anno1800.data.gamedata.Goods;
+import com.anno1800.data.gamedata.Producers;
 import com.anno1800.game.residents.Resident;
 
 /**
@@ -56,6 +57,11 @@ public class Factory extends Producer {
 
     public int getTradeCosts() {
         return tradeCosts;
+    }
+
+    public void freeSlots() {
+        this.slot1 = null;
+        this.slot2 = null;
     }
 
     /**

@@ -9,7 +9,7 @@ import com.anno1800.game.tiles.OldWorldIsland;
 import com.anno1800.game.tiles.Shipyard;
 import com.anno1800.game.tiles.TradeShip;
 import com.anno1800.game.rewards.Reward;
-import static com.anno1800.data.gamedata.Factories.*;
+import static com.anno1800.data.gamedata.Producers.*;
 
 public class OldWorldIslandData {
     @SuppressWarnings("deprecation")

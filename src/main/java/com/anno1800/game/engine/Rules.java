@@ -1,10 +1,10 @@
 package com.anno1800.game.engine;
 
+import com.anno1800.data.gamedata.Producers;
 import com.anno1800.game.board.Board;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.player.PlayerBoard;
-import com.anno1800.game.player.PlayerBoard.ShipType;
-import com.anno1800.game.tiles.Producers;
+import com.anno1800.data.gamedata.ShipType;
 
 /**
  * Central rules engine for Anno 1800 board game.

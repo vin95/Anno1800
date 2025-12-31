@@ -6,8 +6,8 @@ import java.util.List;
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.tiles.Factory;
-import com.anno1800.game.tiles.Producers;
 import com.anno1800.data.gamedata.FactoryData;
+import com.anno1800.data.gamedata.Producers;
 
 /**
  * Generates all possible valid actions for a player in the current game state.

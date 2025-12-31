@@ -119,9 +119,9 @@ public class ResidentCardData {
             new ResidentCard(5, new Goods[]{COTTON_FABRIC, POCKETWATCHES, CARS}, new Reward.DiscardResidentCard(2)),
             new ResidentCard(5, new Goods[]{CIGARS, HIGHBIKES, RUM}, new Reward.DiscardResidentCard(2)),
             
-            new ResidentCard(5, new Goods[]{WORK_CLOTHES, COFFEE, BIG_BERTA}, new Reward.ExpeditionPoints(3)),
-            new ResidentCard(5, new Goods[]{SOAP, POCKETWATCHES, BIG_BERTA}, new Reward.ExpeditionPoints(3)),
-            new ResidentCard(5, new Goods[]{GOODS, SEWING_MACHINES, CARS}, new Reward.ExpeditionPoints(3)),
+            new ResidentCard(5, new Goods[]{WORK_CLOTHES, COFFEE, BIG_BERTA}, new Reward.ExplorationPoints(3)),
+            new ResidentCard(5, new Goods[]{SOAP, POCKETWATCHES, BIG_BERTA}, new Reward.ExplorationPoints(3)),
+            new ResidentCard(5, new Goods[]{GOODS, SEWING_MACHINES, CARS}, new Reward.ExplorationPoints(3)),
             
             new ResidentCard(5, new Goods[]{BEER, CIGARS, CARS}, new Reward.UpgradeResidents(3, 2, 3)),
             new ResidentCard(5, new Goods[]{SOAP, COFFEE, CARS}, new Reward.UpgradeResidents(3, 2, 3)),
@@ -163,7 +163,7 @@ public class ResidentCardData {
             new ResidentCard(7, new Goods[]{COTTON_FABRIC, SOAP, TRADECHIP}, new Reward.DiscardResidentCard(2)),
             new ResidentCard(7, new Goods[]{COTTON_FABRIC, BREAD, TRADECHIP}, new Reward.DiscardResidentCard(2)),
 
-            new ResidentCard(7, new Goods[]{WORK_CLOTHES, BIG_BERTA, TRADECHIP}, new Reward.ExpeditionPoints(3)),
+            new ResidentCard(7, new Goods[]{WORK_CLOTHES, BIG_BERTA, TRADECHIP}, new Reward.ExplorationPoints(3)),
 
             new ResidentCard(7, new Goods[]{BEER, COTTON_FABRIC, TRADECHIP}, new Reward.TradePoints(6)),
 

@@ -1,11 +1,12 @@
 package com.anno1800.data.gamedata;
 
+import static com.anno1800.data.gamedata.Producers.*;
+
 import java.util.ArrayDeque;
 import java.util.Deque;
 
 import com.anno1800.game.tiles.Plantation;
 import com.anno1800.game.tiles.NewWorldIsland;
-import static com.anno1800.game.tiles.Producers.*;
 
 public class NewWorldIslandsData {
     public static Deque<NewWorldIsland> createNewWorldIslands() {
@@ -14,9 +15,9 @@ public class NewWorldIslandsData {
         islands.add(
             new NewWorldIsland(
                 new Plantation[]{
-                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
-                    (Plantation) FactoryData.getProducer(CACAO_PLANTATION),
-                    (Plantation) FactoryData.getProducer(TOBACCO_PLANTATION)
+                    FactoryData.getPlantation(COTTON_PLANTATION),
+                    FactoryData.getPlantation(CACAO_PLANTATION),
+                    FactoryData.getPlantation(TOBACCO_PLANTATION)
                 }
             )
         );
@@ -24,9 +25,9 @@ public class NewWorldIslandsData {
         islands.add(
             new NewWorldIsland(
                 new Plantation[]{
-                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
-                    (Plantation) FactoryData.getProducer(COFFEE_PLANTATION),
-                    (Plantation) FactoryData.getProducer(RUBBER_PLANTATION)
+                    FactoryData.getPlantation(COTTON_PLANTATION),
+                    FactoryData.getPlantation(COFFEE_PLANTATION),
+                    FactoryData.getPlantation(RUBBER_PLANTATION)
                 }
             )
         );
@@ -34,9 +35,9 @@ public class NewWorldIslandsData {
         islands.add(
             new NewWorldIsland(
                 new Plantation[]{
-                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
-                    (Plantation) FactoryData.getProducer(SUGAR_PLANTATION),
-                    (Plantation) FactoryData.getProducer(COFFEE_PLANTATION)
+                    FactoryData.getPlantation(COTTON_PLANTATION),
+                    FactoryData.getPlantation(SUGAR_PLANTATION),
+                    FactoryData.getPlantation(COFFEE_PLANTATION)
                 }
             )
         );
@@ -44,9 +45,9 @@ public class NewWorldIslandsData {
         islands.add(
             new NewWorldIsland(
                 new Plantation[]{
-                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
-                    (Plantation) FactoryData.getProducer(CACAO_PLANTATION),
-                    (Plantation) FactoryData.getProducer(SUGAR_PLANTATION)
+                    FactoryData.getPlantation(COTTON_PLANTATION),
+                    FactoryData.getPlantation(CACAO_PLANTATION),
+                    FactoryData.getPlantation(SUGAR_PLANTATION)
                 }
             )
         );
@@ -54,9 +55,9 @@ public class NewWorldIslandsData {
         islands.add(
             new NewWorldIsland(
                 new Plantation[]{
-                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
-                    (Plantation) FactoryData.getProducer(TOBACCO_PLANTATION),
-                    (Plantation) FactoryData.getProducer(RUBBER_PLANTATION)
+                    FactoryData.getPlantation(COTTON_PLANTATION),
+                    FactoryData.getPlantation(TOBACCO_PLANTATION),
+                    FactoryData.getPlantation(RUBBER_PLANTATION)
                 }
             )
         );
@@ -64,9 +65,9 @@ public class NewWorldIslandsData {
         islands.add(
             new NewWorldIsland(
                 new Plantation[]{
-                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
-                    (Plantation) FactoryData.getProducer(COFFEE_PLANTATION),
-                    (Plantation) FactoryData.getProducer(TOBACCO_PLANTATION)
+                    FactoryData.getPlantation(COTTON_PLANTATION),
+                    FactoryData.getPlantation(COFFEE_PLANTATION),
+                    FactoryData.getPlantation(TOBACCO_PLANTATION)
                 }
             )
         );
@@ -74,9 +75,9 @@ public class NewWorldIslandsData {
         islands.add(
             new NewWorldIsland(
                 new Plantation[]{
-                    (Plantation) FactoryData.getProducer(COTTON_PLANTATION),
-                    (Plantation) FactoryData.getProducer(RUBBER_PLANTATION),
-                    (Plantation) FactoryData.getProducer(SUGAR_PLANTATION)
+                    FactoryData.getPlantation(COTTON_PLANTATION),
+                    FactoryData.getPlantation(RUBBER_PLANTATION),
+                    FactoryData.getPlantation(SUGAR_PLANTATION)
                 }
             )
         );

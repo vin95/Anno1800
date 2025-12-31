@@ -3,8 +3,8 @@ package com.anno1800.ui.examples;
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.actions.Action;
 import com.anno1800.game.tiles.Factory;
-import com.anno1800.game.tiles.Producers;
 import com.anno1800.data.gamedata.FactoryData;
+import com.anno1800.data.gamedata.Producers;
 
 /**
  * Example showing how to execute actions through the Game class.
