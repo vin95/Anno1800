@@ -22,11 +22,14 @@ import static com.anno1800.game.actions.actions.DiscoverNewWorldIsland.*;
 import static com.anno1800.game.actions.actions.DiscoverOldWorldIsland.*;
 import static com.anno1800.game.actions.actions.UpgradeResident.*;
 import static com.anno1800.game.actions.actions.SettleResident.*;
+import com.anno1800.game.actions.actions.FulfillNeeds;
+import com.anno1800.game.actions.actions.Expedition;
 import static com.anno1800.game.actions.actions.SwapResidentCards.*;
 import static com.anno1800.game.actions.actions.FulfillNeeds.*;
 import static com.anno1800.game.actions.actions.BuildShips.*;
 import static com.anno1800.game.actions.actions.BuildShipyard.*;
 import static com.anno1800.game.actions.actions.BuildFactory.*;
+import static com.anno1800.game.actions.actions.ChooseGoods.*;
 
 /**
  * Handles the execution of player actions.
@@ -61,7 +64,9 @@ public class ActionHandler {
                 yield new ActionResult.NoResult();
             }
             case Action.FulfillNeeds(ResidentCard residentCard, Goods[] good) -> {
-                fulfillNeeds(player, residentCard, good);
+                // Create the action record and call the FulfillNeeds class
+                var fulfillNeedsAction = new Action.FulfillNeeds(residentCard, good);
+                FulfillNeeds.fulfillNeeds(player, game, fulfillNeedsAction);
                 yield new ActionResult.NoResult();
             }
             case Action.SwapResidentCards(ResidentCard[] cardsToSwap) -> {
@@ -77,15 +82,17 @@ public class ActionHandler {
                 yield new ActionResult.NoResult();
             }
             case Action.DiscoverOldWorldIsland() -> {
-                discoverOldWorldIsland(player);
+                discoverOldWorldIsland(player, game);
                 yield new ActionResult.NoResult();
             }
             case Action.DiscoverNewWorldIsland() -> {
-                discoverNewWorldIsland(player);
+                discoverNewWorldIsland(player, game);
                 yield new ActionResult.NoResult();
             }
             case Action.Expedition() -> {
-                expedition(player);
+                // Create the action record and call the Expedition class
+                var expeditionAction = new Action.Expedition();
+                Expedition.expedition(player, game, expeditionAction);
                 yield new ActionResult.NoResult();
             }
             case Action.Carneval() -> {
@@ -118,6 +125,8 @@ public class ActionHandler {
             }
             case Action.ImportGood(Goods good) ->
                 new ActionResult.GoodsResult(importGood(player, good));
+            case Action.ChooseGoods(Reward.FreeGoodsChoice reward, Goods chosenGood) ->
+                new ActionResult.RewardResult(chooseGoods(player, reward, chosenGood));
             default -> throw new IllegalArgumentException("Unknown action type: " + action);
         };
     }

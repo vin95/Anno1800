@@ -2,6 +2,7 @@ package com.anno1800.game.actions;
 
 import com.anno1800.data.gamedata.Goods;
 import com.anno1800.game.cards.ResidentCard;
+import com.anno1800.game.rewards.Reward;
 
 /**
  * Represents the result of executing an action.
@@ -12,7 +13,8 @@ public sealed interface ActionResult permits
         ActionResult.NoResult,
         ActionResult.GoodsResult,
         ActionResult.CardResult,
-        ActionResult.CardsResult {
+        ActionResult.CardsResult,
+        ActionResult.RewardResult {
 
     /**
      * Result for actions that don't produce any output.
@@ -40,5 +42,12 @@ public sealed interface ActionResult permits
      * Examples: swapResidentCards
      */
     record CardsResult(ResidentCard[] cards) implements ActionResult {
+    }
+
+    /**
+     * Result for actions that produce a modified reward.
+     * Examples: ChooseGoods (returns FreeGoodsChoice with chosen good)
+     */
+    record RewardResult(Reward reward) implements ActionResult {
     }
 }

@@ -22,20 +22,44 @@ public sealed interface Reward {
     /**
      * Reward: Extra action in this turn
      */
-    record ExtraAction(RewardType type) implements Reward { }
+    record ExtraAction() implements Reward { }
 
     /**
      * Reward: 2 ExpeditionCards
      */
-    record ExpeditionCards(RewardType type) implements Reward { }
+    record ExpeditionCards() implements Reward { }
     
     /**
      * Reward: Free goods - player can choose 1 out of N options
      * The actual choice is made when the reward is executed.
      * 
      * @param options Array of goods to choose from
+     * @param chosenGood The good chosen by the player/agent (null if not chosen yet)
      */
-    record FreeGoodsChoice(Goods[] options) implements Reward {}
+    record FreeGoodsChoice(Goods[] options, Goods chosenGood) implements Reward {
+        // Konstruktor für initiale Erstellung (ohne Wahl)
+        public FreeGoodsChoice(Goods[] options) {
+            this(options, null);
+        }
+        
+        // Methode um eine Wahl zu treffen
+        public FreeGoodsChoice withChoice(Goods chosen) {
+            if (chosenGood != null) {
+                throw new IllegalStateException("Goods already chosen: " + chosenGood);
+            }
+            for (Goods option : options) {
+                if (option.equals(chosen)) {
+                    return new FreeGoodsChoice(options, chosen);
+                }
+            }
+            throw new IllegalArgumentException("Invalid choice: " + chosen + ". Must be one of: " + java.util.Arrays.toString(options));
+        }
+        
+        // Prüft ob eine Wahl getroffen wurde
+        public boolean hasChoice() {
+            return chosenGood != null;
+        }
+    }
     
     /**
      * Reward: Trade points

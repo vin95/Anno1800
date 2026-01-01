@@ -1,6 +1,8 @@
 package com.anno1800.game.actions;
 
 import com.anno1800.game.actions.validators.*;
+import com.anno1800.game.actions.actions.DemolishFactory;
+import com.anno1800.game.actions.actions.OverbuildDefaultFactory;
 
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
@@ -45,6 +47,9 @@ public class ActionValidator {
             case Action.ExhaustWorker exhaustWorker -> ExhaustWorkerValidator.canExhaustWorker(exhaustWorker, player, game);
             case Action.DrawResidentCard drawCard -> DrawResidentCardValidator.canDrawResidentCard(drawCard, player, game);
             case Action.ImportGood importGood -> ImportGoodValidator.canImportGood(importGood, player, game);
+            case Action.ChooseGoods chooseGoods -> true; // ChooseGoods is always valid if the reward exists
+            case Action.DemolishFactory demolishFactory -> DemolishFactory.canDemolishFactory(player, demolishFactory.factory());
+            case Action.OverbuildDefaultFactory overbuildFactory -> OverbuildDefaultFactory.canOverbuildDefaultFactory(player, overbuildFactory.defaultFactory(), overbuildFactory.newFactory());
         };
     }
 }

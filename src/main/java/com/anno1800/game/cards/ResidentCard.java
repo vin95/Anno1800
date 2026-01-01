@@ -7,10 +7,11 @@ public record ResidentCard(
     int populationLevel,
     Goods[] needs,
     Reward reward,
-    boolean isPlayed
+    boolean isPlayed,
+    boolean rewardAvailable
 ) {
     // Überladener Konstruktor - isPlayed wird auf false gesetzt
     public ResidentCard(int populationLevel, Goods[] needs, Reward reward) {
-        this(populationLevel, needs, reward, false);
+        this(populationLevel, needs, reward, false, false);
     }
 }

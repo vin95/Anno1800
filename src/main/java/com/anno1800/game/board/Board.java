@@ -25,12 +25,15 @@ import com.anno1800.game.residents.Engineer;
 import com.anno1800.game.residents.Investor;
 import java.util.Deque;
 import java.util.List;
+import java.util.Collections;
+import java.util.ArrayList;
+import java.util.ArrayDeque;
 
 /**
  * Game board containing all card stacks
  */
 public class Board {
-    // 35 Factory stacks with 2 factories each
+    // Factory stacks (35 stacks, excluding StartFactories)
 
     private final List<Deque<Factory>> factoryStacks;
     
@@ -106,8 +109,9 @@ public class Board {
         List<Engineer> residents_engineers,
         List<Investor> residents_investors
     ) {
+        // Board requires exactly 35 factory stacks (excluding StartFactories)
         if (factoryStacks.size() != 35) {
-            throw new IllegalArgumentException("Board requires exactly 35 factory stacks");
+            throw new IllegalArgumentException("Board requires exactly 35 factory stacks, but got " + factoryStacks.size());
         }
         
         this.factoryStacks = factoryStacks;
@@ -143,16 +147,16 @@ public class Board {
      */
     @SuppressWarnings("unchecked")
     public static Board initializeBoard(int numPlayers) {
-        // 35 Factory stacks
+        // 35 Factory stacks (excluding StartFactories)
         List<Deque<Factory>> factoryStacks = createFactoryStacks(numPlayers);
 
-        // Resident card stacks (levels 2, 5, 7)
-        Deque<ResidentCard> residentStack1 = getCardsForLevel(2);
-        Deque<ResidentCard> residentStack2 = getCardsForLevel(5);
-        Deque<ResidentCard> residentStack3 = getCardsForLevel(7);
+        // Resident card stacks (levels 2, 5, 7) - shuffled for randomness
+        Deque<ResidentCard> residentStack1 = shuffleStack(getCardsForLevel(2));
+        Deque<ResidentCard> residentStack2 = shuffleStack(getCardsForLevel(5));
+        Deque<ResidentCard> residentStack3 = shuffleStack(getCardsForLevel(7));
 
-        // Expedition card stack
-        Deque<ExpeditionCard> expeditionStack = createExpeditionCards();
+        // Expedition card stack - shuffled for randomness
+        Deque<ExpeditionCard> expeditionStack = shuffleStack(createExpeditionCards());
 
         // Shipyard stacks
         Deque<Shipyard> shipyardLevel1 = createLevel1Shipyards(numPlayers);
@@ -169,11 +173,11 @@ public class Board {
         Deque<ExplorerShip> explorerShipLevel2 = (Deque<ExplorerShip>) createShips(ShipType.ExplorerShip, 2, numPlayers);
         Deque<ExplorerShip> explorerShipLevel3 = (Deque<ExplorerShip>) createShips(ShipType.ExplorerShip, 3, numPlayers);
 
-        // Old World Islands
-        Deque<OldWorldIsland> oldWorldIslands = createOldWorldIslands();
+        // Old World Islands - shuffled for randomness
+        Deque<OldWorldIsland> oldWorldIslands = shuffleStack(createOldWorldIslands());
 
-        // New World Islands
-        Deque<NewWorldIsland> newWorldIslands = createNewWorldIslands();
+        // New World Islands - shuffled for randomness
+        Deque<NewWorldIsland> newWorldIslands = shuffleStack(createNewWorldIslands());
 
         // Resident lists
         List<Farmer> residents_farmers = createFarmers();
@@ -217,6 +221,10 @@ public class Board {
         List<Deque<Factory>> factoryStacks = new java.util.ArrayList<>();
         int numFactories = (numPlayers <= 2) ? 1 : 2;
         for (com.anno1800.data.gamedata.Producers producer : com.anno1800.data.gamedata.Producers.values()) {
+            // Skip StartFactories - they are default factories on PlayerBoard
+            if (isStartFactory(producer)) {
+                continue;
+            }
             // Only add if this producer is a Factory (not Plantation)
             try {
                 com.anno1800.game.tiles.Factory template = com.anno1800.data.gamedata.FactoryData.getFactory(producer);
@@ -678,6 +686,37 @@ public class Board {
         };
     }
 
+    /**
+     * Helper method to shuffle a Deque for randomness.
+     * Converts the deque to a list, shuffles it, and returns a new ArrayDeque.
+     * 
+     * @param <T> The type of elements in the deque
+     * @param deque The deque to shuffle
+     * @return A new shuffled deque with the same elements
+     */
+    private static <T> Deque<T> shuffleStack(Deque<T> deque) {
+        List<T> list = new ArrayList<>(deque);
+        Collections.shuffle(list);
+        return new ArrayDeque<>(list);
+    }
 
+    /**
+     * Helper method to determine if a producer is a StartFactory.
+     * StartFactories are the GREEN and RED factories that come as default on PlayerBoard.
+     * 
+     * @param producer The producer to check
+     * @return true if it's a StartFactory
+     */
+    private static boolean isStartFactory(com.anno1800.data.gamedata.Producers producer) {
+        return switch (producer) {
+            // GREEN StartFactories
+            case SAWMILL_GREEN, GRAIN_FARM_GREEN, POTATO_FARM_GREEN, 
+                 PIG_FARM_GREEN, SHEEP_FARM_GREEN,
+            // RED StartFactories
+                 COAL_MINE_RED, BRICK_FACTORY_RED, WAREHOUSE_RED, 
+                 STEEL_WORKS_RED, SAILMAKERS_RED -> true;
+            default -> false;
+        };
+    }
 
 }

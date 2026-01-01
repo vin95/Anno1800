@@ -24,4 +24,41 @@ public class OldWorldIsland implements Island {
         this.tradeShips = tradeShips;
         this.explorerShips = explorerShips;
     }
+
+    // Getter methods
+    public int getFreeLandTiles() {
+        return freeLandTiles;
+    }
+
+    public int getFreeCoastTiles() {
+        return freeCoastTiles;
+    }
+
+    public int getFreeSeaTiles() {
+        return freeSeaTiles;
+    }
+
+    public Reward getReward() {
+        return reward;
+    }
+
+    public Factory[] getFactories() {
+        return factories;
+    }
+
+    public Shipyard[] getShipyards() {
+        return shipyards;
+    }
+
+    public TradeShip[] getTradeShips() {
+        return tradeShips;
+    }
+
+    public ExplorerShip[] getExplorerShips() {
+        return explorerShips;
+    }
+
+    public String getType() {
+        return type;
+    }
 }

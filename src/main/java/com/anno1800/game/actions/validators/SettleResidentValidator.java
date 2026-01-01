@@ -1,6 +1,7 @@
 package com.anno1800.game.actions.validators;
 
 import com.anno1800.game.actions.Action;
+import com.anno1800.game.actions.actions.SettleResident;
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
 
@@ -19,35 +20,7 @@ public class SettleResidentValidator {
      *   - Population level 3,4,5: 3 Gold
      */
     public static boolean canSettleResident(Action.SettleResident action, Player player, Game game) {
-        int populationLevel = action.level();
-        
-        // Check if resident is available on the board
-        boolean residentAvailable = switch (populationLevel) {
-            case 1 -> game.getBoard().getFarmers() > 0;
-            case 2 -> game.getBoard().getWorkers() > 0;
-            case 3 -> game.getBoard().getArtisans() > 0;
-            case 4 -> game.getBoard().getEngineers() > 0;
-            case 5 -> game.getBoard().getInvestors() > 0;
-            default -> false;
-        };
-        
-        if (!residentAvailable) {
-            return false;
-        }
-        
-        // Check if resident card is available in the corresponding stack
-        boolean hasResidentCard = switch (populationLevel) {
-            case 1, 2 -> !game.getBoard().getResidentStack1().isEmpty();
-            case 3, 4, 5 -> !game.getBoard().getResidentStack2().isEmpty();
-            default -> false;
-        };
-        
-        // If no resident card available, check if player has enough gold
-        if (!hasResidentCard) {
-            int goldCost = (populationLevel <= 2) ? 1 : 3;
-            return player.getPlayerBoard().getGold() >= goldCost;
-        }
-        
-        return true;
+        // Use the new SettleResident validation logic
+        return SettleResident.canSettleResident(player, game, action.level());
     }
 }

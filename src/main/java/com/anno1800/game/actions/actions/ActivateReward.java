@@ -1,14 +1,13 @@
 package com.anno1800.game.actions.actions;
 
+import com.anno1800.game.actions.Action;
 import com.anno1800.game.cards.ResidentCard;
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.player.PlayerBoard;
 import com.anno1800.game.rewards.Reward;
-
-import static com.anno1800.data.gamedata.Goods.POTATOES;
-
-import com.anno1800.data.gamedata.Goods;
+import com.anno1800.game.residents.Resident;
+import static com.anno1800.game.residents.ResidentStatus.FIT;
 
 /**
  * Activate a reward.
@@ -17,10 +16,20 @@ public class ActivateReward {
     public static void activateReward(Player player, Reward reward, Game game) {
         switch (reward) {
             case Reward.NewResidents r -> {
-                // TODO: Neue Residents hinzufügen
+                // Nimm r.amount() Residents vom GameBoard und füge sie dem PlayerBoard mit Status FIT hinzu
+                for (int i = 0; i < r.amount(); i++) {
+                    Resident resident = game.getBoard().takeResident(r.populationLevel());
+                    resident.setStatus(FIT);
+                    player.getPlayerBoard().getResidents().add(resident);
+                }
             }
             case Reward.UpgradeResidents r -> {
-                // TODO: Residents upgraden
+                // Use UpgradeResidentAction to handle the upgrade logic
+                Action.UpgradeResident action = new Action.UpgradeResident(
+                    new int[]{r.amount()}, 
+                    new int[]{r.populationLevel1(), r.populationLevel2()}
+                );
+                UpgradeResident.upgradeResident(player, action.amount(), action.residentLevel());
             }
             case Reward.ExtraAction r -> {
                 player.getPlayerBoard().setExtraActionThisTurn();
@@ -29,6 +38,14 @@ public class ActivateReward {
                 player.getPlayerBoard().earnExpeditionCard(2, game.getBoard());
             }
             case Reward.FreeGoodsChoice r -> {
+                // Prüfe ob bereits eine Wahl getroffen wurde
+                if (!r.hasChoice()) {
+                    throw new IllegalStateException(
+                        "FreeGoodsChoice reward requires a choice to be made first. "
+                        + "Use ChooseGoods action to select from: " 
+                        + java.util.Arrays.toString(r.options())
+                    );
+                }
                 // Füge die gewählte Ware dem PlayerBoard hinzu
                 player.getPlayerBoard().addGoodToStoredGoods(r.chosenGood());
             }

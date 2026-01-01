@@ -2,6 +2,8 @@ package com.anno1800.game.player;
 
 import com.anno1800.game.tiles.ExplorerShip;
 import com.anno1800.game.tiles.Factory;
+import com.anno1800.game.tiles.NewWorldIsland;
+import com.anno1800.game.tiles.OldWorldIsland;
 import com.anno1800.game.tiles.Plantation;
 import com.anno1800.game.tiles.Shipyard;
 import com.anno1800.game.tiles.TradeShip;
@@ -45,6 +47,10 @@ public class PlayerBoard {
                                            // da die Shipyards nicht berücksichtigt werden. Besser getFreeLandTiles etc.
                                            // benutzen.
 
+    // Default StartFactories that can be overbuilt
+    private List<Factory> defaultFactories = new ArrayList<>();
+    private List<Factory> overbuildingFactories = new ArrayList<>(); // Factories that overbuilt defaults
+
     ArrayList<Shipyard> shipyards = new ArrayList<>();
 
     ArrayList<TradeShip> tradeShips = new ArrayList<>();
@@ -60,6 +66,8 @@ public class PlayerBoard {
     List<Goods> storedGoods;
 
     public PlayerBoard() {
+        storedGoods = new ArrayList<>();
+        initializeDefaultFactories();
     }
 
     public int getLandTiles() {
@@ -140,6 +148,10 @@ public class PlayerBoard {
 
     public ArrayList<ResidentCard> getResidentCards() {
         return residentCards;
+    }
+
+    public ArrayList<ExpeditionCard> getExpeditionCards() {
+        return expeditionCards;
     }
 
     /**
@@ -447,5 +459,253 @@ public class PlayerBoard {
 
     public void setExtraActionThisTurn() {
         extraActionThisTurn = true;
+    }
+
+    // ========== Island Management Methods ==========
+
+    /**
+     * Adds an Old World Island to the player board.
+     * Increases island count and updates tile counts based on the island's attributes.
+     * 
+     * @param island The Old World Island to add
+     */
+    public void addOldWorldIsland(OldWorldIsland island) {
+        // Increment island count
+        numOldWorldIslands++;
+        
+        // Add tiles from the island to the player's available tiles
+        landTiles += island.getFreeLandTiles();
+        coastTiles += island.getFreeCoastTiles();
+        seaTiles += island.getFreeSeaTiles();
+        
+        // Add buildings from the island to the player board
+        addIslandFactories(island.getFactories());
+        addIslandShipyards(island.getShipyards());
+        addIslandTradeShips(island.getTradeShips());
+        addIslandExplorerShips(island.getExplorerShips());
+    }
+
+    /**
+     * Adds a New World Island to the player board.
+     * Increases island count and adds the island's plantations.
+     * 
+     * @param island The New World Island to add
+     */
+    public void addNewWorldIsland(NewWorldIsland island) {
+        // Increment island count
+        numNewWorldIslands++;
+        
+        // Add plantations from the island to the player board
+        for (Plantation plantation : island.getPlantations()) {
+            addPlantation(plantation);
+        }
+    }
+
+    /**
+     * Helper method to add factories from an island to the player board.
+     */
+    private void addIslandFactories(Factory[] islandFactories) {
+        for (Factory factory : islandFactories) {
+            addFactory(factory);
+        }
+    }
+
+    /**
+     * Helper method to add shipyards from an island to the player board.
+     */
+    private void addIslandShipyards(Shipyard[] islandShipyards) {
+        for (Shipyard shipyard : islandShipyards) {
+            shipyards.add(shipyard);
+            numShipyards++;
+        }
+    }
+
+    /**
+     * Helper method to add trade ships from an island to the player board.
+     */
+    private void addIslandTradeShips(TradeShip[] islandTradeShips) {
+        for (TradeShip tradeShip : islandTradeShips) {
+            tradeShips.add(tradeShip);
+        }
+    }
+
+    /**
+     * Helper method to add explorer ships from an island to the player board.
+     */
+    private void addIslandExplorerShips(ExplorerShip[] islandExplorerShips) {
+        for (ExplorerShip explorerShip : islandExplorerShips) {
+            explorerShips.add(explorerShip);
+        }
+    }
+
+    // ========== Default Factory Management ==========
+
+    /**
+     * Initializes default StartFactories on the PlayerBoard.
+     * These can be overbuilt by other factories.
+     */
+    private void initializeDefaultFactories() {
+        // GREEN StartFactories
+        defaultFactories.add(FactoryData.getFactory(SAWMILL_GREEN));
+        defaultFactories.add(FactoryData.getFactory(GRAIN_FARM_GREEN));
+        defaultFactories.add(FactoryData.getFactory(POTATO_FARM_GREEN));
+        defaultFactories.add(FactoryData.getFactory(PIG_FARM_GREEN));
+        defaultFactories.add(FactoryData.getFactory(SHEEP_FARM_GREEN));
+        
+        // RED StartFactories  
+        defaultFactories.add(FactoryData.getFactory(COAL_MINE_RED));
+        defaultFactories.add(FactoryData.getFactory(BRICK_FACTORY_RED));
+        defaultFactories.add(FactoryData.getFactory(WAREHOUSE_RED));
+        defaultFactories.add(FactoryData.getFactory(STEEL_WORKS_RED));
+        defaultFactories.add(FactoryData.getFactory(SAILMAKERS_RED));
+    }
+
+    /**
+     * Overbuilds a default factory with a new factory.
+     * The default factory is hidden but can be restored if the overbuilding factory is demolished.
+     * 
+     * @param defaultFactory The default factory to overbuild
+     * @param newFactory The new factory that overbuilds the default one
+     * @return true if overbuilding was successful
+     */
+    public boolean overbuildDefaultFactory(Factory defaultFactory, Factory newFactory) {
+        if (defaultFactories.contains(defaultFactory)) {
+            // Remove from active defaults and add to overbuilding list
+            defaultFactories.remove(defaultFactory);
+            overbuildingFactories.add(newFactory);
+            
+            // Add the new factory to the normal factory array
+            buildFactoryAsReward(newFactory);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Demolishes a factory. If it was overbuilding a default factory, 
+     * the default factory becomes available again.
+     * 
+     * @param factory The factory to demolish
+     * @return true if demolition was successful
+     */
+    public boolean demolishFactory(Factory factory) {
+        // Check if this factory was overbuilding a default factory
+        if (overbuildingFactories.contains(factory)) {
+            overbuildingFactories.remove(factory);
+            
+            // Restore the corresponding default factory
+            restoreDefaultFactory(factory);
+            
+            // Remove from normal factory array
+            removeFactoryFromArray(factory);
+            return true;
+        }
+        
+        // Regular factory demolition (not overbuilding)
+        removeFactoryFromArray(factory);
+        return true;
+    }
+
+    /**
+     * Restores a default factory when its overbuilding factory is demolished.
+     * 
+     * @param overbuildingFactory The factory that was overbuilding
+     */
+    private void restoreDefaultFactory(Factory overbuildingFactory) {
+        // Find the corresponding default factory based on the type
+        // This is a simplified approach - you might need more sophisticated logic
+        for (com.anno1800.data.gamedata.Producers producer : com.anno1800.data.gamedata.Producers.values()) {
+            if (isStartFactory(producer)) {
+                try {
+                    Factory defaultFactory = FactoryData.getFactory(producer);
+                    // Add back the default factory (simplified logic)
+                    defaultFactories.add(defaultFactory);
+                    break;
+                } catch (IllegalArgumentException e) {
+                    // Not a factory
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes a factory from the factory array.
+     * 
+     * @param factory The factory to remove
+     */
+    private void removeFactoryFromArray(Factory factory) {
+        for (int i = 0; i < factories.length; i++) {
+            if (factories[i] == factory) {
+                factories[i] = null;
+                numFactories--;
+                break;
+            }
+        }
+    }
+
+    /**
+     * Gets all currently active factories including default factories.
+     * 
+     * @return List of all active factories
+     */
+    public List<Factory> getAllActiveFactories() {
+        List<Factory> allFactories = new ArrayList<>();
+        
+        // Add default factories that are not overbuilt
+        allFactories.addAll(defaultFactories);
+        
+        // Add regular factories from the array
+        for (Factory factory : factories) {
+            if (factory != null) {
+                allFactories.add(factory);
+            }
+        }
+        
+        return allFactories;
+    }
+
+    /**
+     * Gets the default factories that are currently active (not overbuilt).
+     * 
+     * @return List of active default factories
+     */
+    public List<Factory> getDefaultFactories() {
+        return new ArrayList<>(defaultFactories);
+    }
+
+    /**
+     * Gets the factories that are currently overbuilding default factories.
+     * 
+     * @return List of overbuilding factories
+     */
+    public List<Factory> getOverbuildingFactories() {
+        return new ArrayList<>(overbuildingFactories);
+    }
+
+    /**
+     * Gets the stored goods on the player board.
+     * 
+     * @return List of stored goods
+     */
+    public List<Goods> getStoredGoods() {
+        return storedGoods;
+    }
+
+    /**
+     * Helper method to determine if a producer is a StartFactory.
+     * 
+     * @param producer The producer to check
+     * @return true if it's a StartFactory
+     */
+    private static boolean isStartFactory(com.anno1800.data.gamedata.Producers producer) {
+        return switch (producer) {
+            // GREEN StartFactories
+            case SAWMILL_GREEN, GRAIN_FARM_GREEN, POTATO_FARM_GREEN, 
+                 PIG_FARM_GREEN, SHEEP_FARM_GREEN,
+            // RED StartFactories
+                 COAL_MINE_RED, BRICK_FACTORY_RED, WAREHOUSE_RED, 
+                 STEEL_WORKS_RED, SAILMAKERS_RED -> true;
+            default -> false;
+        };
     }
 }

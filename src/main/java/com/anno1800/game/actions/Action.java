@@ -18,7 +18,8 @@ public sealed interface Action permits
         Action.UpgradeResident, Action.DiscoverOldWorldIsland, Action.DiscoverNewWorldIsland,
         Action.Expedition, Action.Carneval, Action.DoOvertime,
         Action.ProduceGoods, Action.TradeGoods, Action.ActivateReward,
-        Action.AssignWorker, Action.ExhaustWorker, Action.DrawResidentCard, Action.ImportGood {
+        Action.AssignWorker, Action.ExhaustWorker, Action.DrawResidentCard, Action.ImportGood, Action.ChooseGoods,
+        Action.DemolishFactory, Action.OverbuildDefaultFactory {
 
     /**
      * Action: Build a factory
@@ -26,6 +27,23 @@ public sealed interface Action permits
      * @param factory The factory to build
      */
     record BuildFactory(Factory factory) implements Action {
+    }
+
+    /**
+     * Action: Demolish a factory
+     * 
+     * @param factory The factory to demolish
+     */
+    record DemolishFactory(Factory factory) implements Action {
+    }
+
+    /**
+     * Action: Overbuild a default factory with a new factory
+     * 
+     * @param defaultFactory The default factory to overbuild
+     * @param newFactory The new factory to place
+     */
+    record OverbuildDefaultFactory(Factory defaultFactory, Factory newFactory) implements Action {
     }
 
     /**
@@ -164,5 +182,14 @@ public sealed interface Action permits
      * Action: import a good from the new World
      */
     record ImportGood(Goods good) implements Action {
+    }
+
+    /**
+     * Action: Choose a good from available options (for FreeGoodsChoice reward)
+     * 
+     * @param reward The FreeGoodsChoice reward to make a choice for
+     * @param chosenGood The good chosen by the player/agent
+     */
+    record ChooseGoods(Reward.FreeGoodsChoice reward, Goods chosenGood) implements Action {
     }
 }

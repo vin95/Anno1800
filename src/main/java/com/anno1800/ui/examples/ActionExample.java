@@ -2,6 +2,7 @@ package com.anno1800.ui.examples;
 
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.actions.Action;
+import com.anno1800.game.actions.ActionResult;
 import com.anno1800.game.tiles.Factory;
 import com.anno1800.data.gamedata.FactoryData;
 import com.anno1800.data.gamedata.Producers;
@@ -25,12 +26,12 @@ public class ActionExample {
         
         // 3. Execute action through Game
         System.out.println("Executing BuildFactory action...");
-        boolean success = game.executeAction(buildAction);
+        ActionResult result = game.executeAction(buildAction);
         
-        if (success) {
+        if (result instanceof ActionResult.NoResult) {
             System.out.println("✓ Action executed successfully!");
         } else {
-            System.out.println("✗ Action failed (not implemented yet)");
+            System.out.println("✓ Action executed with result: " + result);
         }
         
         // 4. More action examples
