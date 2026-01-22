@@ -92,9 +92,9 @@ public sealed interface Action permits
     /**
      * Action: Upgrade up to 3 residents to the next level
      * 
-     * @param resident The resident to upgrade
+     * @param residents The residents to upgrade (must be on player's board, max 3)
      */
-    record UpgradeResident(int[] amount, int[] residentLevel) implements Action {
+    record UpgradeResident(Resident[] residents) implements Action {
     }
 
     /**

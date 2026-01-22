@@ -3,6 +3,8 @@ package com.anno1800.game.actions.validators;
 import com.anno1800.game.actions.Action;
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
+import com.anno1800.game.player.PlayerBoard;
+import com.anno1800.game.tiles.ShipCosts;
 
 /**
  * Validates building-related actions (factories, shipyards, ships).
@@ -15,6 +17,7 @@ public class BuildShipyardValidator {
      * - Must have free coast tiles (shipyards can only be built on coast)
      * - Shipyard of the specified level must be available on board
      * - Level must be valid (1-3)
+     * - Required goods must be obtainable (production/trade/import)
      */
     public static boolean canBuildShipyard(Action.BuildShipyard action, Player player, Game game) {
         // Validate level
@@ -32,6 +35,14 @@ public class BuildShipyardValidator {
             return false;
         }
 
-        return true;
+        PlayerBoard board = player.getPlayerBoard();
+        
+        // PLANNING PHASE: Check if player can obtain required goods
+        boolean canObtain = board.canObtainGoods(ShipCosts.getShipyardCost(action.level()));
+        
+        // Clear storedGoods after validation (rollback)
+        board.clearStoredGoods();
+        
+        return canObtain;
     }
 }

@@ -20,19 +20,19 @@ public class ResidentCosts {
     
     // Settlement costs for new residents at each level
     private static final Map<Integer, Cost> SETTLEMENT_COSTS = Map.of(
-        1, new Cost(new Goods[]{PLANKS}),          // Level 1 (Farmers) - TODO: Add actual costs
-        2, new Cost(new Goods[]{PLANKS, BRICKS}),          // Level 2 (Workers) - TODO: Add actual costs
-        3, new Cost(new Goods[]{BRICKS, COAL, GOODS}),          // Level 3 (Artisans) - TODO: Add actual costs
-        4, new Cost(new Goods[]{GOODS, COAL, STEELBARS, WINDOWS}),          // Level 4 (Engineers) - TODO: Add actual costs
-        5, new Cost(new Goods[]{COAL, GOODS, STEELBARS, WINDOWS, COATS, WORKFORCE_3})           // Level 5 (Investors) - TODO: Add actual costs
+        1, new Cost(new Goods[]{PLANKS}),
+        2, new Cost(new Goods[]{PLANKS, BRICKS}),
+        3, new Cost(new Goods[]{BRICKS, COAL, GOODS}),
+        4, new Cost(new Goods[]{GOODS, STEELBARS, COAL, WINDOWS}),
+        5, new Cost(new Goods[]{GOODS, STEELBARS, COAL, WINDOWS, COATS, WORKFORCE_3})
     );
     
-    // Upgrade costs to reach a specific level
+    // Upgrade costs to reach a specific level from previous level
     private static final Map<Integer, Cost> UPGRADE_COSTS = Map.of(
-        2, new Cost(new Goods[]{BRICKS}),          // Upgrade to Level 2 (from Level 1) - TODO: Add actual costs
-        3, new Cost(new Goods[]{COAL, GOODS}),          // Upgrade to Level 3 (from Level 2) - TODO: Add actual costs
-        4, new Cost(new Goods[]{WINDOWS, STEELBARS}),          // Upgrade to Level 4 (from Level 3) - TODO: Add actual costs
-        5, new Cost(new Goods[]{WORKFORCE_3, COATS})           // Upgrade to Level 5 (from Level 4) - TODO: Add actual costs
+        2, new Cost(new Goods[]{BRICKS}),          // Upgrade 1 -> 2
+        3, new Cost(new Goods[]{GOODS, COAL}),     // Upgrade 2 -> 3
+        4, new Cost(new Goods[]{WINDOWS, STEELBARS}),  // Upgrade 3 -> 4
+        5, new Cost(new Goods[]{WORKFORCE_3, COATS})   // Upgrade 4 -> 5
     );
     
     /**

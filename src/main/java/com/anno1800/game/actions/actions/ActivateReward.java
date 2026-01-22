@@ -13,23 +13,49 @@ import static com.anno1800.game.residents.ResidentStatus.FIT;
  * Activate a reward.
  */
 public class ActivateReward {
+    @SuppressWarnings("deprecation")
     public static void activateReward(Player player, Reward reward, Game game) {
         switch (reward) {
             case Reward.NewResidents r -> {
-                // Nimm r.amount() Residents vom GameBoard und füge sie dem PlayerBoard mit Status FIT hinzu
-                for (int i = 0; i < r.amount(); i++) {
+                // Calculate how many residents can actually be settled
+                int maxSettleable = com.anno1800.game.actions.validators.ActivateRewardValidator
+                    .getMaxSettleableResidents(r, player, game);
+                int toSettle = Math.min(r.amount(), maxSettleable);
+                
+                System.out.println("NewResidents reward: Requested=" + r.amount() + 
+                    ", Max possible=" + maxSettleable + ", Settling=" + toSettle);
+                
+                // Settle the residents
+                for (int i = 0; i < toSettle; i++) {
                     Resident resident = game.getBoard().takeResident(r.populationLevel());
                     resident.setStatus(FIT);
                     player.getPlayerBoard().getResidents().add(resident);
                 }
             }
             case Reward.UpgradeResidents r -> {
-                // Use UpgradeResidentAction to handle the upgrade logic
-                Action.UpgradeResident action = new Action.UpgradeResident(
-                    new int[]{r.amount()}, 
-                    new int[]{r.populationLevel1(), r.populationLevel2()}
-                );
-                UpgradeResident.upgradeResident(player, action.amount(), action.residentLevel());
+                // Find residents of the specified level to upgrade
+                PlayerBoard board = player.getPlayerBoard();
+                int fromLevel = r.populationLevel1();
+                int amount = r.amount();
+                
+                // Find residents matching the from level
+                java.util.List<Resident> candidateResidents = board.getResidents().stream()
+                    .filter(resident -> resident.getPopulationLevel() == fromLevel)
+                    .limit(amount)
+                    .toList();
+                
+                if (candidateResidents.isEmpty()) {
+                    throw new IllegalStateException(
+                        "Cannot upgrade: No residents of level " + fromLevel + " found on player board"
+                    );
+                }
+                
+                // Create array for UpgradeResident action
+                Resident[] residentsToUpgrade = candidateResidents.toArray(new Resident[0]);
+                
+                // Execute the upgrade
+                Action.UpgradeResident action = new Action.UpgradeResident(residentsToUpgrade);
+                UpgradeResident.upgradeResident(player, game, action);
             }
             case Reward.ExtraAction r -> {
                 player.getPlayerBoard().setExtraActionThisTurn();

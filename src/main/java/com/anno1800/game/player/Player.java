@@ -10,6 +10,8 @@ public class Player {
     private final PlayerBoard playerBoard;
     private final int id;
     private int position;
+    private int victoryPoints;
+    private int bonusPoints; // e.g., 7 points for triggering end phase
 
     public Player(String name, PlayerBoard playerBoard, int id) {
         this.name = name;
@@ -36,6 +38,27 @@ public class Player {
 
     public PlayerBoard getPlayerBoard() {
         return playerBoard;
+    }
+    
+    public int getVictoryPoints() {
+        return victoryPoints;
+    }
+    
+    public void addVictoryPoints(int points) {
+        this.victoryPoints += points;
+    }
+    
+    public int getBonusPoints() {
+        return bonusPoints;
+    }
+    
+    public void addBonusPoints(int points) {
+        this.bonusPoints += points;
+        System.out.println("Player " + (id + 1) + " received " + points + " bonus points! Total bonus: " + bonusPoints);
+    }
+    
+    public int getTotalPoints() {
+        return victoryPoints + bonusPoints;
     }
 
     public static Player[] initializePlayers(int numPlayers, Board board) {

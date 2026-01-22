@@ -16,11 +16,10 @@ public class BuildFactoryValidator {
      * Requirements:
      * - Must have free land or coast tile (depending on factory type)
      * - Factory type must be available on board
-     * - Required goods must be producible (checked by agent/AI before action)
+     * - Required goods must be obtainable (production/trade/import)
      * 
-     * Note: This does NOT check if goods are available, because goods are produced
-     * just-in-time and immediately consumed. The agent/AI must ensure that
-     * ProduceGoods actions are executed before BuildFactory.
+     * Note: This uses the planning phase - it checks if goods CAN be obtained
+     * without actually producing them. The actual production happens during execution.
      */
     public static boolean canBuildFactory(Action.BuildFactory action, Player player, Game game) {
         Factory factory = action.factory();
@@ -36,11 +35,14 @@ public class BuildFactoryValidator {
             return false;
         }
 
-        // Note: We do NOT check for goods availability here because:
-        // 1. Goods are produced just-in-time (ProduceGoods action)
-        // 2. They are immediately consumed, not stored
-        // 3. The agent/ActionGenerator must ensure ProduceGoods actions come first
-
-        return true;
+        // PLANNING PHASE: Check if player can obtain required goods
+        // This will simulate production/trade and add to storedGoods
+        boolean canObtain = board.canObtainGoods(factory.costs());
+        
+        // Clear storedGoods after validation (rollback)
+        // The actual production will happen during action execution
+        board.clearStoredGoods();
+        
+        return canObtain;
     }
 }

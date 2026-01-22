@@ -6,12 +6,6 @@ import com.anno1800.data.gamedata.Goods;
 public record ResidentCard(
     int populationLevel,
     Goods[] needs,
-    Reward reward,
-    boolean isPlayed,
-    boolean rewardAvailable
+    Reward reward
 ) {
-    // Überladener Konstruktor - isPlayed wird auf false gesetzt
-    public ResidentCard(int populationLevel, Goods[] needs, Reward reward) {
-        this(populationLevel, needs, reward, false, false);
-    }
 }

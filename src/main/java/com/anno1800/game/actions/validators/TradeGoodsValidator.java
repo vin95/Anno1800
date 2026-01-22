@@ -1,6 +1,7 @@
 package com.anno1800.game.actions.validators;
 
 import com.anno1800.game.actions.Action;
+import com.anno1800.game.cards.ObjectiveCard;
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.tiles.Factory;
@@ -52,11 +53,24 @@ public class TradeGoodsValidator {
             return false;
         }
 
-        // Check if player has enough trade chips to cover the trade costs of the cheapest option
-        if (player.getPlayerBoard().getAvailableTradeChips() < lowestTradeCosts) {
-            return false;
+        // Check if player has enough trade chips to cover the trade costs
+        int availableTradeChips = player.getPlayerBoard().getAvailableTradeChips();
+        
+        // Check if ExplorerTrader objective card is active
+        boolean explorerTraderActive = game.getBoard().getActiveObjectiveCards().stream()
+            .anyMatch(card -> card instanceof ObjectiveCard.ExplorerTrader);
+        
+        if (availableTradeChips >= lowestTradeCosts) {
+            return true; // Can use regular trade chips
+        }
+        
+        // If ExplorerTrader is active, check if we can use explorer chips instead
+        if (explorerTraderActive) {
+            int availableExplorerChips = player.getPlayerBoard().getAvailableExplorerChips();
+            int requiredExplorerChips = lowestTradeCosts * 2; // 2 explorer chips = 1 trade chip
+            return availableExplorerChips >= requiredExplorerChips;
         }
 
-        return true;
+        return false;
     }
 }

@@ -31,6 +31,10 @@ public class DoOvertime {
         targetResident.setStatus(FIT);
 
         // Deduct gold (1 gold per population level)
-        // TODO: Implement gold deduction when PlayerBoard has a method for this
+        int goldCost = populationLevel;
+        player.getPlayerBoard().spendGold(goldCost);
+        
+        System.out.println("DoOvertime: Resident level " + populationLevel + 
+            " status changed to FIT. Cost: " + goldCost + " gold");
     }
 }

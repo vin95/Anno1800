@@ -1,11 +1,15 @@
 package com.anno1800.game.engine;
 
+import com.anno1800.agents.Agent;
 import com.anno1800.game.actions.Action;
+import com.anno1800.game.actions.ActionGenerator;
 import com.anno1800.game.actions.ActionHandler;
 import com.anno1800.game.actions.ActionResult;
 import com.anno1800.game.board.Board;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.state.GameState;
+
+import java.util.List;
 
 /**
  * Main game controller that manages the board and game state
@@ -13,16 +17,24 @@ import com.anno1800.game.state.GameState;
 public class Game {
     private final Board board;
     private Player[] players;
+    private Agent[] agents;
     private final ActionHandler actionHandler;
+    private final ActionGenerator actionGenerator;
     
     // Game state tracking
     private int currentRound;
     private final int startPlayer;
     private int currentPlayer;
+    private int endPhaseRoundsPlayed = 0; // Counts rounds played AFTER end phase triggered
+    
+    // Game configuration
+    private static final int MAX_ROUNDS = 10; // Default: 10 rounds per game
+    private static final int ACTIONS_PER_TURN = 1; // How many actions each player can take per turn
     
     public Game(int numPlayers) {
         this.board = Board.initializeBoard(numPlayers);
         this.players = Player.initializePlayers(numPlayers, this.board);
+        this.agents = new Agent[numPlayers]; // Will be set via setAgent()
         
         // Initialize game state
         this.currentRound = 1;
@@ -37,6 +49,7 @@ public class Game {
         inicializeGame();
         
         this.actionHandler = new ActionHandler(this);
+        this.actionGenerator = new ActionGenerator();
     }
     
     /**
@@ -57,7 +70,14 @@ public class Game {
         currentRound++;
         currentPlayer = 0;  // Reset to first player
         
-        System.out.println("=== Round " + currentRound + " begins ===");
+        // Track rounds played after end phase
+        if (board.isEndPhase()) {
+            endPhaseRoundsPlayed++;
+            System.out.println("=== Round " + currentRound + " begins (END PHASE - Round " + 
+                endPhaseRoundsPlayed + " after trigger) ===");
+        } else {
+            System.out.println("=== Round " + currentRound + " begins ===");
+        }
     }
     
     /**
@@ -116,24 +136,127 @@ public class Game {
     
     /**
      * Check if the game has ended.
-     * Override this method with your game's end condition.
+     * Game ends after MAX_ROUNDS OR when end phase was triggered and 1 additional round was played.
+     * 
+     * End phase logic:
+     * - When triggered in round N: finish round N, play round N+1, then game over
+     * - endPhaseRoundsPlayed counts COMPLETE rounds after trigger
+     * - Game ends when endPhaseRoundsPlayed >= 2 (current round finished + 1 final round)
      * 
      * @return true if game is over
      */
     public boolean isGameOver() {
-        // TODO: Implement game end condition (e.g., max rounds, victory points)
+        // Normal end: exceeded max rounds
+        if (currentRound > MAX_ROUNDS) {
+            return true;
+        }
+        
+        // End phase triggered: finish current round + 1 more round
+        // endPhaseRoundsPlayed increments at START of new round
+        // So when endPhaseRoundsPlayed == 2, we've had the trigger round + 1 final round
+        if (board.isEndPhase() && endPhaseRoundsPlayed >= 2) {
+            return true;
+        }
+        
         return false;
     }
 
+    /**
+     * Start the game and run the main game loop.
+     * Each round, all players take their turns in order.
+     * Game continues until isGameOver() returns true.
+     */
     public void start() {
         System.out.println("=== Game Start ===");
         System.out.println("Players: " + players.length);
-        System.out.println("Starting Round: " + currentRound);
+        System.out.println("Max Rounds: " + MAX_ROUNDS);
+        System.out.println("Starting Player: Player " + (startPlayer + 1));
+        System.out.println();
         
-        // TODO: Implement game loop
-        // while (!isGameOver()) {
-        //     playTurn();
-        // }
+        // Validate that all players have agents assigned
+        for (int i = 0; i < players.length; i++) {
+            if (agents[i] == null) {
+                throw new IllegalStateException("Agent not set for Player " + (i + 1) + 
+                    ". Use setAgent() before starting the game.");
+            }
+        }
+        
+        // Main game loop
+        while (!isGameOver()) {
+            playRound();
+        }
+        
+        // Game over
+        System.out.println("\n=== Game Over ===");
+        System.out.println("Game completed after " + currentRound + " rounds.");
+    }
+    
+    /**
+     * Play one complete round where each player takes their turn.
+     */
+    private void playRound() {
+        System.out.println("\n=== Round " + currentRound + " ===");
+        
+        // Each player takes their turn in order
+        for (int i = 0; i < players.length; i++) {
+            currentPlayer = (startPlayer + i) % players.length;
+            playTurn(currentPlayer);
+        }
+        
+        // Move to next round
+        nextRound();
+    }
+    
+    /**
+     * Execute one player's turn.
+     * The player's agent selects and executes actions.
+     * 
+     * @param playerIndex Index of the player taking the turn
+     */
+    private void playTurn(int playerIndex) {
+        Player player = players[playerIndex];
+        Agent agent = agents[playerIndex];
+        
+        System.out.println("\n--- Player " + (playerIndex + 1) + "'s Turn (Agent: " + agent.getName() + ") ---");
+        
+        // Player can take multiple actions per turn
+        for (int actionNum = 0; actionNum < ACTIONS_PER_TURN; actionNum++) {
+            // Generate all possible actions
+            List<Action> possibleActions = actionGenerator.getPossibleActions(player, this);
+            
+            if (possibleActions.isEmpty()) {
+                System.out.println("  No valid actions available. Turn ends.");
+                break;
+            }
+            
+            // Let agent choose an action
+            GameState gameState = getState();
+            Action chosenAction = agent.selectAction(gameState, possibleActions, player);
+            
+            if (chosenAction == null) {
+                System.out.println("  Player passes. Turn ends.");
+                break;
+            }
+            
+            // Execute the chosen action
+            System.out.println("  Executing: " + chosenAction);
+            ActionResult result = executeAction(chosenAction);
+            System.out.println("  Action executed. Result: " + result);
+        }
+    }
+    
+    /**
+     * Set the agent for a specific player.
+     * Must be called before start() for all players.
+     * 
+     * @param playerIndex The player index (0-based)
+     * @param agent The agent to control this player
+     */
+    public void setAgent(int playerIndex, Agent agent) {
+        if (playerIndex < 0 || playerIndex >= players.length) {
+            throw new IllegalArgumentException("Invalid player index: " + playerIndex);
+        }
+        this.agents[playerIndex] = agent;
     }
 
     private void inicializeGame() {

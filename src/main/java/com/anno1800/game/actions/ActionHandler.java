@@ -17,7 +17,6 @@ import static com.anno1800.game.actions.actions.TradeGoods.*;
 import static com.anno1800.game.actions.actions.ProduceGoods.*;
 import static com.anno1800.game.actions.actions.DoOvertime.*;
 import static com.anno1800.game.actions.actions.Carneval.*;
-import static com.anno1800.game.actions.actions.Expedition.*;
 import static com.anno1800.game.actions.actions.DiscoverNewWorldIsland.*;
 import static com.anno1800.game.actions.actions.DiscoverOldWorldIsland.*;
 import static com.anno1800.game.actions.actions.UpgradeResident.*;
@@ -25,7 +24,6 @@ import static com.anno1800.game.actions.actions.SettleResident.*;
 import com.anno1800.game.actions.actions.FulfillNeeds;
 import com.anno1800.game.actions.actions.Expedition;
 import static com.anno1800.game.actions.actions.SwapResidentCards.*;
-import static com.anno1800.game.actions.actions.FulfillNeeds.*;
 import static com.anno1800.game.actions.actions.BuildShips.*;
 import static com.anno1800.game.actions.actions.BuildShipyard.*;
 import static com.anno1800.game.actions.actions.BuildFactory.*;
@@ -69,16 +67,16 @@ public class ActionHandler {
                 FulfillNeeds.fulfillNeeds(player, game, fulfillNeedsAction);
                 yield new ActionResult.NoResult();
             }
-            case Action.SwapResidentCards(ResidentCard[] cardsToSwap) -> {
-                swapResidentCards(player, cardsToSwap);
+            case Action.SwapResidentCards swapAction -> {
+                swapResidentCards(player, game, swapAction);
                 yield new ActionResult.NoResult();
             }
-            case Action.SettleResident(int level) -> {
-                settleResident(player, level);
+            case Action.SettleResident settleAction -> {
+                settleResident(player, game, settleAction);
                 yield new ActionResult.NoResult();
             }
-            case Action.UpgradeResident(int[] amount, int[] residentLevel) -> {
-                upgradeResident(player, amount, residentLevel);
+            case Action.UpgradeResident upgradeAction -> {
+                upgradeResident(player, game, upgradeAction);
                 yield new ActionResult.NoResult();
             }
             case Action.DiscoverOldWorldIsland() -> {

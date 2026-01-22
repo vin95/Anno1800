@@ -10,15 +10,22 @@ import com.anno1800.game.tiles.TradeShip;
 import com.anno1800.data.gamedata.FactoryData;
 import com.anno1800.data.gamedata.Goods;
 import com.anno1800.game.residents.Resident;
+import com.anno1800.game.player.ProducedGood;
+import com.anno1800.game.player.ProducedGood.GoodSource;
 
 import static com.anno1800.data.gamedata.Producers.*;
 import static com.anno1800.game.residents.ResidentStatus.*;
 import com.anno1800.game.board.Board;
 import com.anno1800.game.cards.ExpeditionCard;
+import com.anno1800.game.cards.ObjectiveCard;
 import com.anno1800.game.cards.ResidentCard;
+import com.anno1800.game.engine.Game;
+import com.anno1800.game.rewards.Reward;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.anno1800.data.gamedata.ShipType;
 
@@ -50,6 +57,7 @@ public class PlayerBoard {
     // Default StartFactories that can be overbuilt
     private List<Factory> defaultFactories = new ArrayList<>();
     private List<Factory> overbuildingFactories = new ArrayList<>(); // Factories that overbuilt defaults
+    private Map<Factory, Factory> overbuildMap = new HashMap<>(); // Maps new factory -> default factory it overbuilt
 
     ArrayList<Shipyard> shipyards = new ArrayList<>();
 
@@ -63,7 +71,19 @@ public class PlayerBoard {
 
     ArrayList<ExpeditionCard> expeditionCards = new ArrayList<>();
 
-    List<Goods> storedGoods;
+    /**
+     * Rewards that have been earned but not yet activated.
+     * Rewards are added when a ResidentCard is fulfilled (FulfillNeeds action).
+     * Players can activate these rewards later using the ActivateReward action.
+     */
+    private ArrayList<Reward> pendingRewards = new ArrayList<>();
+
+    /**
+     * Stored goods with their sources.
+     * Used during planning phase to track how goods would be obtained.
+     * Must be cleared after action execution.
+     */
+    private List<ProducedGood> storedGoods;
 
     public PlayerBoard() {
         storedGoods = new ArrayList<>();
@@ -152,6 +172,35 @@ public class PlayerBoard {
 
     public ArrayList<ExpeditionCard> getExpeditionCards() {
         return expeditionCards;
+    }
+
+    /**
+     * Returns the list of rewards that have been earned but not yet activated.
+     * 
+     * @return List of pending rewards
+     */
+    public ArrayList<Reward> getPendingRewards() {
+        return pendingRewards;
+    }
+
+    /**
+     * Adds a reward to the player's pending rewards list.
+     * Called when a ResidentCard is fulfilled.
+     * 
+     * @param reward The reward to add
+     */
+    public void addPendingReward(Reward reward) {
+        pendingRewards.add(reward);
+    }
+
+    /**
+     * Removes a reward from the pending rewards list after it has been activated.
+     * 
+     * @param reward The reward to remove
+     * @return true if the reward was removed, false if it wasn't in the list
+     */
+    public boolean removePendingReward(Reward reward) {
+        return pendingRewards.remove(reward);
     }
 
     /**
@@ -453,8 +502,13 @@ public class PlayerBoard {
         addFactory(factory);
     }
 
+    /**
+     * Adds a good to stored goods (used when reward gives goods).
+     * @deprecated Use addProducedGood() instead to track source
+     */
+    @Deprecated
     public void addGoodToStoredGoods(Goods good) {
-            storedGoods.add(good);
+        storedGoods.add(new ProducedGood(good, new GoodSource.FromReward()));
     }
 
     public void setExtraActionThisTurn() {
@@ -562,7 +616,8 @@ public class PlayerBoard {
 
     /**
      * Overbuilds a default factory with a new factory.
-     * The default factory is hidden but can be restored if the overbuilding factory is demolished.
+     * Workers in the default factory are exhausted, slots are cleared,
+     * and the default factory becomes passive (not usable until new factory is demolished).
      * 
      * @param defaultFactory The default factory to overbuild
      * @param newFactory The new factory that overbuilds the default one
@@ -570,7 +625,24 @@ public class PlayerBoard {
      */
     public boolean overbuildDefaultFactory(Factory defaultFactory, Factory newFactory) {
         if (defaultFactories.contains(defaultFactory)) {
-            // Remove from active defaults and add to overbuilding list
+            // Exhaust all residents working in the default factory
+            com.anno1800.game.residents.Resident slot1 = defaultFactory.getSlot1();
+            com.anno1800.game.residents.Resident slot2 = defaultFactory.getSlot2();
+            
+            if (slot1 != null) {
+                slot1.setStatus(com.anno1800.game.residents.ResidentStatus.EXHAUSTED);
+            }
+            if (slot2 != null) {
+                slot2.setStatus(com.anno1800.game.residents.ResidentStatus.EXHAUSTED);
+            }
+            
+            // Clear the default factory's work slots
+            defaultFactory.freeSlots();
+            
+            // Track which factory overbuilt which default
+            overbuildMap.put(newFactory, defaultFactory);
+            
+            // Remove from active defaults and add new factory to overbuilding list
             defaultFactories.remove(defaultFactory);
             overbuildingFactories.add(newFactory);
             
@@ -685,9 +757,9 @@ public class PlayerBoard {
     /**
      * Gets the stored goods on the player board.
      * 
-     * @return List of stored goods
+     * @return List of stored goods with their sources
      */
-    public List<Goods> getStoredGoods() {
+    public List<ProducedGood> getStoredGoods() {
         return storedGoods;
     }
 
@@ -707,5 +779,280 @@ public class PlayerBoard {
                  STEEL_WORKS_RED, SAILMAKERS_RED -> true;
             default -> false;
         };
+    }
+
+    // ========== GOODS PLANNING AND CONSUMPTION SYSTEM ==========
+    
+    /**
+     * PLANNING PHASE: Simulates production of goods to check if action is feasible.
+     * Does NOT actually produce goods or exhaust residents.
+     * Adds goods to storedGoods for planning purposes.
+     * 
+     * @param required Array of goods required
+     * @return true if all goods can be produced/traded/imported
+     */
+    public boolean canObtainGoods(Goods[] required) {
+        return canObtainGoods(required, null);
+    }
+    
+    /**
+     * Checks if all required goods can be obtained through production, trading, or import.
+     * PLANNING PHASE: Determines strategy for obtaining goods without modifying game state.
+     * 
+     * @param required Array of required goods
+     * @param game Optional game context for checking objective cards (e.g., ExplorerTrader)
+     * @return true if all goods can be produced/traded/imported
+     */
+    public boolean canObtainGoods(Goods[] required, Game game) {
+        if (required == null || required.length == 0) {
+            return true;
+        }
+        
+        // Try to obtain each required good
+        for (Goods good : required) {
+            if (!tryObtainGood(good, game)) {
+                // Can't obtain this good - rollback and return false
+                clearStoredGoods();
+                return false;
+            }
+        }
+        
+        // All goods can be obtained
+        return true;
+    }
+    
+    /**
+     * Tries to obtain a single good through production, trading, or import.
+     * Adds to storedGoods if successful.
+     * 
+     * @param good The good to obtain
+     * @param game Optional game context for checking objective cards
+     * @return true if the good can be obtained
+     */
+    private boolean tryObtainGood(Goods good, Game game) {
+        // Try 1: Production (find factory that produces this good and has free slot + FIT resident)
+        for (int i = 0; i < numFactories; i++) {
+            Factory factory = factories[i];
+            if (factory != null && factory.produces().equals(good)) {
+                // Check if factory has a free slot
+                if (factory.getSlot1() == null || factory.getSlot2() == null) {
+                    // Check if we have a FIT resident of correct level
+                    Resident resident = findFitResident(factory.populationLevel());
+                    if (resident != null) {
+                        // Success! Add to storedGoods
+                        storedGoods.add(new ProducedGood(good, new GoodSource.Produced(factory, resident)));
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        // Check if ExplorerTrader objective card is active
+        boolean explorerTraderActive = false;
+        if (game != null) {
+            explorerTraderActive = game.getBoard().getActiveObjectiveCards().stream()
+                .anyMatch(card -> card instanceof ObjectiveCard.ExplorerTrader);
+        }
+        
+        // Try 2: Trading (check if we have available trade chips)
+        if (availableTradeChips > 0) {
+            // Note: We don't know which player has the good, so we simulate with player 0
+            storedGoods.add(new ProducedGood(good, new GoodSource.Traded(0, 1)));
+            return true;
+        }
+        
+        // Try 2b: If ExplorerTrader active, try using 2 explorer chips instead of 1 trade chip
+        if (explorerTraderActive && availableExplorerChips >= 2) {
+            // Can use 2 explorer chips as 1 trade chip
+            storedGoods.add(new ProducedGood(good, new GoodSource.Traded(0, 2))); // costs 2 explorer chips
+            return true;
+        }
+        
+        // Try 3: Import from new world (check if we have explorer chips and the good is from new world)
+        if (isNewWorldGood(good) && availableExplorerChips > 0) {
+            storedGoods.add(new ProducedGood(good, new GoodSource.Imported(1)));
+            return true;
+        }
+        
+        // Can't obtain this good
+        return false;
+    }
+    
+    /**
+     * Finds a FIT resident of the specified population level.
+     * Used during planning phase to check if production is possible.
+     * 
+     * @param populationLevel The required population level
+     * @return A FIT resident, or null if none available
+     */
+    private Resident findFitResident(int populationLevel) {
+        for (Resident resident : residents) {
+            if (resident.getPopulationLevel() == populationLevel && 
+                resident.getStatus() == com.anno1800.game.residents.ResidentStatus.FIT) {
+                return resident;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Checks if a good is from the new world.
+     */
+    private boolean isNewWorldGood(Goods good) {
+        return switch (good) {
+            case CACAO, SUGARCANE, TOBACCO, COFFEE_BEANS, COTTON, RUBBER -> true;
+            default -> false;
+        };
+    }
+    
+    /**
+     * EXECUTION PHASE: Consumes goods from storedGoods and performs actual production/trade.
+     * This is called when an action is actually executed.
+     * After consumption, storedGoods is cleared.
+     * 
+     * @param required Array of goods to consume
+     */
+    public void consumeGoods(Goods[] required) {
+        if (required == null || required.length == 0) {
+            return;
+        }
+        
+        for (Goods good : required) {
+            // Find and remove from storedGoods
+            ProducedGood producedGood = null;
+            for (ProducedGood pg : storedGoods) {
+                if (pg.good().equals(good)) {
+                    producedGood = pg;
+                    break;
+                }
+            }
+            
+            if (producedGood == null) {
+                throw new IllegalStateException("Tried to consume " + good + " but it's not in storedGoods. " +
+                    "Ensure canObtainGoods() was called first!");
+            }
+            
+            // Execute the actual action based on source
+            executeGoodSource(producedGood);
+            
+            // Remove from storedGoods
+            storedGoods.remove(producedGood);
+        }
+        
+        // Clear remaining goods
+        clearStoredGoods();
+    }
+    
+    /**
+     * Executes the actual production/trade/import based on the good's source.
+     * This performs the real game state changes (exhaust residents, use chips, etc.)
+     */
+    private void executeGoodSource(ProducedGood producedGood) {
+        switch (producedGood.source()) {
+            case GoodSource.Produced(Factory factory, Resident resident) -> {
+                // Actually assign resident to factory
+                if (factory.getSlot1() == null) {
+                    factory.setSlot1(resident);
+                } else {
+                    factory.setSlot2(resident);
+                }
+                resident.setStatus(com.anno1800.game.residents.ResidentStatus.AT_WORK);
+                System.out.println("  -> Produced " + producedGood.good() + " in " + factory.getType());
+            }
+            case GoodSource.Traded(int fromPlayer, int chipCost) -> {
+                // chipCost = 1: Use 1 trade chip (standard)
+                // chipCost = 2: Use 2 explorer chips (ExplorerTrader alternative)
+                if (chipCost == 1) {
+                    availableTradeChips--;
+                    System.out.println("  -> Traded " + producedGood.good() + " from Player " + (fromPlayer + 1));
+                } else if (chipCost == 2) {
+                    availableExplorerChips -= 2; // ExplorerTrader: 2 explorer = 1 trade
+                    System.out.println("  -> Traded " + producedGood.good() + " from Player " + (fromPlayer + 1) + " (using 2 Explorer Chips via ExplorerTrader)");
+                } else {
+                    throw new IllegalStateException("Invalid chip cost for trading: " + chipCost);
+                }
+            }
+            case GoodSource.Imported(int chip) -> {
+                // Use explorer chip
+                availableExplorerChips--;
+                System.out.println("  -> Imported " + producedGood.good() + " from New World");
+            }
+            case GoodSource.FromReward() -> {
+                // No action needed - already obtained
+                System.out.println("  -> Used " + producedGood.good() + " from reward");
+            }
+            case GoodSource.Other(String desc) -> {
+                System.out.println("  -> Used " + producedGood.good() + " (" + desc + ")");
+            }
+        }
+    }
+    
+    /**
+     * Removes a factory from the player board.
+     * Used when a factory is demolished.
+     * If the factory was overbuilding a default factory, the default factory becomes active again.
+     * Updates the factory counts accordingly.
+     * 
+     * @param factory The factory to remove
+     * @return true if the factory was removed, false if not found
+     */
+    public boolean removeFactory(Factory factory) {
+        boolean found = false;
+        
+        // Check if this factory was overbuilding a default factory
+        if (overbuildMap.containsKey(factory)) {
+            Factory defaultFactory = overbuildMap.get(factory);
+            
+            // Restore the default factory to active list
+            defaultFactories.add(defaultFactory);
+            
+            // Remove from overbuilding tracking
+            overbuildMap.remove(factory);
+            overbuildingFactories.remove(factory);
+        }
+        
+        // Find and remove factory from array
+        for (int i = 0; i < numFactories; i++) {
+            if (factories[i] == factory) {
+                // Shift remaining factories
+                for (int j = i; j < numFactories - 1; j++) {
+                    factories[j] = factories[j + 1];
+                }
+                factories[numFactories - 1] = null;
+                numFactories--;
+                found = true;
+                break;
+            }
+        }
+        
+        if (found) {
+            // Decrease the appropriate tile count
+            // We need to determine if it was on land or coast
+            // For simplicity, prefer reducing land first (matching buildFactory logic)
+            if (numFactoriesOnLand > 0) {
+                numFactoriesOnLand--;
+            } else if (numFactoriesOnCoast > 0) {
+                numFactoriesOnCoast--;
+            }
+        }
+        
+        return found;
+    }
+
+    /**
+     * Clears all stored goods. Called after action execution or when planning fails.
+     * This is the cleanup/rollback mechanism.
+     */
+    public void clearStoredGoods() {
+        storedGoods.clear();
+    }
+    
+    /**
+     * Adds a produced good to storedGoods (used during planning).
+     * 
+     * @param producedGood The good with its source
+     */
+    public void addProducedGood(ProducedGood producedGood) {
+        storedGoods.add(producedGood);
     }
 }

@@ -8,6 +8,7 @@ import static com.anno1800.game.factories.createResidents.*;
 import static com.anno1800.data.gamedata.OldWorldIslandData.createOldWorldIslands;
 import static com.anno1800.data.gamedata.NewWorldIslandsData.createNewWorldIslands;
 import com.anno1800.game.cards.ResidentCard;
+import com.anno1800.game.cards.ObjectiveCard;
 import com.anno1800.game.tiles.ExplorerShip;
 import com.anno1800.game.tiles.Factory;
 import com.anno1800.game.tiles.NewWorldIsland;
@@ -45,6 +46,10 @@ public class Board {
     // Expedition card stack (also called Relict cards)
     private final Deque<ExpeditionCard> expeditionStack;
     
+    // Objective card stack (shuffled at game start, 5 cards drawn)
+    private final Deque<ObjectiveCard> objectiveCardDeck;
+    private final List<ObjectiveCard> activeObjectiveCards;
+    
     // 3 Shipyard stacks (Level 1-3) - noch nicht implementiert
     private final Deque<Shipyard> shipyardLevel1;
     private final Deque<Shipyard> shipyardLevel2;
@@ -81,6 +86,8 @@ public class Board {
     private int investors = 15;
 
     private boolean endPhase = false;
+    private int endPhaseTriggeredByPlayer = -1; // Player ID who triggered end phase, -1 if not triggered
+    private int endPhaseTriggeredInRound = -1; // Round when end phase was triggered
 
     private int gold = 1000;
     private int tradeChips = 1000;
@@ -92,6 +99,8 @@ public class Board {
         Deque<ResidentCard> residentStack2,
         Deque<ResidentCard> residentStack3,
         Deque<ExpeditionCard> expeditionStack,
+        Deque<ObjectiveCard> objectiveCardDeck,
+        List<ObjectiveCard> activeObjectiveCards,
         Deque<Shipyard> shipyardLevel1,
         Deque<Shipyard> shipyardLevel2,
         Deque<Shipyard> shipyardLevel3,
@@ -119,6 +128,8 @@ public class Board {
         this.residentStack2 = residentStack2;
         this.residentStack3 = residentStack3;
         this.expeditionStack = expeditionStack;
+        this.objectiveCardDeck = objectiveCardDeck;
+        this.activeObjectiveCards = activeObjectiveCards;
         this.shipyardLevel1 = shipyardLevel1;
         this.shipyardLevel2 = shipyardLevel2;
         this.shipyardLevel3 = shipyardLevel3;
@@ -158,6 +169,13 @@ public class Board {
         // Expedition card stack - shuffled for randomness
         Deque<ExpeditionCard> expeditionStack = shuffleStack(createExpeditionCards());
 
+        // Objective card deck - shuffled, draw 5 cards at start
+        Deque<ObjectiveCard> objectiveCardDeck = new ArrayDeque<>(ObjectiveCard.createShuffledDeck());
+        List<ObjectiveCard> activeObjectiveCards = new ArrayList<>();
+        for (int i = 0; i < 5 && !objectiveCardDeck.isEmpty(); i++) {
+            activeObjectiveCards.add(objectiveCardDeck.pollFirst());
+        }
+
         // Shipyard stacks
         Deque<Shipyard> shipyardLevel1 = createLevel1Shipyards(numPlayers);
         Deque<Shipyard> shipyardLevel2 = createLevel2Shipyards(numPlayers);
@@ -192,6 +210,8 @@ public class Board {
             residentStack2,
             residentStack3,
             expeditionStack,
+            objectiveCardDeck,
+            activeObjectiveCards,
             shipyardLevel1,
             shipyardLevel2,
             shipyardLevel3,
@@ -268,6 +288,14 @@ public class Board {
 
     public Deque<ExpeditionCard> getExpeditionStack() {
         return expeditionStack;
+    }
+
+    public Deque<ObjectiveCard> getObjectiveCardDeck() {
+        return objectiveCardDeck;
+    }
+
+    public List<ObjectiveCard> getActiveObjectiveCards() {
+        return activeObjectiveCards;
     }
 
     public Deque<Shipyard> getShipyardLevel1() {
@@ -348,6 +376,31 @@ public class Board {
 
     public boolean isEndPhase() {
         return endPhase;
+    }
+    
+    public int getEndPhaseTriggeredByPlayer() {
+        return endPhaseTriggeredByPlayer;
+    }
+    
+    public int getEndPhaseTriggeredInRound() {
+        return endPhaseTriggeredInRound;
+    }
+    
+    /**
+     * Triggers the end phase of the game.
+     * Called when a player plays their last resident card.
+     * 
+     * @param playerId The ID of the player who triggered the end phase
+     * @param currentRound The current round number
+     */
+    public void setEndPhase(int playerId, int currentRound) {
+        if (!endPhase) {
+            this.endPhase = true;
+            this.endPhaseTriggeredByPlayer = playerId;
+            this.endPhaseTriggeredInRound = currentRound;
+            System.out.println("\n*** END PHASE TRIGGERED by Player " + (playerId + 1) + " in Round " + currentRound + " ***");
+            System.out.println("*** Current round will be completed, then one final round will be played ***\n");
+        }
     }
 
     /**
@@ -698,6 +751,24 @@ public class Board {
         List<T> list = new ArrayList<>(deque);
         Collections.shuffle(list);
         return new ArrayDeque<>(list);
+    }
+
+    /**
+     * Returns a factory to its stack on the board.
+     * Used when a factory is demolished.
+     * 
+     * @param factory The factory to return to the board
+     */
+    public void returnFactory(Factory factory) {
+        Producers type = factory.getType();
+        int stackIndex = type.ordinal();
+        
+        if (stackIndex < 0 || stackIndex >= factoryStacks.size()) {
+            throw new IllegalArgumentException("Invalid factory type: " + type);
+        }
+        
+        Deque<Factory> stack = factoryStacks.get(stackIndex);
+        stack.addLast(factory);
     }
 
     /**

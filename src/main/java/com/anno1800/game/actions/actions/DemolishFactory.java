@@ -4,15 +4,21 @@ import com.anno1800.game.tiles.Factory;
 import com.anno1800.game.board.Board;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.player.PlayerBoard;
+import com.anno1800.game.residents.Resident;
+import com.anno1800.game.residents.ResidentStatus;
 
 /**
  * Demolish factory action.
  * Removes a factory from the player's board.
+ * Residents working in the factory are exhausted.
+ * The factory is returned to its stack on the game board.
  */
 public class DemolishFactory {
 
     /**
      * Demolishes a factory from the player's board.
+     * Workers in the factory are exhausted, slots are cleared,
+     * and the factory is returned to its stack on the game board.
      * 
      * @param player The player demolishing the factory
      * @param board The game board
@@ -21,32 +27,24 @@ public class DemolishFactory {
     public static void demolishFactory(Player player, Board board, Factory factory) {
         PlayerBoard playerBoard = player.getPlayerBoard();
         
-        if (!canDemolishFactory(player, factory)) {
-            throw new IllegalStateException("Cannot demolish factory: " + factory);
+        // Exhaust all residents working in the factory
+        Resident slot1 = factory.getSlot1();
+        Resident slot2 = factory.getSlot2();
+        
+        if (slot1 != null) {
+            slot1.setStatus(ResidentStatus.EXHAUSTED);
+        }
+        if (slot2 != null) {
+            slot2.setStatus(ResidentStatus.EXHAUSTED);
         }
         
-        // Remove factory from player board (simplified implementation)
-        // In a real implementation, this would remove the factory from the player's collection
-        System.out.println("Factory demolition not fully implemented - would remove: " + factory);
+        // Clear the factory's work slots
+        factory.freeSlots();
         
-        System.out.println("Demolished factory: " + factory);
-    }
-
-    /**
-     * Checks if a factory can be demolished.
-     * 
-     * @param player The player attempting to demolish
-     * @param factory The factory to check
-     * @return true if the factory can be demolished
-     */
-    public static boolean canDemolishFactory(Player player, Factory factory) {
-        if (player == null || factory == null) {
-            return false;
-        }
+        // Remove factory from player board
+        playerBoard.removeFactory(factory);
         
-        PlayerBoard playerBoard = player.getPlayerBoard();
-        
-        // Check if player owns the factory
-        return java.util.Arrays.asList(playerBoard.getFactories()).contains(factory);
+        // Return factory to its stack on the game board
+        board.returnFactory(factory);
     }
 }

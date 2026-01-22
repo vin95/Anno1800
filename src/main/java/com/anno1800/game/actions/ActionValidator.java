@@ -1,8 +1,6 @@
 package com.anno1800.game.actions;
 
 import com.anno1800.game.actions.validators.*;
-import com.anno1800.game.actions.actions.DemolishFactory;
-import com.anno1800.game.actions.actions.OverbuildDefaultFactory;
 
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
@@ -27,7 +25,7 @@ public class ActionValidator {
             case Action.BuildFactory buildFactory -> BuildFactoryValidator.canBuildFactory(buildFactory, player, game);
             case Action.BuildShipyard buildShipyard -> BuildShipyardValidator.canBuildShipyard(buildShipyard, player, game);
             case Action.BuildShips buildShips -> BuildShipsValidator.canBuildShips(buildShips, player, game);
-            case Action.FulfillNeeds fulfillNeeds -> FullfillNeedsValidator.canFullfillNeeds(fulfillNeeds, player, fulfillNeeds.residentCard(), game);
+            case Action.FulfillNeeds fulfillNeeds -> FulfillNeedsValidator.canFulfillNeeds(fulfillNeeds, fulfillNeeds.residentCard(), player, game);
             case Action.SwapResidentCards swapResidentCards -> SwapResidentCardsValidator.canSwapResidentCards(swapResidentCards, swapResidentCards.cardsToSwap(), player, game);
             case Action.SettleResident settleResident -> SettleResidentValidator.canSettleResident(settleResident, player, game);
             case Action.UpgradeResident upgradeResident -> UpgradeResidentValidator.canUpgradeResident(upgradeResident, player, game);
@@ -48,8 +46,8 @@ public class ActionValidator {
             case Action.DrawResidentCard drawCard -> DrawResidentCardValidator.canDrawResidentCard(drawCard, player, game);
             case Action.ImportGood importGood -> ImportGoodValidator.canImportGood(importGood, player, game);
             case Action.ChooseGoods chooseGoods -> true; // ChooseGoods is always valid if the reward exists
-            case Action.DemolishFactory demolishFactory -> DemolishFactory.canDemolishFactory(player, demolishFactory.factory());
-            case Action.OverbuildDefaultFactory overbuildFactory -> OverbuildDefaultFactory.canOverbuildDefaultFactory(player, overbuildFactory.defaultFactory(), overbuildFactory.newFactory());
+            case Action.DemolishFactory demolishFactory -> DemolishFactoryValidator.canDemolishFactory(demolishFactory, player, game);
+            case Action.OverbuildDefaultFactory overbuildFactory -> OverbuildDefaultFactoryValidator.canOverbuildDefaultFactory(overbuildFactory, player, game);
         };
     }
 }

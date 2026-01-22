@@ -29,10 +29,10 @@ public class ActionExecutor {
                 SettleResident.settleResident(player, game, settleResident);
                 
             case Action.SwapResidentCards swapResidentCards -> 
-                SwapResidentCards.swapResidentCards(player, swapResidentCards.cardsToSwap());
+                SwapResidentCards.swapResidentCards(player, game, swapResidentCards);
                 
             case Action.UpgradeResident upgradeResident -> 
-                UpgradeResident.upgradeResident(player, upgradeResident.amount(), upgradeResident.residentLevel());
+                UpgradeResident.upgradeResident(player, game, upgradeResident);
                 
             case Action.DiscoverOldWorldIsland discoverOldWorldIsland -> 
                 DiscoverOldWorldIsland.discoverOldWorldIsland(player, game);

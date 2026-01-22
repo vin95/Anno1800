@@ -9,13 +9,13 @@ import com.anno1800.game.player.PlayerBoard;
 /**
  * FulfillNeeds action.
  * Removes goods from player's stored goods to fulfill resident card needs.
- * Sets isPlayed to true and rewardAvailable to true.
+ * Adds the card's reward to the player's pending rewards list.
  */
 public class FulfillNeeds {
 
     /**
      * Fulfills the needs of a resident card by consuming goods from stored goods.
-     * Sets isPlayed=true and rewardAvailable=true on the resident card.
+     * Adds the card's reward to the player's pending rewards list.
      * 
      * @param player The player fulfilling the needs
      * @param game The current game state
@@ -25,16 +25,57 @@ public class FulfillNeeds {
         PlayerBoard playerBoard = player.getPlayerBoard();
         ResidentCard residentCard = action.residentCard();
         
-        // Simplified implementation - just mark as played
-        System.out.println("Fulfilling needs for resident card (simplified implementation)");
+        System.out.println("Fulfilling needs for resident card - Level " + residentCard.populationLevel());
         
-        // In a real implementation, this would:
-        // 1. Check if player has required goods
-        // 2. Remove goods from stored goods
-        // 3. Set card state to played and reward available
+        // Get required goods
+        Goods[] needs = residentCard.needs();
+        
+        if (needs != null && needs.length > 0) {
+            System.out.println("  Needs: " + java.util.Arrays.toString(needs));
+            
+            // PLANNING PHASE: Determine how to obtain goods (with game context for ExplorerTrader)
+            if (!playerBoard.canObtainGoods(needs, game)) {
+                throw new IllegalStateException("Cannot obtain required goods for ResidentCard");
+            }
+            
+            // EXECUTION PHASE: Actually obtain and consume goods
+            playerBoard.consumeGoods(needs);
+        }
+        
+        // Add the reward to the player's pending rewards list
+        playerBoard.addPendingReward(residentCard.reward());
+        System.out.println("  -> Reward added to pending rewards: " + residentCard.reward());
+        
+        // Award victory points based on population level
+        int victoryPoints = getVictoryPointsForLevel(residentCard.populationLevel());
+        player.addVictoryPoints(victoryPoints);
+        System.out.println("  -> Victory Points awarded: " + victoryPoints + " (Level " + residentCard.populationLevel() + ")");
+        
+        // Remove the card from player's hand
+        playerBoard.getResidentCards().remove(residentCard);
+        
+        // Check if this was the player's last card -> trigger end phase
+        if (playerBoard.getResidentCards().isEmpty()) {
+            game.getBoard().setEndPhase(player.getId(), game.getCurrentRound());
+            player.addBonusPoints(7); // 7 bonus points for triggering end phase
+        }
     }
 
     
+    /**
+     * Returns the victory points awarded for fulfilling a resident card of the given level.
+     * 
+     * @param populationLevel The population level of the resident card
+     * @return Victory points for this level
+     */
+    private static int getVictoryPointsForLevel(int populationLevel) {
+        return switch (populationLevel) {
+            case 2 -> 3;
+            case 5 -> 8;
+            case 7 -> 5;
+            default -> 0; // Should not happen with valid resident cards
+        };
+    }
 
     /**
      * Gets the goods needed to fulfill a resident card's needs.

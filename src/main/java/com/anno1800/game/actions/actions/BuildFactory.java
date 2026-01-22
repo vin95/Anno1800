@@ -3,28 +3,39 @@ package com.anno1800.game.actions.actions;
 import com.anno1800.data.gamedata.Goods;
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
+import com.anno1800.game.player.PlayerBoard;
 import com.anno1800.game.tiles.Factory;
 
 /**
  * Build a factory on a free land tile.
-     * 
-     * PRECONDITION: ActionValidator has verified all requirements.
-     * All required goods must have been produced in previous actions.
+ * 
+ * PRECONDITION: ActionValidator has verified all requirements.
+ * Goods are obtained and consumed during this action.
  */
 public class BuildFactory {
     public static void buildFactory(Player player, Factory factory, Game game) {
-        // Goods verification (informational only)
+        PlayerBoard board = player.getPlayerBoard();
+        
+        // Get required goods
         Goods[] costs = factory.costs();
+        
         if (costs != null && costs.length > 0) {
             System.out.println("Building factory requires: " + java.util.Arrays.toString(costs));
-            System.out.println("Assuming all goods were produced in previous ProduceGoods actions.");
+            
+            // PLANNING PHASE: Determine how to obtain goods
+            if (!board.canObtainGoods(costs)) {
+                throw new IllegalStateException("Cannot obtain required goods for " + factory.getType());
+            }
+            
+            // EXECUTION PHASE: Actually obtain and consume goods
+            board.consumeGoods(costs);
         }
 
         // Take factory from board
         Factory factoryFromBoard = game.getBoard().takeFactory(factory.getType());
 
         // Add factory to player's board
-        player.getPlayerBoard().buildFactory(factoryFromBoard);
+        board.buildFactory(factoryFromBoard);
 
         System.out.println("Successfully built factory: " + factory.getType());
     }

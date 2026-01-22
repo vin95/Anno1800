@@ -31,6 +31,21 @@ public class SettleResident {
             throw new IllegalStateException("No residents of level " + level + " available on the board");
         }
         
+        // Get required goods
+        com.anno1800.game.residents.ResidentCosts.Cost cost = com.anno1800.game.residents.ResidentCosts.getSettlementCost(level);
+        
+        if (cost.goods() != null && cost.goods().length > 0) {
+            System.out.println("Settling resident level " + level + " requires: " + java.util.Arrays.toString(cost.goods()));
+            
+            // PLANNING PHASE: Determine how to obtain goods
+            if (!playerBoard.canObtainGoods(cost.goods())) {
+                throw new IllegalStateException("Cannot obtain required goods for settling resident level " + level);
+            }
+            
+            // EXECUTION PHASE: Actually obtain and consume goods
+            playerBoard.consumeGoods(cost.goods());
+        }
+        
         // Take a resident from the GameBoard
         Resident resident = board.takeResident(level);
         
@@ -84,10 +99,5 @@ public class SettleResident {
         
         // Check if there are residents available on the board
         return hasResidentAvailable(board, level);
-    }
-
-    // Legacy method for backward compatibility
-    public static void settleResident(Player player, int level) {
-        throw new UnsupportedOperationException("Use settleResident(Player, Game, SettleResident) instead");
     }
 }
