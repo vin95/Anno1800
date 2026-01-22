@@ -18,8 +18,14 @@ public class Carneval {
         for (Resident resident : board.getResidents()) {
             resident.setStatus(FIT);
         }
-        for (Factory factory : board.getFactories()) {
-            factory.freeSlots();
+        // Only iterate over BUILT factories (up to numFactories)
+        Factory[] allFactories = board.getFactories();
+        int numFactories = board.getNumFactories();
+        for (int i = 0; i < numFactories; i++) {
+            Factory factory = allFactories[i];
+            if (factory != null) {
+                factory.freeSlots();
+            }
         }
         board.resetAvailableTradeChips();
         for (TradeShip ship : board.getTradeShips()) {

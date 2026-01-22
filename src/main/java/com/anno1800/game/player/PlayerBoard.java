@@ -88,6 +88,8 @@ public class PlayerBoard {
     public PlayerBoard() {
         storedGoods = new ArrayList<>();
         initializeDefaultFactories();
+        // Default factories occupy land tiles
+        numFactoriesOnLand = 10; // 10 start factories (5 GREEN + 5 RED)
     }
 
     public int getLandTiles() {
@@ -250,25 +252,18 @@ public class PlayerBoard {
         board.addShip(1, ShipType.TradeShip, gameBoard);
         board.addShip(1, ShipType.ExplorerShip, gameBoard);
 
-        // Factories initialisieren
-        board.addFactory(FactoryData.getFactory(SAWMILL_GREEN));
-        board.addFactory(FactoryData.getFactory(GRAIN_FARM_GREEN));
-        board.addFactory(FactoryData.getFactory(POTATO_FARM_GREEN));
-        board.addFactory(FactoryData.getFactory(PIG_FARM_GREEN));
-        board.addFactory(FactoryData.getFactory(SHEEP_FARM_GREEN));
-        board.addFactory(FactoryData.getFactory(COAL_MINE_RED));
-        board.addFactory(FactoryData.getFactory(BRICK_FACTORY_RED));
-        board.addFactory(FactoryData.getFactory(WAREHOUSE_RED));
-        board.addFactory(FactoryData.getFactory(STEEL_WORKS_RED));
-        board.addFactory(FactoryData.getFactory(SAILMAKERS_RED));
-
+        // Note: Start-Factories are already initialized in defaultFactories by constructor
+        // They should NOT be added to factories[] array to avoid double-counting
+        
         // Plantations initialisieren (Beispiel, ggf. anpassen)
-        board.addPlantation(FactoryData.getPlantation(CACAO_PLANTATION));
-        board.addPlantation(FactoryData.getPlantation(SUGAR_PLANTATION));
-        board.addPlantation(FactoryData.getPlantation(TOBACCO_PLANTATION));
-        board.addPlantation(FactoryData.getPlantation(COFFEE_PLANTATION));
-        board.addPlantation(FactoryData.getPlantation(COTTON_PLANTATION));
-        board.addPlantation(FactoryData.getPlantation(RUBBER_PLANTATION));
+        // REMOVED: Plantations should only be added when player discovers NewWorldIsland!
+        // Plantations will be added through addNewWorldIsland() method when player explores
+        // board.addPlantation(FactoryData.getPlantation(CACAO_PLANTATION));
+        // board.addPlantation(FactoryData.getPlantation(SUGAR_PLANTATION));
+        // board.addPlantation(FactoryData.getPlantation(TOBACCO_PLANTATION));
+        // board.addPlantation(FactoryData.getPlantation(COFFEE_PLANTATION));
+        // board.addPlantation(FactoryData.getPlantation(COTTON_PLANTATION));
+        // board.addPlantation(FactoryData.getPlantation(RUBBER_PLANTATION));
 
         board.addShipyard(1);
     }
@@ -830,7 +825,56 @@ public class PlayerBoard {
      * @return true if the good can be obtained
      */
     private boolean tryObtainGood(Goods good, Game game) {
-        // Try 1: Production (find factory that produces this good and has free slot + FIT resident)
+        // Special case: WORKFORCE_3 means "Artisan resident" - check if we have one available
+        if (good == Goods.WORKFORCE_3) {
+            Resident artisan = findFitResident(3); // Level 3 = Artisan
+            if (artisan != null) {
+                storedGoods.add(new ProducedGood(good, new GoodSource.FromReward()));
+                return true;
+            }
+            return false;
+        }
+        
+        // Special case: WORKFORCE_4 means "Engineer resident"
+        if (good == Goods.WORKFORCE_4) {
+            Resident engineer = findFitResident(4); // Level 4 = Engineer
+            if (engineer != null) {
+                storedGoods.add(new ProducedGood(good, new GoodSource.FromReward()));
+                return true;
+            }
+            return false;
+        }
+        
+        // Special case: WORKFORCE_5 means "Investor resident"
+        if (good == Goods.WORKFORCE_5) {
+            Resident investor = findFitResident(5); // Level 5 = Investor
+            if (investor != null) {
+                storedGoods.add(new ProducedGood(good, new GoodSource.FromReward()));
+                return true;
+            }
+            return false;
+        }
+        
+        // Try 1a: Check Default Factories first (these are always available at game start)
+        for (Factory factory : defaultFactories) {
+            if (factory.produces().equals(good)) {
+                // Check if default factory is not overbuilt
+                boolean isOverbuilt = overbuildMap.values().stream()
+                    .anyMatch(df -> df == factory);
+                
+                if (!isOverbuilt && (factory.getSlot1() == null || factory.getSlot2() == null)) {
+                    // Check if we have a FIT resident of correct level
+                    Resident resident = findFitResident(factory.populationLevel());
+                    if (resident != null) {
+                        // Success! Add to storedGoods
+                        storedGoods.add(new ProducedGood(good, new GoodSource.Produced(factory, resident)));
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        // Try 1b: Production in regular factories (find factory that produces this good and has free slot + FIT resident)
         for (int i = 0; i < numFactories; i++) {
             Factory factory = factories[i];
             if (factory != null && factory.produces().equals(good)) {
@@ -854,24 +898,73 @@ public class PlayerBoard {
                 .anyMatch(card -> card instanceof ObjectiveCard.ExplorerTrader);
         }
         
-        // Try 2: Trading (check if we have available trade chips)
-        if (availableTradeChips > 0) {
-            // Note: We don't know which player has the good, so we simulate with player 0
-            storedGoods.add(new ProducedGood(good, new GoodSource.Traded(0, 1)));
-            return true;
+        // Try 2: Trading (check if we have available trade chips AND another player can produce this good)
+        if (availableTradeChips > 0 && game != null) {
+            // Check if any other player has a factory that produces this good
+            boolean otherPlayerCanProduce = false;
+            for (Player otherPlayer : game.getPlayers()) {
+                if (otherPlayer.getPlayerBoard() == this) {
+                    continue; // Skip self
+                }
+                
+                // Check if other player has a factory that produces this good
+                for (Factory factory : otherPlayer.getPlayerBoard().getAllActiveFactories()) {
+                    if (factory.produces().equals(good)) {
+                        otherPlayerCanProduce = true;
+                        break;
+                    }
+                }
+                if (otherPlayerCanProduce) break;
+            }
+            
+            if (otherPlayerCanProduce) {
+                // Note: We don't know which player has the good, so we simulate with player 0
+                storedGoods.add(new ProducedGood(good, new GoodSource.Traded(0, 1)));
+                return true;
+            }
         }
         
         // Try 2b: If ExplorerTrader active, try using 2 explorer chips instead of 1 trade chip
-        if (explorerTraderActive && availableExplorerChips >= 2) {
-            // Can use 2 explorer chips as 1 trade chip
-            storedGoods.add(new ProducedGood(good, new GoodSource.Traded(0, 2))); // costs 2 explorer chips
-            return true;
+        if (explorerTraderActive && availableExplorerChips >= 2 && game != null) {
+            // Check if any other player has a factory that produces this good
+            boolean otherPlayerCanProduce = false;
+            for (Player otherPlayer : game.getPlayers()) {
+                if (otherPlayer.getPlayerBoard() == this) {
+                    continue; // Skip self
+                }
+                
+                // Check if other player has a factory that produces this good
+                for (Factory factory : otherPlayer.getPlayerBoard().getAllActiveFactories()) {
+                    if (factory.produces().equals(good)) {
+                        otherPlayerCanProduce = true;
+                        break;
+                    }
+                }
+                if (otherPlayerCanProduce) break;
+            }
+            
+            if (otherPlayerCanProduce) {
+                // Can use 2 explorer chips as 1 trade chip
+                storedGoods.add(new ProducedGood(good, new GoodSource.Traded(0, 2))); // costs 2 explorer chips
+                return true;
+            }
         }
         
-        // Try 3: Import from new world (check if we have explorer chips and the good is from new world)
+        // Try 3: Import from new world (check if we have a plantation that produces this good)
         if (isNewWorldGood(good) && availableExplorerChips > 0) {
-            storedGoods.add(new ProducedGood(good, new GoodSource.Imported(1)));
-            return true;
+            // Check if player has a plantation that produces this good
+            boolean hasPlantation = false;
+            for (Plantation plantation : plantations) {
+                if (plantation != null && plantation.produces().equals(good)) {
+                    hasPlantation = true;
+                    break;
+                }
+            }
+            
+            if (hasPlantation) {
+                storedGoods.add(new ProducedGood(good, new GoodSource.Imported(1)));
+                return true;
+            }
         }
         
         // Can't obtain this good

@@ -37,7 +37,7 @@ public class BuildFactoryValidator {
 
         // PLANNING PHASE: Check if player can obtain required goods
         // This will simulate production/trade and add to storedGoods
-        boolean canObtain = board.canObtainGoods(factory.costs());
+        boolean canObtain = board.canObtainGoods(factory.costs(), game);
         
         // Clear storedGoods after validation (rollback)
         // The actual production will happen during action execution

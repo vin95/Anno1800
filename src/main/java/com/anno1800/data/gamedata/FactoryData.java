@@ -66,7 +66,7 @@ public class FactoryData {
             COAL_MINE_RED,
             new Goods[]{PLANKS},
             Producers.COAL_MINE_RED.getProduces(),
-            1,
+            3,
             2
         ));
 
@@ -74,7 +74,7 @@ public class FactoryData {
             BRICK_FACTORY_RED,
             new Goods[]{COAL},
             Producers.BRICK_FACTORY_RED.getProduces(),
-            1,
+            3,
             2
         ));
 
@@ -82,7 +82,7 @@ public class FactoryData {
             WAREHOUSE_RED,
             new Goods[]{BRICKS, WORKFORCE_3},
             Producers.WAREHOUSE_RED.getProduces(),
-            1,
+            3,
             2
         ));
 
@@ -90,7 +90,7 @@ public class FactoryData {
             STEEL_WORKS_RED,
             new Goods[]{BRICKS, COAL},
             Producers.STEEL_WORKS_RED.getProduces(),
-            1,
+            3,
             2
         ));
 
@@ -98,7 +98,7 @@ public class FactoryData {
             SAILMAKERS_RED,
             new Goods[]{PLANKS, WOOL},
             Producers.SAILMAKERS_RED.getProduces(),
-            1,
+            3,
             2
         ));
         

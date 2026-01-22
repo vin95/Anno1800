@@ -270,10 +270,10 @@ public sealed interface ObjectiveCard {
     }
     
     /**
-     * Create a shuffled deck of all objective cards.
+     * Create an unshuffled deck of all objective cards (for testing).
      */
-    static List<ObjectiveCard> createShuffledDeck() {
-        List<ObjectiveCard> deck = new ArrayList<>(List.of(
+    static List<ObjectiveCard> createDeck() {
+        return new ArrayList<>(List.of(
             new MostInvestors(),
             new MostEngineers(),
             new NewWorldExplorer(),
@@ -281,6 +281,13 @@ public sealed interface ObjectiveCard {
             new ExplorerTrader()
             // More cards can be added here in the future
         ));
+    }
+    
+    /**
+     * Create a shuffled deck of all objective cards.
+     */
+    static List<ObjectiveCard> createShuffledDeck() {
+        List<ObjectiveCard> deck = createDeck();
         Collections.shuffle(deck);
         return deck;
     }

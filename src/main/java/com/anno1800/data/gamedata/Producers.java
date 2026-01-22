@@ -19,7 +19,7 @@ public enum Producers {
     // Red Materials - Artisan Goods (Start)
     COAL_MINE_RED("Coal Mine Red", COAL),
     BRICK_FACTORY_RED("Brick Factory Red", BRICKS),
-    WAREHOUSE_RED("Warehouse Red", PLANKS),
+    WAREHOUSE_RED("Warehouse Red", GOODS),
     STEEL_WORKS_RED("Steel Works Red", STEELBARS),
     SAILMAKERS_RED("Sailmakers Red", SAILS),
     
@@ -30,7 +30,7 @@ public enum Producers {
     BRICK_FACTORY_BLUE("Brick Factory Blue", BRICKS),
     BREWERY_BLUE("Brewery", BEER),
     BAKERY_BLUE("Bakery", BREAD),
-    WAREHOUSE_BLUE("Warehouse Blue", PLANKS),
+    WAREHOUSE_BLUE("Warehouse Blue", GOODS),
     STEEL_WORKS_BLUE("Steel Works Blue", STEELBARS),
     SAILMAKERS_BLUE("Sailmakers Blue", SAILS),
     DISTILLERY_BLUE("Distillery", SNAPS),

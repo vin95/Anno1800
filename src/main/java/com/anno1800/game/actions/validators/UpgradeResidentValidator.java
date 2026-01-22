@@ -55,7 +55,7 @@ public class UpgradeResidentValidator {
             
             // PLANNING PHASE: Check if player can obtain required goods for this upgrade
             ResidentCosts.Cost cost = ResidentCosts.getUpgradeCost(targetLevel);
-            if (!playerBoard.canObtainGoods(cost.goods())) {
+            if (!playerBoard.canObtainGoods(cost.goods(), game)) {
                 playerBoard.clearStoredGoods();
                 return false;
             }

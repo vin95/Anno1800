@@ -28,17 +28,25 @@ public class Game {
     private int endPhaseRoundsPlayed = 0; // Counts rounds played AFTER end phase triggered
     
     // Game configuration
-    private static final int MAX_ROUNDS = 10; // Default: 10 rounds per game
+    private final int maxRounds; // Maximum rounds per game
+    private final boolean testMode; // If true, no shuffling and deterministic start player
     private static final int ACTIONS_PER_TURN = 1; // How many actions each player can take per turn
     
     public Game(int numPlayers) {
-        this.board = Board.initializeBoard(numPlayers);
+        this(numPlayers, false, 10);
+    }
+    
+    public Game(int numPlayers, boolean testMode, int maxRounds) {
+        this.testMode = testMode;
+        this.maxRounds = maxRounds;
+        this.board = Board.initializeBoard(numPlayers, testMode);
         this.players = Player.initializePlayers(numPlayers, this.board);
         this.agents = new Agent[numPlayers]; // Will be set via setAgent()
         
         // Initialize game state
         this.currentRound = 1;
-        this.startPlayer = (int) (Math.random() * numPlayers);
+        // In test mode, always use player 0 as start player for deterministic behavior
+        this.startPlayer = testMode ? 0 : (int) (Math.random() * numPlayers);
         for (int i = 0; i < players.length; i++) {
             int position = ((i - startPlayer + numPlayers) % numPlayers) + 1;
             players[i].setPosition(position);
@@ -136,7 +144,7 @@ public class Game {
     
     /**
      * Check if the game has ended.
-     * Game ends after MAX_ROUNDS OR when end phase was triggered and 1 additional round was played.
+     * Game ends after maxRounds OR when end phase was triggered and 1 additional round was played.
      * 
      * End phase logic:
      * - When triggered in round N: finish round N, play round N+1, then game over
@@ -147,7 +155,7 @@ public class Game {
      */
     public boolean isGameOver() {
         // Normal end: exceeded max rounds
-        if (currentRound > MAX_ROUNDS) {
+        if (currentRound > maxRounds) {
             return true;
         }
         
@@ -169,7 +177,10 @@ public class Game {
     public void start() {
         System.out.println("=== Game Start ===");
         System.out.println("Players: " + players.length);
-        System.out.println("Max Rounds: " + MAX_ROUNDS);
+        System.out.println("Max Rounds: " + maxRounds);
+        if (testMode) {
+            System.out.println("TEST MODE: No shuffling, deterministic start player");
+        }
         System.out.println("Starting Player: Player " + (startPlayer + 1));
         System.out.println();
         
@@ -275,5 +286,13 @@ public class Game {
     
     public Player[] getPlayers() {
         return players;
+    }
+    
+    public boolean isTestMode() {
+        return testMode;
+    }
+    
+    public int getMaxRounds() {
+        return maxRounds;
     }
 }

@@ -16,7 +16,7 @@ public class ShipCosts {
      */
     public static Goods[] getShipyardCost(int level) {
         return switch (level) {
-            case 1 -> new Goods[]{PLANKS, BRICKS};
+            case 1 -> new Goods[]{}; // Level 1 shipyard has no build cost
             case 2 -> new Goods[]{PLANKS, BRICKS, STEELBARS};
             case 3 -> new Goods[]{PLANKS, BRICKS, STEELBARS, WINDOWS};
             default -> throw new IllegalArgumentException("Invalid shipyard level: " + level + ". Must be 1-3.");

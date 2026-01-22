@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Collections;
 import java.util.ArrayList;
 import java.util.ArrayDeque;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Game board containing all card stacks
@@ -37,6 +39,8 @@ public class Board {
     // Factory stacks (35 stacks, excluding StartFactories)
 
     private final List<Deque<Factory>> factoryStacks;
+    // Mapping from Producers enum to factory stack index
+    private final Map<Producers, Integer> factoryStackIndex;
     
     // 3 Resident card stacks
     private final Deque<ResidentCard> residentStack1;
@@ -146,6 +150,23 @@ public class Board {
         this.residents_artisans = residents_artisans;
         this.residents_engineers = residents_engineers;
         this.residents_investors = residents_investors;
+        
+        // Build index mapping for factory stacks
+        this.factoryStackIndex = new HashMap<>();
+        int stackIdx = 0;
+        for (Producers producer : Producers.values()) {
+            if (isStartFactory(producer)) {
+                continue; // Skip StartFactories
+            }
+            try {
+                com.anno1800.data.gamedata.FactoryData.getFactory(producer);
+                // It's a Factory, add to index
+                factoryStackIndex.put(producer, stackIdx);
+                stackIdx++;
+            } catch (IllegalArgumentException e) {
+                // Not a Factory (probably a Plantation), skip
+            }
+        }
     }
 
     // Getter methods
@@ -158,44 +179,59 @@ public class Board {
      */
     @SuppressWarnings("unchecked")
     public static Board initializeBoard(int numPlayers) {
+        return initializeBoard(numPlayers, false);
+    }
+    
+    /**
+     * Initializes the game board with all card stacks
+     * @param numPlayers Number of players
+     * @param testMode If true, stacks are not shuffled for deterministic testing
+     */
+    @SuppressWarnings("unchecked")
+    public static Board initializeBoard(int numPlayers, boolean testMode) {
         // 35 Factory stacks (excluding StartFactories)
         List<Deque<Factory>> factoryStacks = createFactoryStacks(numPlayers);
 
-        // Resident card stacks (levels 2, 5, 7) - shuffled for randomness
-        Deque<ResidentCard> residentStack1 = shuffleStack(getCardsForLevel(2));
-        Deque<ResidentCard> residentStack2 = shuffleStack(getCardsForLevel(5));
-        Deque<ResidentCard> residentStack3 = shuffleStack(getCardsForLevel(7));
+        // Resident card stacks (levels 2, 5, 7) - shuffled for randomness (unless test mode)
+        Deque<ResidentCard> residentStack1 = testMode ? getCardsForLevel(2) : shuffleStack(getCardsForLevel(2));
+        Deque<ResidentCard> residentStack2 = testMode ? getCardsForLevel(5) : shuffleStack(getCardsForLevel(5));
+        Deque<ResidentCard> residentStack3 = testMode ? getCardsForLevel(7) : shuffleStack(getCardsForLevel(7));
 
-        // Expedition card stack - shuffled for randomness
-        Deque<ExpeditionCard> expeditionStack = shuffleStack(createExpeditionCards());
+        // Expedition card stack - shuffled for randomness (unless test mode)
+        Deque<ExpeditionCard> expeditionStack = testMode ? createExpeditionCards() : shuffleStack(createExpeditionCards());
 
-        // Objective card deck - shuffled, draw 5 cards at start
-        Deque<ObjectiveCard> objectiveCardDeck = new ArrayDeque<>(ObjectiveCard.createShuffledDeck());
+        // Objective card deck - shuffled, draw 5 cards at start (unless test mode)
+        Deque<ObjectiveCard> objectiveCardDeck;
+        if (testMode) {
+            objectiveCardDeck = new ArrayDeque<>(ObjectiveCard.createDeck());
+        } else {
+            objectiveCardDeck = new ArrayDeque<>(ObjectiveCard.createShuffledDeck());
+        }
         List<ObjectiveCard> activeObjectiveCards = new ArrayList<>();
         for (int i = 0; i < 5 && !objectiveCardDeck.isEmpty(); i++) {
             activeObjectiveCards.add(objectiveCardDeck.pollFirst());
         }
 
-        // Shipyard stacks
-        Deque<Shipyard> shipyardLevel1 = createLevel1Shipyards(numPlayers);
-        Deque<Shipyard> shipyardLevel2 = createLevel2Shipyards(numPlayers);
-        Deque<Shipyard> shipyardLevel3 = createLevel3Shipyards(numPlayers);
+        // Shipyard stacks (fixed quantities on board)
+        Deque<Shipyard> shipyardLevel1 = createLevel1Shipyards(4);
+        Deque<Shipyard> shipyardLevel2 = createLevel2Shipyards(6);
+        Deque<Shipyard> shipyardLevel3 = createLevel3Shipyards(4);
 
-        // Trade ship stacks
-        Deque<TradeShip> tradeShipLevel1 = (Deque<TradeShip>) createShips(ShipType.TradeShip, 1, numPlayers);
-        Deque<TradeShip> tradeShipLevel2 = (Deque<TradeShip>) createShips(ShipType.TradeShip, 2, numPlayers);
-        Deque<TradeShip> tradeShipLevel3 = (Deque<TradeShip>) createShips(ShipType.TradeShip, 3, numPlayers);
+        // Trade ship stacks (fixed quantities on board)
+        Deque<TradeShip> tradeShipLevel1 = (Deque<TradeShip>) createShips(ShipType.TradeShip, 1, 6);
+        Deque<TradeShip> tradeShipLevel2 = (Deque<TradeShip>) createShips(ShipType.TradeShip, 2, 6);
+        Deque<TradeShip> tradeShipLevel3 = (Deque<TradeShip>) createShips(ShipType.TradeShip, 3, 6);
 
-        // Explorer ship stacks
-        Deque<ExplorerShip> explorerShipLevel1 = (Deque<ExplorerShip>) createShips(ShipType.ExplorerShip, 1, numPlayers);
-        Deque<ExplorerShip> explorerShipLevel2 = (Deque<ExplorerShip>) createShips(ShipType.ExplorerShip, 2, numPlayers);
-        Deque<ExplorerShip> explorerShipLevel3 = (Deque<ExplorerShip>) createShips(ShipType.ExplorerShip, 3, numPlayers);
+        // Explorer ship stacks (fixed quantities on board)
+        Deque<ExplorerShip> explorerShipLevel1 = (Deque<ExplorerShip>) createShips(ShipType.ExplorerShip, 1, 6);
+        Deque<ExplorerShip> explorerShipLevel2 = (Deque<ExplorerShip>) createShips(ShipType.ExplorerShip, 2, 6);
+        Deque<ExplorerShip> explorerShipLevel3 = (Deque<ExplorerShip>) createShips(ShipType.ExplorerShip, 3, 6);
 
-        // Old World Islands - shuffled for randomness
-        Deque<OldWorldIsland> oldWorldIslands = shuffleStack(createOldWorldIslands());
+        // Old World Islands - shuffled for randomness (unless test mode)
+        Deque<OldWorldIsland> oldWorldIslands = testMode ? createOldWorldIslands() : shuffleStack(createOldWorldIslands());
 
-        // New World Islands - shuffled for randomness
-        Deque<NewWorldIsland> newWorldIslands = shuffleStack(createNewWorldIslands());
+        // New World Islands - shuffled for randomness (unless test mode)
+        Deque<NewWorldIsland> newWorldIslands = testMode ? createNewWorldIslands() : shuffleStack(createNewWorldIslands());
 
         // Resident lists
         List<Farmer> residents_farmers = createFarmers();
@@ -637,8 +673,8 @@ public class Board {
      * @return true if at least one factory of this type is available
      */
     public boolean hasFactory(Producers type) {
-        int stackIndex = type.ordinal();
-        if (stackIndex < 0 || stackIndex >= factoryStacks.size()) {
+        Integer stackIndex = factoryStackIndex.get(type);
+        if (stackIndex == null || stackIndex < 0 || stackIndex >= factoryStacks.size()) {
             return false;
         }
         Deque<Factory> stack = factoryStacks.get(stackIndex);
@@ -667,7 +703,11 @@ public class Board {
             throw new IllegalStateException("No factory of type " + type + " available on the board");
         }
         
-        int stackIndex = type.ordinal();
+        Integer stackIndex = factoryStackIndex.get(type);
+        if (stackIndex == null) {
+            throw new IllegalStateException("No stack index found for factory type " + type);
+        }
+        
         Deque<Factory> stack = factoryStacks.get(stackIndex);
         Factory factory = stack.poll();
         

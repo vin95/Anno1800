@@ -28,7 +28,7 @@ public class SettleResidentValidator {
         
         // PLANNING PHASE: Check if player can obtain required goods
         ResidentCosts.Cost cost = ResidentCosts.getSettlementCost(action.level());
-        boolean canObtain = board.canObtainGoods(cost.goods());
+        boolean canObtain = board.canObtainGoods(cost.goods(), game);
         
         // Clear storedGoods after validation (rollback)
         board.clearStoredGoods();

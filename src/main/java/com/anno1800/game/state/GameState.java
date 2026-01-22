@@ -158,6 +158,14 @@ public record GameState(
         int tradeShipCount,
         int explorerShipCount,
         
+        // Ship levels
+        int tradeShipLevel1,
+        int tradeShipLevel2,
+        int tradeShipLevel3,
+        int explorerShipLevel1,
+        int explorerShipLevel2,
+        int explorerShipLevel3,
+        
         // Resources
         int gold,
         int availableTradeChips,
@@ -193,16 +201,28 @@ public record GameState(
                 ))
                 .toList();
             
+            // Count trade ships by level
+            int tradeL1 = (int) board.getTradeShips().stream().filter(s -> s.getLevel() == 1).count();
+            int tradeL2 = (int) board.getTradeShips().stream().filter(s -> s.getLevel() == 2).count();
+            int tradeL3 = (int) board.getTradeShips().stream().filter(s -> s.getLevel() == 3).count();
+            
+            // Count explorer ships by level
+            int explorerL1 = (int) board.getExplorerShips().stream().filter(s -> s.getLevel() == 1).count();
+            int explorerL2 = (int) board.getExplorerShips().stream().filter(s -> s.getLevel() == 2).count();
+            int explorerL3 = (int) board.getExplorerShips().stream().filter(s -> s.getLevel() == 3).count();
+            
             return new PlayerState(
                 player.getName(),
                 player.getPosition(),
                 board.getFreeLandTiles(),
                 board.getFreeCoastTiles(),
                 board.getFreeSeaTiles(),
-                board.getFactories().length,
+                board.getAllActiveFactories().size(),
                 board.getShipyards().size(),
                 board.getTradeShips().size(),
                 board.getExplorerShips().size(),
+                tradeL1, tradeL2, tradeL3,
+                explorerL1, explorerL2, explorerL3,
                 board.getGold(),
                 board.getAvailableTradeChips(),
                 board.getAvailableExplorerChips(),

@@ -37,8 +37,8 @@ public class ActionGenerator {
         
         // Factory actions
         actions.addAll(generateBuildFactoryActions(player, game));
-        actions.addAll(generateDemolishFactoryActions(player, game));
-        actions.addAll(generateOverbuildDefaultFactoryActions(player, game));
+        // actions.addAll(generateDemolishFactoryActions(player, game)); // REMOVED: Called internally
+        // actions.addAll(generateOverbuildDefaultFactoryActions(player, game)); // REMOVED: Called internally during BuildFactory
         
         // Building actions
         actions.addAll(generateBuildShipyardActions(player, game));
@@ -50,15 +50,15 @@ public class ActionGenerator {
         actions.addAll(generateSwapResidentCardsActions(player, game));
         actions.addAll(generateFulfillNeedsActions(player, game));
         
-        // Worker actions
-        actions.addAll(generateAssignWorkerActions(player, game));
-        actions.addAll(generateExhaustWorkerActions(player, game));
-        actions.addAll(generateDoOvertimeActions(player, game));
+        // Worker actions (all internal - called during production)
+        // actions.addAll(generateAssignWorkerActions(player, game)); // REMOVED: Called internally
+        // actions.addAll(generateExhaustWorkerActions(player, game)); // REMOVED: Called internally
+        // actions.addAll(generateDoOvertimeActions(player, game)); // REMOVED: Called internally
         
-        // Production actions
-        actions.addAll(generateProduceGoodsActions(player, game));
-        actions.addAll(generateTradeGoodsActions(player, game));
-        actions.addAll(generateImportGoodActions(player, game));
+        // Production actions (all internal - called during other actions)
+        // actions.addAll(generateProduceGoodsActions(player, game)); // REMOVED: Called internally
+        // actions.addAll(generateTradeGoodsActions(player, game)); // REMOVED: Called internally
+        // actions.addAll(generateImportGoodActions(player, game)); // REMOVED: Called internally
         
         // Exploration actions
         actions.addAll(generateDiscoverOldWorldIslandActions(player, game));
@@ -67,7 +67,7 @@ public class ActionGenerator {
         
         // Special actions
         actions.addAll(generateCarnevalActions(player, game));
-        actions.addAll(generateDrawResidentCardActions(player, game));
+        // Note: DrawResidentCard is not a player action - it's called internally by SettleResident and SwapResidentCards
         actions.addAll(generateActivateRewardActions(player, game));
         
         return actions;
@@ -86,7 +86,9 @@ public class ActionGenerator {
             try {
                 var producer = FactoryData.getProducer(producerType);
                 
-                if (producer instanceof Factory factory) {
+                // Only allow building of regular Factories, not StartFactories
+                // StartFactories are default factories and cannot be built - only overbuilt/demolished
+                if (producer instanceof Factory factory && !(producer instanceof com.anno1800.game.tiles.StartFactory)) {
                     Action.BuildFactory buildAction = new Action.BuildFactory(factory);
                     
                     if (ActionValidator.canExecute(buildAction, player, game)) {
@@ -109,8 +111,12 @@ public class ActionGenerator {
         List<Action> demolishActions = new ArrayList<>();
         PlayerBoard board = player.getPlayerBoard();
         
-        // Check all factories in player's factory array
-        for (Factory factory : board.getFactories()) {
+        // Check only BUILT factories (only iterate up to numFactories)
+        Factory[] allFactories = board.getFactories();
+        int numFactories = board.getNumFactories();
+        
+        for (int i = 0; i < numFactories; i++) {
+            Factory factory = allFactories[i];
             if (factory != null) {
                 Action.DemolishFactory demolishAction = new Action.DemolishFactory(factory);
                 
@@ -126,6 +132,7 @@ public class ActionGenerator {
     /**
      * Generate all possible OverbuildDefaultFactory actions.
      * For each default factory, try to overbuild with each available factory type.
+     * Only regular Factories can be used to overbuild - not other StartFactories.
      */
     private List<Action> generateOverbuildDefaultFactoryActions(Player player, Game game) {
         List<Action> overbuildActions = new ArrayList<>();
@@ -140,7 +147,8 @@ public class ActionGenerator {
                 try {
                     var producer = FactoryData.getProducer(producerType);
                     
-                    if (producer instanceof Factory newFactory) {
+                    // Only allow overbuilding with regular Factories, not StartFactories
+                    if (producer instanceof Factory newFactory && !(producer instanceof com.anno1800.game.tiles.StartFactory)) {
                         Action.OverbuildDefaultFactory overbuildAction = 
                             new Action.OverbuildDefaultFactory(defaultFactory, newFactory);
                         
@@ -230,11 +238,11 @@ public class ActionGenerator {
         PlayerBoard board = player.getPlayerBoard();
         List<Resident> residents = board.getResidents();
         
-        // Get all residents that could potentially be upgraded (level 1-4, ON_BOARD status)
+        // Get all residents that could potentially be upgraded (level 1-4, FIT status)
         List<Resident> upgradableResidents = new ArrayList<>();
         for (Resident resident : residents) {
             if (resident.getPopulationLevel() < 5 && 
-                resident.getStatus() == ResidentStatus.ON_BOARD) {
+                resident.getStatus() == ResidentStatus.FIT) {
                 upgradableResidents.add(resident);
             }
         }
@@ -348,8 +356,12 @@ public class ActionGenerator {
             }
         }
         
-        // For each factory with empty slots
-        for (Factory factory : board.getFactories()) {
+        // For each BUILT factory with empty slots (only iterate up to numFactories)
+        Factory[] allFactories = board.getFactories();
+        int numFactories = board.getNumFactories();
+        
+        for (int i = 0; i < numFactories; i++) {
+            Factory factory = allFactories[i];
             if (factory == null) continue;
             
             // Check slot 1
@@ -432,7 +444,12 @@ public class ActionGenerator {
         List<Action> produceActions = new ArrayList<>();
         PlayerBoard board = player.getPlayerBoard();
         
-        for (Factory factory : board.getFactories()) {
+        // Only check BUILT factories (only iterate up to numFactories)
+        Factory[] allFactories = board.getFactories();
+        int numFactories = board.getNumFactories();
+        
+        for (int i = 0; i < numFactories; i++) {
+            Factory factory = allFactories[i];
             if (factory == null) continue;
             
             // Check if factory has at least one worker
