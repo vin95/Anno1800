@@ -58,7 +58,11 @@ public class ActivateReward {
                 UpgradeResident.upgradeResident(player, game, action);
             }
             case Reward.ExtraAction r -> {
-                player.getPlayerBoard().setExtraActionThisTurn();
+                // Mark that the player has an extra action available this turn
+                // The extra action flag is now handled through the UseExtraAction ObjectiveCard
+                // For regular ExtraAction rewards from ResidentCards, we simply allow them
+                player.getPlayerBoard().markExtraActionUsed(); // Prevents stacking multiple extra actions
+                System.out.println(player.getName() + " earned an Extra Action from reward!");
             }
             case Reward.ExpeditionCards r -> {
                 player.getPlayerBoard().earnExpeditionCard(2, game.getBoard());

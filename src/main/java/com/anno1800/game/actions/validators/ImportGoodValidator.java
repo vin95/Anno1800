@@ -19,7 +19,9 @@ public class ImportGoodValidator {
         }
         
         int availableTradeChips = player.getPlayerBoard().getAvailableTradeChips();
-        int requiredTradeChips = 2; // Import costs 2 trade chips (using more than 1)
+        // Rule: "Um eine Ressource von einer eigenen Neuen-Welt-Insel nutzen zu können, 
+        //        muss ein Handels-Plättchen erschöpft werden"
+        int requiredTradeChips = 1; // Import costs 1 trade chip
         
         // STANDARD LOGIC: Check if player has enough trade chips
         if (availableTradeChips >= requiredTradeChips) {
@@ -32,7 +34,7 @@ public class ImportGoodValidator {
             if (explorerTraderActive) {
                 // ALTERNATIVE: Use explorer chips instead (2 explorer = 1 trade)
                 int availableExplorerChips = player.getPlayerBoard().getAvailableExplorerChips();
-                int requiredExplorerChips = requiredTradeChips * 2; // 2 trade chips = 4 explorer chips
+                int requiredExplorerChips = requiredTradeChips * 2; // 1 trade chip = 2 explorer chips
                 if (availableExplorerChips < requiredExplorerChips) {
                     return false; // Not enough explorer chips either
                 }

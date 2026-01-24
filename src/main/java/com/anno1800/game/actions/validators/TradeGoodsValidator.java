@@ -2,10 +2,13 @@ package com.anno1800.game.actions.validators;
 
 import com.anno1800.game.actions.Action;
 import com.anno1800.game.cards.ObjectiveCard;
+import com.anno1800.data.gamedata.Goods;
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.tiles.Factory;
 import com.anno1800.game.tiles.Producer;
+
+import java.util.Set;
 
 /**
  * Validates production and trade-related actions.
@@ -13,15 +16,44 @@ import com.anno1800.game.tiles.Producer;
 public class TradeGoodsValidator {
 
     /**
+     * New World resources that cannot be traded from other players.
+     * Rule: "Neue-Welt-Ressourcen von Mitspielern können nicht erhandelt werden."
+     */
+    private static final Set<Goods> NEW_WORLD_RESOURCES = Set.of(
+        Goods.CACAO,
+        Goods.SUGARCANE,
+        Goods.TOBACCO,
+        Goods.COFFEE_BEANS,
+        Goods.COTTON,
+        Goods.RUBBER
+    );
+
+    /**
      * Validates TradeGoods action.
      * Requirements:
+     * - The good must NOT be a New World resource 
+     *   (Rule: "Neue-Welt-Ressourcen von Mitspielern können nicht erhandelt werden.")
+     * - The good must not have been traded already this turn
+     *   (Rule: "Pro Spielzug kann dieselbe Ressource nur einmal erhandelt werden.")
      * - At least one different player (Mitspieler) must have a factory that
-     * produces the requested good
+     *   produces the requested good
      * - The trading player must have enough availableTradeChips to cover the trade
-     * costs
+     *   costs
      * - The trade costs are determined by the factory's tradeCosts value
      */
     public static boolean canTradeGoods(Action.TradeGoods action, Player player, Game game) {
+        // Check if this is a New World resource (cannot be traded)
+        // Rule: "Neue-Welt-Ressourcen von Mitspielern können nicht erhandelt werden."
+        if (NEW_WORLD_RESOURCES.contains(action.good())) {
+            return false;
+        }
+        
+        // Check if this good has already been traded this turn
+        // Rule: "Pro Spielzug kann dieselbe Ressource nur einmal erhandelt werden."
+        if (player.getPlayerBoard().hasAlreadyTradedThisTurn(action.good())) {
+            return false;
+        }
+
         // Check all other players to find the one with the cheapest factory that produces the
         // requested good
         Factory cheapestFactory = null;

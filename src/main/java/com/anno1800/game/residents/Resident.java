@@ -32,4 +32,37 @@ public abstract class Resident {
     public ResidentCosts.Cost getRecoverCost() {
         return ResidentCosts.getSettlementCost(populationLevel);
     }
+    
+    /**
+     * Checks if this resident is exhausted.
+     * 
+     * @return true if the resident is in EXHAUSTED status
+     */
+    public boolean isExhausted() {
+        return status == EXHAUSTED;
+    }
+    
+    /**
+     * Checks if this resident is fit (can be used for actions).
+     * 
+     * @return true if the resident is in FIT status
+     */
+    public boolean isFit() {
+        return status == FIT;
+    }
+    
+    /**
+     * Exhausts this resident (sets status to EXHAUSTED).
+     * Used when a resident performs work or is used for ObjectiveCard actions.
+     */
+    public void exhaust() {
+        this.status = EXHAUSTED;
+    }
+    
+    /**
+     * Recovers this resident from exhausted state (sets status to FIT).
+     */
+    public void recover() {
+        this.status = FIT;
+    }
 }

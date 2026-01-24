@@ -28,6 +28,10 @@ import static com.anno1800.game.actions.actions.BuildShips.*;
 import static com.anno1800.game.actions.actions.BuildShipyard.*;
 import static com.anno1800.game.actions.actions.BuildFactory.*;
 import static com.anno1800.game.actions.actions.ChooseGoods.*;
+import static com.anno1800.game.actions.actions.ViewResidentCards.*;
+import static com.anno1800.game.actions.actions.UseExtraAction.*;
+import static com.anno1800.game.actions.actions.DiscardResidentCardAction.*;
+import static com.anno1800.game.actions.actions.InvestorGoldAction.*;
 
 /**
  * Handles the execution of player actions.
@@ -125,6 +129,24 @@ public class ActionHandler {
                 new ActionResult.GoodsResult(importGood(player, good));
             case Action.ChooseGoods(Reward.FreeGoodsChoice reward, Goods chosenGood) ->
                 new ActionResult.RewardResult(chooseGoods(player, reward, chosenGood));
+            case Action.ViewResidentCards viewAction -> {
+                viewResidentCards(player, game, viewAction);
+                yield new ActionResult.NoResult();
+            }
+            
+            // Objective Card Free Actions
+            case Action.UseExtraAction extraAction -> {
+                useExtraAction(player, game, extraAction);
+                yield new ActionResult.NoResult();
+            }
+            case Action.DiscardResidentCardAction discardAction -> {
+                discardResidentCard(player, game, discardAction);
+                yield new ActionResult.NoResult();
+            }
+            case Action.InvestorGoldAction investorAction -> {
+                investorGoldAction(player, game, investorAction);
+                yield new ActionResult.NoResult();
+            }
             default -> throw new IllegalArgumentException("Unknown action type: " + action);
         };
     }

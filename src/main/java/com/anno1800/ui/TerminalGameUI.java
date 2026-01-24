@@ -132,10 +132,20 @@ public class TerminalGameUI {
         
         if (selectedAction != null) {
             executeAndSaveAction(selectedAction);
+            
+            // Check if action is a free action that doesn't consume the turn
+            if (!(selectedAction instanceof Action.ViewResidentCards)) {
+                // Move to next player only if it's not a free action
+                game.nextPlayer();
+            } else {
+                // For free actions, allow the player to take another action
+                System.out.println("\n[Free action - you can take another action]");
+                playTurn(); // Recursively call playTurn to allow another action
+            }
+        } else {
+            // If no action was selected, move to next player
+            game.nextPlayer();
         }
-        
-        // Move to next player
-        game.nextPlayer();
     }
     
     /**
@@ -153,12 +163,14 @@ public class TerminalGameUI {
         List<Action> upgradeResidentActions = new ArrayList<>();
         List<Action> settleResidentActions = new ArrayList<>();
         List<Action> overbuildDefaultFactoryActions = new ArrayList<>();
+        List<Action> fulfillNeedsActions = new ArrayList<>();
         boolean hasSwapResidentCards = false;
         boolean hasBuildFactory = false;
         boolean hasBuildShipyard = false;
         boolean hasBuildShips = false;
         boolean hasUpgradeResident = false;
         boolean hasSettleResident = false;
+        boolean hasFulfillNeeds = false;
         
         for (Action action : availableActions) {
             if (action instanceof Action.SwapResidentCards) {
@@ -200,6 +212,12 @@ public class TerminalGameUI {
             } else if (action instanceof Action.OverbuildDefaultFactory) {
                 overbuildDefaultFactoryActions.add(action);
                 // Don't display - will be handled within BuildFactory flow
+            } else if (action instanceof Action.FulfillNeeds) {
+                fulfillNeedsActions.add(action);
+                if (!hasFulfillNeeds) {
+                    displayActions.add(action); // Add only one as placeholder
+                    hasFulfillNeeds = true;
+                }
             } else {
                 displayActions.add(action);
             }
@@ -223,6 +241,8 @@ public class TerminalGameUI {
                     System.out.printf("[%d] Upgrade Residents (Interactive Selection)\n", i + 1);
                 } else if (action instanceof Action.SettleResident) {
                     System.out.printf("[%d] Settle Resident (Interactive Selection)\n", i + 1);
+                } else if (action instanceof Action.FulfillNeeds) {
+                    System.out.printf("[%d] Fulfill Needs (Interactive Selection)\n", i + 1);
                 } else {
                     System.out.printf("[%d] %s\n", i + 1, formatAction(action));
                 }
@@ -276,6 +296,11 @@ public class TerminalGameUI {
                     // Special handling for SettleResident
                     if (selectedAction instanceof Action.SettleResident) {
                         return selectSettleResident(settleResidentActions);
+                    }
+                    
+                    // Special handling for FulfillNeeds
+                    if (selectedAction instanceof Action.FulfillNeeds) {
+                        return selectFulfillNeeds(fulfillNeedsActions);
                     }
                     
                     return selectedAction;
@@ -982,6 +1007,124 @@ public class TerminalGameUI {
     }
     
     /**
+     * Interactive selection of ResidentCard to fulfill.
+     * Shows all resident cards with indication if they can be fulfilled.
+     */
+    private Action selectFulfillNeeds(List<Action> fulfillActions) {
+        Player currentPlayer = game.getCurrentPlayer();
+        PlayerBoard board = currentPlayer.getPlayerBoard();
+        List<ResidentCard> availableCards = board.getResidentCards();
+        
+        if (availableCards.isEmpty()) {
+            System.out.println("No resident cards available to fulfill!");
+            return null;
+        }
+        
+        System.out.println("\n" + "=".repeat(80));
+        System.out.println("FULFILL NEEDS - Interactive Selection");
+        System.out.println("=".repeat(80));
+        System.out.println("Type 'cancel' to return to action selection.");
+        System.out.println();
+        
+        // Map each card to its possible fulfill actions
+        java.util.Map<ResidentCard, java.util.List<Action.FulfillNeeds>> cardToActions = new java.util.LinkedHashMap<>();
+        for (Action action : fulfillActions) {
+            if (action instanceof Action.FulfillNeeds fn) {
+                cardToActions.computeIfAbsent(fn.residentCard(), k -> new java.util.ArrayList<>()).add(fn);
+            }
+        }
+        
+        System.out.println("Available Resident Cards:");
+        System.out.println("-".repeat(80));
+        
+        java.util.List<ResidentCard> cardsList = new java.util.ArrayList<>(cardToActions.keySet());
+        for (int i = 0; i < cardsList.size(); i++) {
+            ResidentCard card = cardsList.get(i);
+            boolean canFulfill = cardToActions.containsKey(card) && !cardToActions.get(card).isEmpty();
+            String status = canFulfill ? "(can play card)" : "(cannot play card)";
+            
+            System.out.printf("[%d] Level %d - Needs: %s → Reward: %s %s\n", 
+                i + 1, 
+                card.populationLevel(),
+                formatNeeds(card.needs()),
+                card.reward(),
+                status);
+        }
+        
+        System.out.println();
+        
+        while (true) {
+            System.out.print("Select card to fulfill: ");
+            String input = scanner.nextLine().trim().toLowerCase();
+            
+            if (input.equals("cancel")) {
+                return null;
+            }
+            
+            try {
+                int choice = Integer.parseInt(input);
+                if (choice >= 1 && choice <= cardsList.size()) {
+                    ResidentCard selectedCard = cardsList.get(choice - 1);
+                    java.util.List<Action.FulfillNeeds> actionsForCard = cardToActions.get(selectedCard);
+                    
+                    if (actionsForCard == null || actionsForCard.isEmpty()) {
+                        System.out.println("This card cannot be fulfilled (missing goods)!");
+                        continue;
+                    }
+                    
+                    // If only one way to fulfill, return it
+                    if (actionsForCard.size() == 1) {
+                        return actionsForCard.get(0);
+                    }
+                    
+                    // Multiple ways to fulfill - let user choose
+                    return selectFulfillNeedsOption(actionsForCard, selectedCard);
+                } else {
+                    System.out.println("Invalid choice!");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input! Enter a number or 'cancel'.");
+            }
+        }
+    }
+    
+    /**
+     * Select from multiple ways to fulfill a card's needs.
+     */
+    private Action selectFulfillNeedsOption(java.util.List<Action.FulfillNeeds> options, ResidentCard card) {
+        System.out.println("\n" + "=".repeat(80));
+        System.out.println("Multiple ways to fulfill this card:");
+        System.out.println("-".repeat(80));
+        
+        for (int i = 0; i < options.size(); i++) {
+            Action.FulfillNeeds action = options.get(i);
+            System.out.printf("[%d] Using goods: %s\n", i + 1, formatNeeds(action.goods()));
+        }
+        
+        System.out.println();
+        
+        while (true) {
+            System.out.print("Select option (or 'cancel'): ");
+            String input = scanner.nextLine().trim().toLowerCase();
+            
+            if (input.equals("cancel")) {
+                return null;
+            }
+            
+            try {
+                int choice = Integer.parseInt(input);
+                if (choice >= 1 && choice <= options.size()) {
+                    return options.get(choice - 1);
+                } else {
+                    System.out.println("Invalid choice!");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input!");
+            }
+        }
+    }
+    
+    /**
      * Get the name of a population level.
      */
     private String getLevelName(int level) {
@@ -1237,6 +1380,15 @@ public class TerminalGameUI {
                 String.format("Activate Reward: %s", ar.reward());
             case Action.ChooseGoods cg -> 
                 String.format("Choose Good: %s from %s", cg.chosenGood(), cg.reward());
+            case Action.ViewResidentCards vrc -> 
+                "View Resident Cards (FREE ACTION)";
+            case Action.UseExtraAction uea -> 
+                "Use Extra Action (3 Gold + 3 Explorer Chips) (FREE ACTION)";
+            case Action.DiscardResidentCardAction drca -> 
+                String.format("Discard Resident Card Level %d (2 Explorer Chips) (FREE ACTION)", 
+                    drca.card().populationLevel());
+            case Action.InvestorGoldAction iga -> 
+                "Exhaust Investor for 5 Gold (FREE ACTION)";
         };
     }
     

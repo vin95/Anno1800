@@ -31,6 +31,9 @@ public class UpgradeResidentValidator {
         }
         
         // Validate each resident and accumulate goods costs
+        // IMPORTANT: We must not clear storedGoods between residents!
+        // Each resident's planning must build on the previous ones to ensure
+        // we don't double-assign the same resources.
         for (Resident resident : residents) {
             // Check if resident belongs to player
             if (!playerBoard.getResidents().contains(resident)) {
@@ -54,14 +57,16 @@ public class UpgradeResidentValidator {
             }
             
             // PLANNING PHASE: Check if player can obtain required goods for this upgrade
+            // This accumulates in storedGoods - DO NOT clear between residents!
             ResidentCosts.Cost cost = ResidentCosts.getUpgradeCost(targetLevel);
             if (!playerBoard.canObtainGoods(cost.goods(), game)) {
                 playerBoard.clearStoredGoods();
                 return false;
             }
+            // Continue to next resident - storedGoods now contains accumulated planning
         }
         
-        // Clear storedGoods after validation (rollback)
+        // Clear storedGoods after validation (rollback all accumulated planning)
         playerBoard.clearStoredGoods();
         
         return true;

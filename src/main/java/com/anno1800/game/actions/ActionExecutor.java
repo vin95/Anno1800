@@ -47,6 +47,9 @@ public class ActionExecutor {
                 OverbuildDefaultFactory.overbuildDefaultFactory(player, game.getBoard(), 
                     overbuildDefaultFactory.defaultFactory(), overbuildDefaultFactory.newFactory());
             
+            case Action.ViewResidentCards viewResidentCards -> 
+                ViewResidentCards.viewResidentCards(player, game, viewResidentCards);
+            
             // Add other actions as needed
             default -> throw new UnsupportedOperationException("Action not implemented: " + action.getClass().getSimpleName());
         }

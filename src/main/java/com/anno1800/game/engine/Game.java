@@ -6,9 +6,12 @@ import com.anno1800.game.actions.ActionGenerator;
 import com.anno1800.game.actions.ActionHandler;
 import com.anno1800.game.actions.ActionResult;
 import com.anno1800.game.board.Board;
+import com.anno1800.game.cards.ObjectiveCard;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.state.GameState;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,6 +34,9 @@ public class Game {
     private final int maxRounds; // Maximum rounds per game
     private final boolean testMode; // If true, no shuffling and deterministic start player
     private static final int ACTIONS_PER_TURN = 1; // How many actions each player can take per turn
+    
+    // Active ObjectiveCards for this game (5 drawn at game start)
+    private List<ObjectiveCard> activeObjectiveCards = new ArrayList<>();
     
     public Game(int numPlayers) {
         this(numPlayers, false, 10);
@@ -56,8 +62,40 @@ public class Game {
         // Initialize player boards after positions are set
         inicializeGame();
         
+        // Draw 5 ObjectiveCards for the game
+        initializeObjectiveCards();
+        
         this.actionHandler = new ActionHandler(this);
         this.actionGenerator = new ActionGenerator();
+    }
+    
+    /**
+     * Initialize the 5 active ObjectiveCards for this game.
+     */
+    private void initializeObjectiveCards() {
+        List<ObjectiveCard> deck = testMode ? 
+            ObjectiveCard.createDeck() : 
+            ObjectiveCard.createShuffledDeck();
+        
+        // Draw 5 cards (or all if fewer than 5)
+        int cardsToDraw = Math.min(5, deck.size());
+        for (int i = 0; i < cardsToDraw; i++) {
+            activeObjectiveCards.add(deck.get(i));
+        }
+        
+        System.out.println("Active Objective Cards:");
+        for (ObjectiveCard card : activeObjectiveCards) {
+            System.out.println("  - " + card.getTitle() + ": " + card.getDescription());
+        }
+    }
+    
+    /**
+     * Get the list of active ObjectiveCards for this game.
+     * 
+     * @return Unmodifiable list of active ObjectiveCards
+     */
+    public List<ObjectiveCard> getActiveObjectiveCards() {
+        return Collections.unmodifiableList(activeObjectiveCards);
     }
     
     /**
@@ -254,6 +292,13 @@ public class Game {
             ActionResult result = executeAction(chosenAction);
             System.out.println("  Action executed. Result: " + result);
         }
+        
+        // Clear turn-specific state
+        // Rule: "Pro Spielzug kann dieselbe Ressource nur einmal erhandelt werden."
+        player.getPlayerBoard().clearTradedGoodsThisTurn();
+        
+        // Clear free action flags for ObjectiveCard actions
+        player.getPlayerBoard().clearFreeActionFlagsThisTurn();
     }
     
     /**

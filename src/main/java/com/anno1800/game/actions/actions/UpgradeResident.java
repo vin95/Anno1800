@@ -38,7 +38,7 @@ public class UpgradeResident {
         
         System.out.println("Upgrading " + residents.length + " resident(s)");
         
-        // Upgrade each resident
+        // PHASE 1: Validate and plan all upgrades (accumulate resource planning)
         for (Resident oldResident : residents) {
             int currentLevel = oldResident.getPopulationLevel();
             int targetLevel = currentLevel + 1;
@@ -56,15 +56,28 @@ public class UpgradeResident {
             ResidentCosts.Cost cost = ResidentCosts.getUpgradeCost(targetLevel);
             
             if (cost.goods() != null && cost.goods().length > 0) {
-                System.out.println("  Upgrading resident from level " + currentLevel + " to " + targetLevel);
+                System.out.println("  Planning upgrade for resident from level " + currentLevel + " to " + targetLevel);
                 System.out.println("    Requires: " + java.util.Arrays.toString(cost.goods()));
                 
-                // PLANNING PHASE: Determine how to obtain goods
+                // PLANNING PHASE: Determine how to obtain goods (accumulates in storedGoods)
                 if (!playerBoard.canObtainGoods(cost.goods())) {
                     throw new IllegalStateException("Cannot obtain required goods for upgrade");
                 }
+            }
+        }
+        
+        // PHASE 2: Execute all upgrades (consume planned resources and transform residents)
+        for (Resident oldResident : residents) {
+            int currentLevel = oldResident.getPopulationLevel();
+            int targetLevel = currentLevel + 1;
+            
+            // Get required goods
+            ResidentCosts.Cost cost = ResidentCosts.getUpgradeCost(targetLevel);
+            
+            if (cost.goods() != null && cost.goods().length > 0) {
+                System.out.println("  Executing upgrade for resident from level " + currentLevel + " to " + targetLevel);
                 
-                // EXECUTION PHASE: Actually obtain and consume goods
+                // EXECUTION PHASE: Actually obtain and consume goods from storedGoods
                 playerBoard.consumeGoods(cost.goods());
             }
             

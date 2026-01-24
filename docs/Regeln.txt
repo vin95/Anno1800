@@ -1,0 +1,976 @@
+Das Brettspiel von Martin Wallace
+Für 2-4 Spieler ab 12 Jahren
+Der Neuanfang auf der Insel ist beschwerlich, doch ihr habt es gewagt. Mit ein paar Bewohnern in eurer Stadt habt ihr die
+ersten Industrien aufgebaut und auch die ersten Schiffe liegen vor Anker. Alles scheint bereit dazu, eure Insel mit neuen Handelsrouten
+in der Alten und Neuen Welt zum Zentrum der Industrialisierung zu machen. Doch der Vorstoß in das neue Zeitalter will gut geplant
+sein: Ressourcen und Technologien sind begrenzt und die Konkurrenz schläft nicht. Eine wachsende Bevölkerung erweitert eure
+Möglichkeiten auf der Heimat-Insel und eine große Flotte ermöglicht es euch, auf Expedition zu gehen oder weitere Inseln zu erkunden.
+Aber es ist nicht leicht, die richtige Balance zwischen Fortschritt und zufriedener Bevölkerung zu finden. Steigert stetig euren Einfluss
+und gewinnt nicht nur die Gunst der Königin, sondern auch das Spiel für euch!
+SPIELMATERIAL
+4 Spielhilfen 1 Spielplan 4 Heimat-Inseln
+12 Alte-Welt-Inseln 8 Neue-Welt-Inseln 120 Bau-
+Plättchen
+1 Startspieler-Plättchen
+1 Feuerwerks-Plättchen
+130 Marine-Plättchen
+77 Handels-
+Plättchen (bronze)
+53 Erkundungs-
+Plättchen (silber)
+38 Gold-Plättchen
+26 Wert 1 12 Wert 5
+102 Bevölkerungs-Karten
+46 Bauer/Arbeiter
+32 Handwerker/Ingenieur/Investor
+24 Neue Welt
+22 Expeditions-Karten 20 Auftrags-Karten 125 Bevölkerungs-Steine
+25 Bauern
+(grün)
+40 Arbeiter
+(blau)
+25 Handwerker
+(rot)
+20 Ingenieure
+(lila)
+15 Investoren
+(türkis)
+z zLegt 5 Auftrags-Karten und das
+Feuerwerks-Plättchen neben die
+Bevölkerungs-Steine. Nehmt für die erste
+Partie die Auftrags-Karten mit den
+3 Rauten oberhalb ihres Namens:
+Alonso Graves, Universität, Edvard Goode,
+Isabel Sarmento, Zoo.
+SPIELAUFBAU
+2
+Platziert den Spielplan in der Tischmitte.
+Sortiert alle Bau-Plättchen und legt sie
+entsprechend ihrer Abbildungen auf den
+Spielplan. Dabei muss die Blaupausen-Seite
+mit den Kosten (lila Balken) sichtbar sein.
+Anzahl Bau-Plättchen:
+• 35 Industrien je 2x
+• 1er-Werft 4x
+• 2er-Werft 6x
+• 3er-Werft 4x
+• 6 Schiffe je 6x
+1
+6
+6
+7
+Mischt die 3 Bevölkerungs-Karten-
+stapel sowie die Expeditions-Karten
+getrennt und legt sie verdeckt auf ihre
+jeweiligen Felder auf dem Spielplan.
+2
+Mischt die Alte- und Neue-Welt-
+Inseln getrennt und legt sie rechts am
+Spielplan an. Legt daneben auch die
+Marine- und Gold-Plättchen bereit.
+3
+Sortiert die Bevölkerungs-Steine und
+legt sie passend links am Spielplan an.4
+4
+5
+5
+z
+z
+8
+Dies ist der persönliche
+Erschöpft-Bereich. Wenn
+ihr aufgefordert werdet,
+Bevölkerungs-Steine oder
+Marine-Plättchen zu
+„erschöpfen“, legt sie in
+diesen Bereich.
+z zJeder Spieler erhält eine
+Heimat-Insel und setzt
+4 Bauern, 3 Arbeiter und 2
+Handwerker auf ihre jeweiligen
+Wohnviertel. Auf die beiden
+Handels-Schiffe wird jeweils
+1 Handels-Plättchen platziert
+und auf das Erkundungs-Schiff
+1 Erkundungs-Plättchen.
+Schließlich erhält noch jeder
+Spieler 7 Bauer/Arbeiter- und
+2 Handwerker/Ingenieur/In-
+vestor-Karten auf die Hand.
+Wer zuletzt das Land verlassen
+hat, wird Startspieler und erhält
+das Startspieler-Plättchen.
+Der zweite Spieler erhält
+1 Gold, der dritte Spieler
+erhält 2 Gold und der vierte
+Spieler erhält 3 Gold.
+Der Startspieler beginnt dann
+das Spiel.
+3
+6
+1
+2 2
+7
+8
+9
+9 9
+9
+3
+z
+z
+Wohnviertel
+Hier liegen die verfüg-
+baren Bevölkerungs-
+Steine bereit.
+Inselfelder:
+Landfeld
+Landfeld mit Küste
+Meeresfeld
+SPIELABLAUF UND SPIELZIEL
+In Anno1800 - Das Brettspiel baut jeder Spieler seine eigenen Inseln aus,
+indem neue Gebäude, Werften und Schiffe errichtet, Ressourcen gehan-
+delt und die Bedürfnisse der Bevölkerung befriedigt werden. Die mittels
+produzierter und gehandelter Ressourcen ausgespielten Karten bringen
+dann am Spielende Einfluss-Punkte. Beginnend mit dem Startspieler sind
+die Spieler im Uhrzeigersinn so lange nacheinander am Zug, bis das Spielende
+ausgelöst wird, indem ein Spieler seine letzte Hand-Karte ausspielt.
+Die laufende Runde wird dann zu Ende gespielt. Auf sie folgt eine letzte
+Runde, danach werden die Einfluss-Punkte gezählt und so der Sieger be-
+stimmt. Ein ausführliches Wertungsbeispiel findet ihr auf Seite 11.
+SPIELZUG
+Im eigenen Spielzug hat jeder Spieler 1 Aktion zur Verfügung.
+Die möglichen Aktionen sind:
+Ausbauen (Industrien, Werften oder Schiffe) Seite 6
+Bevölkerungs-Karten ausspielen & aktivieren Seite 7
+Bevölkerungs-Karten austauschen Seite 7
+Arbeitskraft erhöhen Seite 8
+Aufsteigen Seite 8
+Alte Welt erschließen Seite 9
+Neue Welt erkunden Seite 9
+Expeditions-Karten nehmen Seite 10
+Stadtfest feiern Seite 10
+Es gibt außerdem noch die freien Aktionen Bevölkerungs-Karten aktivieren
+(Seite 7) und Auftrags-Karten aktivieren (Seite 12), die im eigenen Zug
+durchgeführt werden können, sofern genügend Ressourcen dafür vor-
+handen sind. Die Effekte, die ihr dabei nutzen könnt, werden auf Seite 13
+näher beschrieben.
+RESSOURCEN-MANAGEMENT
+Bevor die einzelnen Aktionen erklärt werden, solltet ihr die Kern-Mechanik
+von Anno 1800 - Das Brettspiel verstehen. Dabei geht es darum, die euch
+zur Verfügung stehenden Ressourcen so einzusetzen, dass ihr mög-
+lichst effizient die jeweils favorisierten Aktionen durchführen könnt. Das
+Ressourcen-Management besteht aus den Elementen Produktion, Handel
+und Schichtende.
+Produktion
+Fast alle Aktionen erfordern Ressourcen, um sie durchzuführen.
+Ressourcen werden von Bevölkerungs-Steinen produziert. Es gibt 5
+unterschiedliche Bevölkerungs-Steine, die jeweils einer Farbe und einem
+Symbol zugeordnet sind:
+Um eine Ressource produzieren zu lassen, wird ein Bevölkerungs-Stein
+aus seinem jeweiligen Wohnviertel auf einen freien Arbeitsplatz der
+eigenen Insel gesetzt. Der Arbeitsplatz gibt dabei vor, welcher Bevölke-
+rungs-Stein benötigt wird. Durch das Setzen wird einmal die abgebildete
+Ressource produziert und muss im selben Spielzug verwendet werden.
+Es kann nicht für spätere Züge auf Vorrat produziert werden. Ge-
+setzte Bevölkerungs-Steine bleiben auf ihren Arbeitsplätzen, produzieren
+solange sie dort liegen aber keine weiteren Ressourcen.
+In einigen Fällen wird keine Ressource benötigt, sondern der Bevölke-
+rungs-Stein direkt. Dabei wird sozusagen die Arbeitskraft des jeweiligen
+Bevölkerungs-Steins verwendet, ohne dass dieser an einem bestimmten
+Arbeitsplatz benötigt wird. In diesen Fällen wird ein Bevölkerungs-Stein
+der benötigten Art aus seinem Wohnviertel in den Erschöpft-Bereich
+links neben der Heimat-Insel gesetzt. Bevölkerungs-Steine im Erschöpft-
+Bereich können vorübergehend für keine weitere Aktion verwendet
+werden.
+z
+z4
+Andreas will ein Lagerhaus bauen und benötigt dafür 1x Ziegelsteine und 1 Hand-
+werker. Er setzt einen seiner Handwerker auf die Ziegelei und erschöpft einen weite-
+ren Handwerker, den er links neben seine Heimat-Insel legt.
+Linda benötigt für ihren Zug Bier. Die
+Brauerei dazu besitzt sie schon, deshalb
+setzt sie einen ihrer Arbeiter aus seinem
+Wohnviertel auf einen der beiden ver-
+fügbaren Arbeitsplätze. Damit hat sie
+sofort 1x Bier produziert, das sie in ihrem Zug nutzen kann. Benötigt sie nochmals
+Bier, muss sie erneut einen Arbeiter einsetzen.
+Bauer - grün Arbeiter - blau
+Handwerker - rot Ingenieur - lila
+Investor - türkis
+Bestimmte Aktionen erfordern Marine-Plättchen, um sie durchzuführen.
+Es gibt 2 Arten von Marine-Plättchen, die immer den Wert 1 haben:
+Um diese Aktionen durchzuführen, werden Marine-Plättchen der abgebil-
+deten Art und Menge von eigenen Schiffen erschöpft. Marine-Plättchen
+im Erschöpft-Bereich können vorübergehend für keine weitere Aktion
+verwendet werden.
+Handel
+Wird für eine Aktion eine Ressource benötigt, die der Spieler nicht selbst
+produzieren kann oder will, kann diese Ressource durch Handel von
+einem Mitspieler erworben werden. Für jede erhandelte Ressource
+müssen 2 Voraussetzungen erfüllt sein:
+1) Der aktive Spieler besitzt ausreichend Handels-Plättchen auf
+seinen Schiffen.
+2) Mindestens 1 Mitspieler besitzt ein Bau-Plättchen,
+das die benötigte Ressource produzieren kann.
+Die Anzahl der benötigten Handels-Plättchen wird durch die Bevölkerungs-
+Stufe vorgegeben, die diese Ressource produziert. Die Kosten sind auf den
+Wohnvierteln angegeben: 1 Handels-Plättchen für Bauern und Arbeiter,
+2 für Handwerker und 3 für Ingenieure. Nachdem der Spieler die benötig-
+ten Handels-Plättchen erschöpft hat, gilt die Ressource damit als produziert.
+Der Mitspieler darf den Handel nicht verwehren, setzt aber auch keinen
+Bevölkerungs-Stein auf einen Arbeitsplatz. Er erhält dafür
+1 Gold aus dem Vorrat. Jeder Handel wird mit 1 Gold vergütet, egal wie
+viele Handels-Plättchen dafür eingesetzt werden mussten.
+WICHTIG!
+Pro Spielzug kann dieselbe Ressource nur einmal erhandelt
+werden. Es können aber mehrere unterschiedliche Ressourcen
+erhandelt werden, solange der Spieler ausreichend Handels-Plättchen
+Es kann auch gehandelt werden, wenn die Arbeitsplätze des
+Mitspielers bereits besetzt sind.
+Nicht erhandelt werden können Ressourcen aus der Neuen Welt,
+Bevölkerungs-Steine und Erkundungs-Plättchen.
+Spieler können nicht mit sich selbst handeln!
+Schichtende
+Im eigenen Zug kann jeder Spieler Gold ausgeben, um für eigene, bereits
+eingesetzte Bevölkerungs-Steine das Schichtende einzuläuten. Der
+jeweilige Bevölkerungs-Stein wird dabei von seinem Arbeitsplatz oder aus
+dem Erschöpft-Bereich genommen und zurück auf sein Wohnviertel gesetzt.
+Er ist dadurch sofort wieder einsetzbar. Gold ausgeben bedeutet
+immer, es zurück in den Vorrat zu legen.
+Die benötigte Menge Gold pro Bevölkerungs-Stein steht auf der Heimat-
+Insel:
+hat.
+z
+z5
+Linda will eine Karte ausspielen, für die sie 2 Erkundungs-Plättchen benötigt.
+Sie verfügt über zwei Handels-Schiffe mit je 1 Handels-Plättchen und ein
+Erkundungs-Schiff mit 2 Erkundungs-Plättchen. Von letzterem kann sie die
+2 Plättchen nehmen und erschöpfen. Die Karte kann damit ausgespielt werden.
+Andreas benötigt 1x Hochräder, besitzt allerdings nicht die
+Industrie dazu. Seine beiden Mitspieler Diana und Maxim
+können beide Hochräder produzieren. Daher möchte er mit
+einem von ihnen handeln. Da die Hochrad-Produktion einen
+Ingenieur benötigt, muss Andreas 3 Handels-Plättchen
+erschöpfen (Anzahl siehe Wohnviertel). Zwischen Diana
+und Maxim kann er nun frei wählen, auch wenn bei Maxim
+bereits beide Arbeitsplätze belegt sind. Er entscheidet sich für Maxim, der dafür
+1 Gold aus dem Vorrat erhält. Andreas hat dadurch sofort 1x Hochräder „produ-
+ziert“, das er in seinem Zug nutzen kann. Ein zweites Mal dürfte er aber in diesem
+Zug weder von Maxim noch von Diana Hochräder erhandeln, andere Ressourcen
+aber schon.
+Linda benötigt für ihre nächsten Aktionen Bretter sowie mehrere Arbeiter. Sie gibt
+2 Gold aus, um ihre beiden Bauern aus dem Sägewerk zurück auf ihre Wohnviertel zu
+schicken (jeweils 1 Gold). Dadurch wird sowohl die Arbeitskraft, als auch der Arbeits-
+platz frei. Außerdem gibt sie 2 Gold aus, um ihren Arbeiter aus dem Erschöpft-
+Bereich auf sein Wohnviertel zu schicken. Alle drei sind ab jetzt wieder einsetzbar.
+Handels-Plättchen Erkundungs-Plättchen
+Andreas Diana Maxim
+AKTIONEN
+AUSBAUEN
+Mit der Ausbauen-Aktion erweitern die Spieler ihre Inseln durch neue
+Industrien oder Werften oder Schiffe. Die Gesamtheit an möglichen
+Ausbauten wird als Bau-Plättchen bezeichnet. Nachdem die benötigten
+Ressourcen zum Bau produziert wurden, wird ein gebautes Bau-Plättchen
+vom Spielplan genommen, umgedreht und mit seiner gebauten Seite auf
+einer eigenen Insel platziert.
+Auf jedem Inselfeld kann nur ein Bau-Plättchen liegen. Es dürfen aber
+bereits ausliegende oder vorgedruckte Bau-Plättchen überbaut
+werden. Das gilt auch für Bau-Plättchen, die für das gerade neugebaute
+Plättchen verwendet wurden. Die überbauten Bau-Plättchen werden
+zurück auf den Spielplan gelegt. Während der Ausbauen-Aktion dürfen
+jederzeit bereits gebaute Bau-Plättchen von den eigenen Inseln zurück auf
+den Spielplan gelegt werden. Lagen auf einem so entfernten Bau-Plättchen
+Bevölkerungs-Steine, werden sie erschöpft.
+Industrien
+Jede Industrie gibt es jeweils zweimal auf dem Spielplan. Jeder Spieler
+darf jede Industrie höchstens einmal haben. Pro Ausbauen-Aktion kann
+nur 1 Industrie gebaut werden. Industrien können auf allen Landfeldern
+gebaut werden. Die Blaupausen-Seite der Industrien zeigt, welche Ressourcen
+als Kosten benötigt werden (lila Balken oben), welche Ressource dort
+produziert werden kann (Ressourcen-Symbol in der Mitte) und welche
+Art Bevölkerungs-Stein dafür notwendig sein wird (Rahmenfarbe und
+Symbol). Die Gebäude-Seite zeigt jeweils zwei Arbeitsplätze für bestimm-
+te Bevölkerungs-Steine (Farbe und Symbol) sowie die Ressource, die dort
+produziert werden kann.
+Einige Industrien auf dem Spielplan sind Alternativen zu auf den Heimat-
+Inseln vorgedruckten Start-Industrien. Diese bieten Arbeitsplätze für
+Arbeiter statt Bauern oder Handwerker. Werden solche Industrien gebaut,
+muss damit die entsprechende Start-Industrie überbaut werden.
+Werften
+Werften zeigen auf ihrer Blaupausen-Seite und auf ihrer Werft-Seite eine
+Zahl in einem Steuerrad. Sie gibt an, welche maximale Schiffs-Stärke für
+die jeweilige Werft gilt. 1er-Werften können nur Schiffe der Stärke 1 bau-
+en, 2er-Werften können Schiffe der Stärke 1 oder 2 bauen und 3er-Werften
+können alle Schiffe bauen. Pro Ausbauen-Aktion kann nur 1 Werft gebaut
+werden, aber jeder Spieler kann beliebig viele Werften jeder Stärke
+haben. Werften können nur auf Landfeldern mit Küste gebaut werden.
+HINWEIS: Die Bau-Plättchen „Bretter“ und „1er-Werft“ auf dem Spielplan
+sind tatsächlich kostenlos und können regulär in einer Ausbauen-Aktion
+gebaut werden, ohne dass dafür Ressourcen produziert werden müssen.
+Schiffe
+Schiffe werden in Werften gebaut und zeigen auf ihrer Blaupausen-Seite
+und auf ihrer Schiffs-Seite durch ihre jeweilige Anzahl Marine-Plättchen,
+welche Stärke sie haben (1, 2 oder 3). Pro Ausbauen-Aktion können
+maximal so viele Schiffe gebaut werden, wie es bereits Werften
+auf den eigenen Inseln gibt. Jede Werft kann dabei 1 Schiff bauen,
+dessen Stärke maximal der Stärke der Werft entsprechen darf. Ähnlich wie
+Werften kann jeder Spieler beliebig viele Schiffe jeder Stärke haben.
+Auf ein gebautes Schiff wird sofort die entsprechende Anzahl Marine-
+Plättchen gelegt. Neue Handels-Plättchen können dann sofort genutzt
+werden, um Ressourcen für weitere Schiffe zu erhandeln.
+Es gibt Handels- und Erkundungs-Schiffe und jede Werft kann beide Arten
+bauen. Schiffe können nur auf Meeresfeldern gebaut werden.
+z
+z6
+Kosten
+Produzierte
+Ressource
+benötigte
+Bevölkerungs-SteineBlaupausen-Seite Gebäude-Seite
+Produzierte Ressource
+2 Arbeitsplätze für
+Bevölkerungs-Steine
+Andreas möchte die Fensterfabrik bauen.
+Dafür benötigt er Bretter und Glas. Er setzt
+einen Bauern ins Sägewerk und einen
+Arbeiter in die Glashütte, mit der er zuvor
+den Kartoffelhof überbaut hat (1). Dann
+nimmt er sich die Fensterfabrik, dreht
+sie um und entscheidet sich, damit seine
+Glashütte zu überbauen. Da die Glashütte
+keine vorgedruckte Industrie ist, nimmt er
+ihr Bau-Plättchen und legt es wieder mit
+der Blaupausen-Seite nach oben auf den
+Spielplan. Den Arbeiter, den er gerade erst
+daraufgesetzt hat, legt er in den Erschöpft-
+Bereich (2). Anschließend platziert er die
+Fensterfabrik auf seiner Heimat-Insel (3).
+Kosten
+Schiffs-Stärke
+Blaupausen-Seite Schiffs-Seite
+Schiffs-Stärke
+Kosten
+Maximale
+Schiffs-Stärke
+Blaupausen-Seite Werft-Seite
+Maximale
+Schiffs-Stärke
+BEVÖLKERUNGS-KARTEN
+AUSSPIELEN & AKTIVIEREN
+Auf den Bevölkerungs-Karten sind Spezialisten abgebildet, die für
+Ressourcen Einfluss-Punkte und einen einmaligen Vorteils-Effekt bringen.
+Um eine Bevölkerungs-Karte auszuspielen, müssen die Bedürfnisse erfüllt
+und die dafür benötigten Ressourcen produziert werden, die auf der Karte
+angegeben sind (lila Balken oben). Die Karte wird dann offen unterhalb
+der eigenen Heimat-Insel ausgelegt.
+Jede ausgespielte Bevölkerungs-Karte zeigt einen einmal anwendbaren
+Effekt. Dieser kann zu einem beliebigen Zeitpunkt während des gleichen
+oder eines späteren eigenen Zuges aktiviert werden. Dazu wird die Karte
+auf ihre Rückseite gedreht, bleibt aber im Spielerbereich liegen. Der Effekt
+tritt sofort ein (Effekte werden auf Seite 13 näher beschrieben). Das Akti-
+vieren ist eine freie Aktion, es können also beliebig viele Karten
+pro Zug aktiviert werden.
+Jede ausgespielte Karte im Spielerbereich, egal ob aktiviert oder nicht,
+bringt am Ende des Spiels ihre jeweiligen Einfluss-Punkte.
+BEVÖLKERUNGS-KARTEN
+AUSTAUSCHEN
+Als Aktion können bis zu 3 Bevölkerungs-Karten von der Hand unter
+ihre jeweiligen Bevölkerungs-Kartenstapel gelegt werden. Danach werden
+vom jeweiligen Bevölkerungs-Kartenstapel so viele neue Karten gezogen
+und auf die Hand genommen, wie im ersten Schritt daruntergelegt wur-
+den. Ist ein Stapel aufgebraucht, können auch keine Bevölkerungs-Karten
+dieser Art ausgetauscht werden.
+z
+z7
+Linda verfügt über insgesamt drei Werften: zwei mit
+Stärke 1 und eine mit Stärke 2. Sie könnte damit in einer
+Aktion wahlweise bis zu drei 1er-Schiffe bauen, oder bis
+zu zwei 1er-Schiffe und ein 2er-Schiff. Sie entschließt sich
+für ein 1er-Erkundungs-Schiff (1x Segel, 1x Bretter und
+1x Kanonen), sowie ein 2er-Handels-Schiff (1x Segel, 1x
+Waren und 1x Bretter) (1).
+Andreas hat 3 Handkarten, die er gerne austauschen würde, weil sie für ihn
+schwierig zu erfüllen sind. Er legt die 8-Einfluss-Punkte- und die 5-Einfluss-Punkte-
+Karte unter ihre Stapel (Handwerker/Ingenieur/Investor bzw. Neue-Welt) und zieht
+deshalb von beiden Stapeln je 1 neue Karte. In diesem Beispiel ist der Stapel mit den
+3-Einfluss-Punkte-Karten (Bauer/Arbeiter) bereits aufgebraucht, deshalb kann er
+diese Karte nicht mehr austauschen und behält sie auf der Hand.
+Bretter und Segel produziert sie je 2x und erschöpft dann 2 Handels-Plättchen, um sich
+von Andreas 1x Waren zu erhandeln. Das 2er-Handels-Schiff ist damit bereits gebaut.
+Sie legt es auf ein freies Meeresfeld und darauf auch direkt 2 Handels-Plättchen (2).
+Für das Erkundungs-Schiff fehlt ihr jetzt ein Handwerker. Sie kann allerdings die
+durch das gerade gebaute 2er-Handels-Schiff erhaltenen Handels-Plättchen ein-
+setzen, um sich auch 1x Kanonen von Andreas zu erhandeln. Damit hat sie dann alle
+Ressourcen, um das 1er-Erkundungs-Schiff zu bauen, was sie auf ihr letztes freies
+Meeresfeld legt (3).
+2
+3
+Kosten Einfluss-Punkte
+Effekt
+Einfluss-
+Punkte
+ARBEITSKRAFT ERHÖHEN
+Mit der Arbeitskraft-erhöhen-Aktion können bis zu 3 neue Bevölke-
+rungs-Steine aus dem Vorrat der eigenen Heimat-Insel hinzugefügt
+werden. Um 1 Bevölkerungs-Stein hinzuzufügen, müssen die jeweils dafür
+benötigten Ressourcen produziert werden, die oberhalb der einzelnen
+Wohnviertel der Stadt stehen. Dabei entsprechen die Kosten immer nur
+1 Bevölkerungs-Stein. So erworbene Bevölkerungs-Steine können direkt
+eingesetzt werden, um Ressourcen zu produzieren, die für das weitere
+Erhöhen der Arbeitskraft benötigt werden.
+Für jeden neuen Bauern oder Arbeiter muss 1 Bauer/Arbeiter-Bevölke-
+rungs-Karte gezogen und auf die Hand genommen werden. Für jeden
+neuen Handwerker, Ingenieur oder Investor muss 1 Handwerker/
+Ingenieur/Investor-Bevölkerungs-Karte gezogen und auf die Hand
+genommen werden.
+Wenn die Arbeitskraft erhöht werden soll, aber der entsprechende
+Bevölkerungs-Kartenstapel bereits aufgebraucht ist, wird keine
+Karte gezogen. Stattdessen muss für jeden hinzugefügten Bevölkerungs-
+Stein die auf dem Spielplan angegebene Menge Gold ausgegeben
+werden. Ist das nicht möglich, kann der Bevölkerungs-Stein nicht hinzu-
+gefügt werden.
+AUFSTEIGEN
+Mit der Aufsteigen-Aktion können bis zu 3 Verbesserungen der eigenen
+Bevölkerungs-Steine durchgeführt werden. Um eine Verbesserung durch-
+zuführen, müssen die dafür benötigten Ressourcen produziert werden,
+die zwischen den Wohnvierteln oberhalb des Aufstiegs-Symbols stehen.
+1 Verbesserung ist dabei der Schritt von einer Art Bevölkerungs-Stein zur
+nachfolgenden:
+Bauer Arbeiter Handwerker Ingenieur Investor.
+Die 3 Verbesserungen können auf 1 bis 3 Bevölkerungs-Steine aufgeteilt
+werden.
+Ein zu verbessernder Bevölkerungs-Stein wird durch die jeweils neue Art
+aus dem Vorrat ersetzt. Da sich durch Verbesserungen also die Menge
+an Bevölkerungs-Steinen nicht erhöht, werden dabei auch keine neuen
+Bevölkerungs-Karten gezogen.
+WICHTIG: Befindet sich der zu verbessernde Bevölkerungs-Stein auf
+einem Bau-Plättchen, wird auch der neue Bevölkerungs-Stein auf diesen
+Arbeitsplatz gesetzt. Das heißt, dass nun die Farben von Arbeitsplatz und
+Bevölkerungs-Stein bis zum nächsten Schichtende (Seite 5) oder Stadtfest
+(Seite 10) nicht übereinstimmen.
+z
+z8
+Linda möchte 3 neue Bevölkerungs-Steine auf ihre Wohnviertel setzen. Sie kann voll-
+kommen frei entscheiden, welche 3 das sein sollen und entscheidet sich für 2 Arbeiter
+und 1 Ingenieur. Dafür benötigt sie insgesamt 2x Bretter, 1x Ziegelsteine, 1x Kohle,
+1x Waren, 1x Stahlträger und 1x Fenster. Sie hat bereits die verbesserte Köhlerei,
+Ziegelei und das Stahlwerk, sodass sie diese mit Arbeitern statt mit Handwerkern
+besetzen kann. Aber ihr fehlen 2 Arbeiter, um alle benötigten Ressourcen zu produ-
+zieren. Sie produziert daher als erstes 2x Bretter und 2x Ziegelsteine, um dadurch
+direkt 2 weitere Arbeiter auf ihr Wohnviertel zu setzen. Im zweiten Schritt nutzt sie
+diese beiden, um zusammen mit ihren beiden Handwerkern die Ressourcen für den
+Ingenieur zu produzieren und setzt ihn auf sein Wohnviertel.
+Andreas möchte 3 Verbesserungen durchführen. 1 Bauer soll 2x verbessert werden,
+also ein Handwerker werden (1x Ziegelsteine, danach 1x Kohle und 1x Waren).
+1 weiterer Bauer soll 1x verbessert, also zu einem Arbeiter (1x Ziegelsteine). Der Bau-
+er, der zu einem Arbeiter werden soll, ist bereits auf einem Arbeitsplatz eingesetzt,
+deshalb tauscht er ihn auch auf diesem Platz aus. Den anderen Bauern legt er aus
+seinem Wohnviertel zurück in den Vorrat und setzt stattdessen einen Handwerker aus
+dem Vorrat auf das entsprechende Wohnviertel. Er zieht keine Bevölkerungs-Karten,
+da sich die Gesamtzahl seiner Bevölkerungs-Steine nicht erhöht hat.
+Da Linda damit insgesamt 3 neue Bevölkerungs-Steine erhalten hat, muss sie auch
+3 neue Handkarten ziehen: 2x vom Bauer/Arbeiter-Stapel und 1x vom Handwerker/
+Ingenieur/Investor-Stapel. In diesem Beispiel ist nur noch 1 Karte im Bauer/Arbeiter-
+Stapel. Für die 1 Karte, die sie daher nicht ziehen kann, muss sie stattdessen wie auf
+dem Spielplan angegeben 1 Gold ausgeben.
+ALTE WELT ERSCHLIESSEN
+Mit der Alte-Welt-erschließen-Aktion kann die eigene Insel erweitert
+werden, um mehr Platz für weitere Bau-Plättchen zu schaffen. Um
+eine Alte-Welt-Insel zu erschließen, muss die aktuell dafür benötigte
+Anzahl Erkundungs-Plättchen erschöpft werden. Die erste Alte-Welt-
+Insel jedes Spielers benötigt 1 Erkundungs-Plättchen, die zweite 2,
+die dritte 3 und die vierte 4. Diese Kosten sind unabhängig davon, wie
+viele Neue-Welt-Inseln der Spieler hat. Kein Spieler kann mehr als 4
+Alte-Welt-Inseln erschließen. Pro Alte-Welt-erschließen-Aktion kann
+maximal 1 Alte-Welt-Insel erschlossen werden.
+Alte-Welt-Inseln werden vom Stapel gezogen und offen rechts an die
+eigene Inselgruppe angelegt. Sie erweitern diese um 2 Meeresfelder und
+4 Landfelder, davon 2 mit Küste, die alle für die Ausbauen-Aktion (Seite
+6) genutzt werden können. Die Heimat-Insel muss nicht komplett bebaut
+sein, um eine Alte-Welt-Insel erschließen zu dürfen. Bau-Plättchen
+können weiterhin auf die Heimat-Insel gebaut werden.
+Alte-Welt-Inseln bringen dem Spieler einen einmaligen Vorteil. Dies
+sind entweder Effekte (Seite 13), die sofort ausgelöst werden, sobald
+die Insel erschlossen wird oder aber Industrien, Werften oder Schiffe, die
+regulär genutzt werden können. Nur auf diese Weise kann es vorkommen,
+dass Spieler eine Industrie doppelt haben.
+NEUE WELT ERKUNDEN
+Mit der Neue-Welt-erkunden-Aktion können wertvolle Ressourcen von
+weit entfernten Inseln für den Handel entdeckt werden. Um eine Neue-
+Welt-Insel zu erkunden, muss wie bei den Alte-Welt-Inseln die aktuell
+dafür benötigte Anzahl Erkundungs-Plättchen erschöpft werden. Die
+erste Neue-Welt-Insel jedes Spielers benötigt 1 Erkundungs-Plättchen, die
+zweite 2, die dritte 3 und die vierte 4. Diese Kosten sind unabhängig davon,
+wie viele Alte-Welt-Inseln der Spieler hat. Kein Spieler kann mehr als
+4 Neue-Welt-Inseln erkunden. Pro Neue-Welt-erkunden-Aktion kann
+maximal 1 Neue-Welt-Insel erkundet werden.
+Für jede erkundete Neue-Welt-Insel muss der Spieler außerdem 3
+Neue-Welt-Karten ziehen und auf die Hand nehmen.
+Neue-Welt-Inseln werden vom Stapel gezogen und offen in den eigenen
+Spielerbereich gelegt. Jede Neue-Welt-Insel zeigt 3 Ressourcen, die sie
+produzieren kann.
+Um eine Ressource von einer eigenen Neuen-Welt-Insel nutzen zu können,
+muss ein Handels-Plättchen erschöpft werden, was auch mehrmals pro
+Zug erfolgen kann. Die Neue-Welt-Ressourcen von Mitspielern
+können nicht erhandelt werden. Das gilt aber nur für die Neue-Welt-
+Ressourcen und nicht für deren Folgeindustrien. Tabak kann z. B. nicht
+erhandelt werden, Zigarren, für die Tabak benötigt wird, aber schon.
+Auf Neue-Welt-Inseln können keine Bau-Plättchen gebaut werden.
+z
+z9
+Andreas braucht dringend Zuckerrohr aus der Neuen Welt, damit er eine Rumbren-
+nerei bauen kann. Er erschöpft ein Erkundungs-Plättchen, weil es seine erste Neue-
+Welt-Insel ist und zieht zusätzlich 3 Neue-Welt-Karten, die er auf die Hand nimmt.
+Die erkundete Insel bietet tatsächlich
+Zuckerrohr! In seinem nächsten Zug
+erschöpft Andreas direkt ein Handels-
+Plättchen und produziert zusätzlich
+Bretter, um die Rumbrennerei bauen zu
+können. Linda hatte zwar schon eine
+Neue-Welt-Insel mit Zuckerrohr, da
+diese Ressourcen aber nicht mit einem
+Mitspieler gehandelt werden können,
+musste Andreas eine eigene Neue-Welt-
+Insel erkunden.
+Linda hat in einem früheren Zug bereits für 1 Erkundungs-Plättchen eine Alte-Welt-
+Insel erschlossen und dadurch nicht nur mehr Platz für weitere Bau-Plättchen,
+sondern auch ein verbessertes Lagerhaus erhalten. Für ihre 2. Alte-Welt-Insel muss
+sie jetzt 2 Erkundungs-Plättchen erschöpfen. Sie zieht die oberste Alte-Welt-Insel
+vom verdeckten Stapel und legt sie an. Der einmalige Vorteil lässt sie sofort 2 Expedi-
+tions-Karten nehmen.
+EXPEDITIONS-KARTEN NEHMEN
+Mit der Expeditions-Karten-nehmen-Aktion erhalten die Spieler Expediti-
+ons-Karten, die am Spielende zusätzliche Einfluss-Punkte bringen können,
+bis dahin aber keine weiteren Vorteile bringen. Um eine Expedition zu
+starten, müssen die dafür benötigten Ressourcen erschöpft werden:
+2 Erkundungs-Plättchen für bis zu 3 Expeditionskarten.
+Expeditions-Karten werden vom Stapel gezogen und bilden für jeden
+Spieler einen eigenen verdeckten Stapel unterhalb der Heimat-Insel. Sie
+zählen nicht zu den Handkarten der Spieler. Die eigenen Expeditions-Kar-
+ten dürfen jederzeit angesehen werden.
+Expeditions-Karten zeigen jeweils links ein Tier für den Zoo und rechts
+ein Artefakt für das Museum. Die Hintergrundfarbe und das darunter-
+stehende Symbol geben an, welche Bevölkerungs-Steine als Besucher am
+Ende des Spiels benötigt werden, um die darunterstehenden Einfluss-
+Punkte zu erhalten. Jeder Bevölkerungs-Stein kann nur für je ein Feld
+genutzt werden.
+STADTFEST FEIERN
+Wenn ein Spieler keine andere Aktion mehr ausführen kann oder will,
+erlaubt es das Stadtfest, Bevölkerungs-Steine und Marine-Plättchen zu-
+rückzusetzen. In den folgenden Zügen können sie dann erneut eingesetzt
+werden. Die gesamte Bevölkerung kehrt dazu auf ihre Wohnviertel zurück
+und alle Schiffe laufen in den Hafen ein. Um das Stadtfest zu feiern, wer-
+den alle Bevölkerungs-Steine und Marine-Plättchen von den Arbeitsplät-
+zen und aus dem Erschöpft-Bereich wieder auf ihre jeweiligen Wohnviertel
+in der Stadt bzw. auf die Schiffe zurückgesetzt.
+SPIELENDE
+Sobald ein Spieler seine letzte Handkarte ausgespielt hat, also keine Be-
+völkerungs-Karten mehr auf der Hand hat, wird das Spielende ausgelöst.
+Dieser Spieler erhält sofort das Feuerwerks-Plättchen. Die aktuelle
+Runde wird noch zu Ende gespielt, sodass jeder Spieler gleich oft am Zug
+war. Danach wird noch eine weitere, letzte Runde gespielt, bevor das Spiel
+beendet wird.
+Sollte der Spieler, der das Spielende ausgelöst hat, zu irgendeinem Zeit-
+punkt wieder Bevölkerungs-Karten auf die Hand bekommen, bleibt das
+Spielende dennoch ausgelöst und der Spieler muss auch nicht das Feuer-
+werks-Plättchen abgeben.
+z
+z10
+Linda hat in ihrem Zug 3 Expeditions-Karten gezogen. Sie hält sie vor ihren Mitspie-
+lern geheim, versucht aber, am Spielende über 3 Handwerker, 2 Ingenieure und
+1 Investor zu verfügen, um so bis zu 1+1+2+3+2+1=10 Einfluss-Punkte zu erhal-
+ten. Hat sie z. B. am Spielende nur 1 Handwerker und 1 Investor, erhält sie 1+3=4
+Einfluss-Punkte.
+Da Andreas Startspieler ist und Linda als zweite Spielerin das Spielende einläutet,
+wird nach ihrem Zug noch die Runde zu Ende gespielt, also sind ihre beiden Mitspie-
+ler Maxim und Diana noch jeweils einmal dran. Danach beginnt Andreas die letzte
+Runde des Spiels, sodass jeder noch ein letztes Mal am Zug ist, bevor die Einfluss-
+Punkte gezählt werden.
+WERTUNG
+Jeder Spieler zählt im Anschluss die eigenen Einfluss-Punkte:
+1. Jede ausgespielte Bevölkerungs-Karte im eigenen
+Spielerbereich, egal ob offen oder verdeckt, bringt so viele
+Einfluss-Punkte, wie auf ihr angegeben sind:
+• Bauer/Arbeiter-Karten: 3 Einfluss-Punkte.
+• Handwerker/Ingenieur/Investor-Karten: 8 Einfluss-Punkte.
+• Neue-Welt-Karten: 5 Einfluss-Punkte.
+2. Die Expeditions-Karten werden aufgedeckt und entsprechend
+ihrer Hintergrundfelder mit eigenen Handwerkern, Ingenieuren und
+Investoren besetzt. Diese können aus den Wohnvierteln, von
+Arbeitsplätzen, oder aus dem Erschöpft-Bereich genommen
+werden. Jeder Bevölkerungs-Stein kann nur für ein Feld auf den
+Expeditions-Karten verwendet werden. Jedes besetzte Feld wird
+einzeln gewertet und bringt dann die darunterstehenden
+Einfluss-Punkte. Expeditions-Karten müssen also nicht vollbesetzt
+sein, um Einfluss-Punkte zu bringen.
+3. Je 3 Gold bringen 1 Einfluss-Punkt.
+4. Das Feuerwerks-Plättchen bringt 7 Einfluss-Punkte.
+5. Verteilt zum Abschluss noch die Einfluss-Punkte der ausliegenden
+Auftrags-Karten (Seite 12).
+Wer jetzt die meisten Einfluss-Punkte hat, gewinnt! Sollte es einen
+Gleichstand geben, gewinnt, wer in Summe die meisten Industrien,
+Werften und Schiffe hat. Nicht überbaute, vorgedruckte Bau-Plättchen
+zählen daher natürlich dazu. Bei einem erneuten Gleichstand gewinnt,
+wer die wenigsten Handkarten besitzt. Ansonsten wird der Sieg geteilt.
+TIPP: Auf kosmos.de/anno-1800 findet ihr ein Wertungsblatt
+zum Download.
+z
+z11
+Linda zählt ihre Einfluss-Punkte:
+1. 11 Karten mit je 3 Einfluss-Punkte. 3 Karten mit je 8 Einfluss-Punkte
+und 4 Karten mit je 5 Einfluss-Punkte
+11x3 + 3x8 + 4x5 = 77 Einfluss-Punkte durch Bevölkerungs-Karten.
+2. 3 Expeditions-Karten, auf denen allerdings ein Ingenieur fehlt
+3x1 + 1x2 + 1x3 = 8 Einfluss-Punkte durch Expeditions-Karten.
+3. 5 Gold = 1 Einfluss-Punkt.
+4. Da sie das Spielende eingeläutet hat, besitzt sie das Feuerwerks-Plättchen
+= 7 Einfluss-Punkte.
+5. Die Auftrags-Karten bringen ihr:
+Da sie weder die meisten, noch die zweitmeisten Ingenieure hat
+= 0 Einfluss-Punkte.
+6 Einfluss-Punkte für jede Industrie Grammophon/Hochrad/
+Dampfwagen
+= 6 Einfluss-Punkte (Hochrad).
+6 Einfluss-Punkte für jede Neue-Welt-Insel, die sie hat
+= 6 Einfluss-Punkte (1 Neue-Welt-Insel).
+1 zusätzlichen Einfluss-Punkt für jedes besuchte Zootier
+= 2 Einfluss-Punkte (2 besuchte Zoo-Tiere).
+Insgesamt hat Linda also
+77 + 8 +1 + 7 + 0 + 6 + 6 + 2 = 107 Einfluss-Punkte.
+11x
+3x
+4x
+AUFTRAGS-KARTEN
+Auftrags-Karten stellen Chancen und Herausforderungen verschiedener
+Persönlichkeiten und Errungenschaften aus der Anno-Welt für euch dar.
+Zu Beginn jedes Spiels zieht ihr 5 zufällige Auftrags-Karten, die das
+gesamte Spiel über im Spiel bleiben. Ihr könnt natürlich auch eure Lieb-
+lingskombination auswählen. Für das erste Spiel empfehlen wir die
+Auftrags-Karten Alonso Graves, Universität, Edvard Goode, Isabel
+Sarmento und Zoo.
+Es gibt zwei Arten von Auftrags-Karten. Die meisten Auftrags-Karten
+belohnen euch am Spielende mit Einfluss-Punkten, wenn ihr ihre
+jeweiligen Anforderungen erfüllt. Sie haben einen dunkleren Hinter-
+grund als die Effekt-Auftrags-Karten. Diese haben denselben hellen
+Hintergrund wie die Bevölkerungs-Karten. Sie bieten euch bestimmte
+Effekte, die ihr schon während des Spiels nutzen könnt. Ihre Effekte sind
+keine Aktionen und werden im Spielverlauf auch nicht verbraucht. Jeder
+von euch kann sie also im eigenen Zug nutzen, wann immer es richtig oder
+notwendig erscheint.
+Alonso Graves – 3 Erkundungs-Plättchen erschöpfen
+und 3 Gold ausgeben, um eine zusätzliche Aktion durch-
+führen zu können.
+Aarhant – 1 Investor erschöpfen, um 5 Gold aus dem
+Vorrat zu erhalten.
+Der Redakteur – 2 Erkundungs-Plättchen erschöpfen,
+um 1 beliebige Handkarte unter ihren jeweiligen Be-
+völkerungs-Kartenstapel zu legen. Es wird keine neue
+Karte gezogen
+WICHTIG: Die Effekt-Auftrags-Karten Alonso Graves, Aarhant und Der
+Redakteur können jeweils nur 1x pro Zug genutzt werden.
+Beryl O’Mara – Jeweils 2 Erkundungs-Plättchen können
+wie 1 Handels-Plättchen verwendet werden. Es findet
+kein Austausch der Plättchen statt! Es können aber z. B.
+2 Erkundungs-Plättchen erschöpft werden, um 1 von
+einem Bauern oder Arbeiter produzierte Ressource zu
+erhandeln. Auf diese Art können auch mehrere Ressourcen
+in einem Zug erhandelt werden.
+Carl Leonard von Malching, Eli Bleakworth, Die Königin, Edvard
+Goode, Willie Wibblesock, Prinzessin Qing – Jede auf diesen Karten
+abgebildete Industrie bringt dem Spieler, der sie gebaut hat, am Spielende
+die danebenstehende Anzahl Einfluss-Punkte.
+Hannah Goode, Universität, Weltausstellung, Madame Kahina,
+Die Besucherin – Jede dieser Karten bringt dem Spieler, der am Spielende
+die jeweils meisten der abgebildeten Elemente (Bevölkerungs-Steine
+insgesamt, Ingenieure, Investoren, Handels-Plättchen, Expeditions-
+Karten) besitzt, 10 Einfluss-Punkte. Wer die zweitmeisten Elemente besitzt,
+erhält 4 Einfluss-Punkte. Bei Gleichstand erhalten alle am Gleichstand
+beteiligten Spieler die jeweiligen Einfluss-Punkte. Bei einem Gleichstand
+um die meisten Elemente werden dennoch auch die Einfluss-Punkte für
+die zweitmeisten Elemente vergeben.
+Zoo, Museum – Jede dieser Karten erhöht die
+Einfluss-Punkte, die ihr für besuchte Tiere bzw.
+Artefakte bekommt, um 1. Somit ist ein von einem
+Ingenieur besetztes Tier-Feld einer Expeditions-
+Karte am Spielende z. B. 3 statt 2 Einfluss-Punkte
+wert, wenn die Auftrags-Karte Zoo im Spiel ist.
+Bente Jorgensen – Jeder Spieler, der am Spielende
+maximal 1 Alte-Welt-Insel erschlossen hat, erhält 18 Ein-
+fluss-Punkte. Die Heimat-Insel ist keine Alte-Welt-Insel!
+Isabel Sarmento – Jede Neue-Welt-Insel, die ein Spieler
+erkundet hat, bringt am Spielende 6 Einfluss-Punkte.
+Pyrphorier – Am Spielende verliert jeder Spieler 2 Ein-
+fluss-Punkte für jede Bevölkerungs-Karte, die er noch auf
+der Hand hat. Ausgespielte, aber nicht aktivierte
+Bevölkerungs-Karten zählen nicht zu den Handkarten.
+z
+z12
+KOMBINATION VON
+AUFTRAGS-KARTEN
+Normalerweise zieht ihr zu Beginn des Spiels 5 zufällige Auftrags-Karten.
+Wenn ihr das Spielgefühl allerdings in eine gewisse Richtung lenken wollt,
+könnt ihr euch an diesen Vorschlägen orientieren, um die 5 Auftrags-Karten
+gezielt zusammenzustellen:
+Für ein komplexeres Spiel mit mehr Möglichkeiten, nehmt beliebig viele
+der Effekt-Auftrags-Karten (Alonso Graves, Aarhant, Der Redakteur, Beryl
+O‘Mara) ins Spiel.
+Für ein konfrontativeres Spiel, in dem ihr stärker um Punkte konkurriert,
+nehmt beliebig viele der Auftrags-Karten, die euch für die Mehrheit
+bestimmter Spiel-Elemente belohnt (Hannah Goode, Universität, Weltaus-
+tellung, Madame Kahina, Die Besucherin).
+Für ein entspannteres Spiel mit dem Fokus auf den Ausbau der Inseln,
+nehmt beliebig viele der Auftrags-Karten, die euch Punkte für verschiedene
+Industrien geben (Carl Leonard von Malching, Eli Bleakworth, Die Königin,
+Edvard Goode, Willie Wibblesock, Prinzessin Qing).
+Die Auftrags-Karten Zoo und Museum legen den Fokus auf Expeditions-
+Karten.
+Nutzt die Auftrags-Karte Pyrphorier, um das Spielgefühl und eure Strategie
+zu verändern. Da die Karte euch für übrige Bevölkerungs-Karten am
+Spielende bestraft, wird stärker darum konkurriert, das Spielende
+auszulösen und vorsichtiger vorgegangen, was das Erhöhen der Arbeits-
+kraft angeht.
+EFFEKTE DER BEVÖLKERUNGS-
+UND AUFTRAGS-KARTEN
+Du erhältst die abgebildeten Bevölkerungs-
+Steine auf deine Wohnviertel und die ent-
+sprechenden Bevölkerungs-Karten auf die
+Hand. Ist der entsprechende Stapel aufgebraucht,
+muss stattdessen Gold ausgegeben werden. Ist das
+nicht möglich, kann der Effekt nicht oder nicht voll-
+ständig genutzt werden.
+Du erhältst die angegebene Menge Handels-
+oder Erkundungs-Plättchen und legst sie auf
+die Bevölkerungs-Karte. Du kannst sie regulär
+wie Marine-Plättchen nutzen, allerdings gehen
+sie nach ihrer Verwendung direkt in den Vorrat
+zurück. Sie gehen auch in den Vorrat zurück,
+wenn sie bis zu deinem nächsten Stadtfest
+nicht verbraucht wurden.
+Du erhältst die angegebene Menge Gold.
+Lege es in deinen persönlichen Vorrat.
+Du erhältst 2 Expeditions-Karten. Dieser Effekt
+verfällt, wenn der Expeditions-Kartenstapel bereits
+aufgebraucht ist.
+Du erhältst einmalig kostenlos eine der abge-
+bildeten Neue-Welt-Ressourcen, die du beim
+Aktivieren der Karte nutzen musst.
+Du erhältst bis zu 3 kostenlose Verbesserungen
+für deine Bevölkerungs-Steine. Du darfst damit nur
+die abgebildeten Bevölkerungs-Steine verbessern.
+Alle Verbesserungen die du nutzen willst, müssen
+im selben Zug verwendet werden und können nicht
+auf mehrere Züge aufgeteilt werden.
+Du erhältst eine zusätzliche Aktion, die du nach
+den normalen Regeln durchführen darfst.
+Du darfst bis zu 2 beliebige Handkarten unter
+ihre jeweiligen Bevölkerungs-Kartenstapel
+legen. Es werden keine neuen Karten gezogen.
+WICHTIG: Im Gegensatz zu allen anderen
+Effekten kannst du diesen nur in dem Zug
+aktivieren, in dem du die Karte ausgespielt
+hast. Am Ende deines Zuges musst du die Karte auf
+ihre Rückseite drehen. Du musst den Effekt nicht
+nutzen, aber du kannst ihn nicht erst in einem
+späteren Zug aktivieren!
+z
+z13
+TIPPS FÜR DEN EINSTIEG
+Anno 1800 - Das Brettspiel kann gerade zu Beginn etwas überwältigend
+sein. Deshalb möchten wir euch ein paar Tipps und Hinweise mit auf den
+Weg geben, mit denen auch ihr neuen Spielern eine Orientierung bieten
+könnt.
+Ihr werdet den Eindruck haben, dass das Spielende in scheinbar unend-
+licher Ferne liegt. Denn das Ende wird erst dann ausgelöst, sobald ein
+Spieler keine Handkarten mehr hat. Über weite Teile des Spiels werdet ihr
+aber schneller mehr Handkarten ziehen, als ihr erfüllen könnt. Das ist auch
+ganz natürlich, denn eure Inseln verfügen zu Beginn nur über sehr spär-
+liche Produktionsmöglichkeiten. Während eure Stadt wächst und ihr mehr
+Einwohner bekommt, steigen dementsprechend auch die Bedürfnisse, die
+es zu erfüllen gilt. Es wäre nicht ungewöhnlich, wenn ihr nach einiger Zeit
+eure anfängliche Handkartenzahl verdoppelt habt. Lasst euch aber von
+dem Gefühl, dass eure Partie wohl niemals enden wird, nicht täuschen! Ein
+wichtiges Element des Spiels ist, herauszufinden, wann evtl. auf weitere
+Einwohner verzichtet werden sollte, weil ihr in der Lage seid, euch effizient
+um all jene zu kümmern, die ihr bereits auf der Hand habt. Vor allem, wer
+der oder die Erste ohne Handkarten sein möchte, um die 7 Bonus-Punkte
+zu erhalten, sollte das im Blick behalten.
+Das bedeutet aber nicht, dass das immer der richtige Weg sein muss.
+Wer das Spielende einläutet, hat schließlich noch nicht gewonnen, und
+in vielen Partien habt ihr durch übrige Handkarten am Spielende keine
+Nachteile (außer die Auftrags-Karte Pyrphorier ist im Spiel). Ihr könnt also
+genauso gut versuchen, möglichst viele Einwohner zu bekommen und
+zufrieden zu stellen, während andere eventuell ihre Einwohnerzahl gering
+halten wollen, um dadurch das Spielende besser kontrollieren zu können.
+Ganz wichtig ist aber: Die Insel jedes Spielers wird mit jeder Runde besser.
+Ihr habt mehr Industrien und eine größere Marine. Und durch den Handel
+profitiert jeder auch vom Fortschritt der Mitspieler. Und wenn ein gewisser
+Entwicklungspunkt für alle Spieler überschritten ist, kann es plötzlich sehr
+zügig auf das Spielende zugehen. Denn dann seid ihr irgendwann in der
+Lage, eure Bevölkerungs-Karten deutlich schneller auszuspielen, als dass
+ihr neue bekommt.
+An dieser Stelle sei auch gesagt, dass die Menge an Stadtfesten, die ihr
+feiert, wohlüberlegt sein sollte. Denn wenn die ganze Stadt am Feiern
+ist, wird schließlich nicht gearbeitet. Zwischen diesen Anlässen solltet ihr
+daher versuchen, eure Möglichkeiten optimal zu nutzen.
+Gerade zu Beginn einer Partie könnte die Frage aufkommen „Wo soll ich
+überhaupt anfangen?“. Es lohnt sich, die Bedürfnisse eurer Einwohner
+auf euren Handkarten zu betrachten. Tauchen dort bestimmte Industrien
+mehrmals auf, könntet ihr mit dem Bau einer solchen beginnen. Einige
+Einwohner verlangt es nach Seife? Dann baut doch direkt eine Seifensie-
+derei. Auf diese Weise könnt ihr direkt die wichtigsten Industrien für euch
+durchgehen und in die Partie starten. Auch ein früher Vorstoß zu neuen
+Ufern ist nicht verkehrt, indem ihr mit eurer Flotte eine Alte-Welt-Insel
+erschließt. Der Bauplatz mag zu Beginn noch nicht direkt nötig sein, die
+einmaligen Vorteile jeder Insel aber schon.
+Unterschätzt auch nicht jene Industrien, über die ihr eigentlich schon ver-
+fügt. Für eure 5 Start-Industrien, die jeweils Handwerker erfordern, könnt
+ihr alternative Versionen bauen. Diese erfordern für dieselbe Ressource
+jeweils Arbeiter und ersetzen die Handwerker-Variante. Eine solche
+Investition kann sich durchaus lohnen, da ihr im Spielverlauf leichter an
+Arbeiter als an Handwerker kommt und viele Karten und Plättchen die in
+diesen Industrien produzierten Ressourcen benötigen.
+Für den weiteren Spielverlauf lohnt sich auch ein Blick auf Industrien,
+die eine Voraussetzung für viele andere sind. Kanonen sind beispielsweise
+notwendig, wenn die Erkundungs-Flotte ausgebaut werden soll, während
+Baumwollstoff für Neue-Welt-Karten enorm wichtig ist. Eine frühe In-
+vestition in solche Industrien macht euch zu lukrativen Handelspartnern
+für eure Mitspieler.
+ANMERKUNGEN ZUR
+RESSOURCE „WAREN“
+Kundige Anno 1800-Fans und Mitglieder der Anno Union sind sicherlich
+über die Ressource „Waren“ gestolpert. Aus dem PC-Spiel kennt ihr sie
+nicht als Ressource sondern als Icon für „Treibgut“. Letztendlich sind ja alle
+Ressourcen Waren, deren Produktion und Verwendung ihr organisiert.
+In Anno 1800 - Das Brettspiel sind die Waren aber eine eigenständige und
+gleichberechtigte Ressource wie z. B. Bretter auch. Die Kisten repräsentie-
+ren eine bunte Mischung unterschiedlicher speziellerer Waren: Die Trauben
+im Champagner, Kupfer und Zink für Messing oder die Ladung von Schiffen.
+Das entsprechende Gebäude auf dem Bau-Plättchen ist daher auch das
+Lagerhaus. Es ist ein sehr vielseitig nutzbarer Umschlagplatz auf eurer
+Insel und ein wichtiger Teil der Infrastruktur.
+Wir haben auf diese Lösung zurückgegriffen, um die Komplexität des
+PC-Spiels einfangen zu können, aber gleichzeitig die Zugänglichkeit und
+Spielbarkeit zu gewährleisten. So können wir eine große Bandbreite an
+Ressourcen und vor allem deren Verknüpfung untereinander nachvollzieh-
+bar darstellen.
+z
+z14
+DANKSAGUNG
+Martin Wallace und der KOSMOS-Verlag danken allen, die beim Testspielen, Regellesen und der Entstehung des Spiels beteiligt waren und Anno 1800 –
+Das Brettspiel mit vielen kreativen Ideen zu dem gemacht haben, was ihr jetzt in Händen haltet.
+Dies gilt insbesondere für Steve Deng, Stephen Hurn, Sheree Hurn, Jason Kotzur, Sasha Jenkins, Edward Crompton, Colin Tudehope, Gabrielle Joyce, Ian
+Gent, Adrienne Ezell, Zack Byrne, Nathan Wirth, Christian Fiore, Katharina Mayer, Dorothea Wagner und André Deibert.
+Unser Dank gilt außerdem Ubisoft Blue Byte und dem gesamten Anno-Team von Ubisoft Mainz.
+In Gedenken an Piero Cioni.
+DER AUTOR
+Martin Wallace, geboren 1962, wuchs in Manchester auf und lebt heute in Australien. Der studierte Lehrer und Geschichtswissenschaftler
+ist inzwischen hauptberuflicher Spieleautor und hat im Zuge dessen auch bereits einen eigenen Verlag gegründet. Seine komplexen
+Strategiespiele beschäftigen sich häufig mit wirtschaftlichen Aspekten und zeichnen sich durch die thematische Einbindung historischer
+Ereignisse und Schauplätze aus. Mit Anno 1800 - Das Brettspiel verbindet er dieses Geschick mit den Mechaniken der PC-Spiel-Vorlage zu
+einem cleveren Wettstreit um die einflussreichste Inselgruppe.
+IMPRESSUM
+Autor: Martin Wallace
+Designberater: Stephen Hurn
+Lizenz & Bildmaterial: Ubisoft Blue Byte
+Grafik: Fiore GmbH
+Redaktion: Alexandra Kunz, Wolfgang Lüdtke, Felix Noe, Kilian Vosse
+© 2020 Ubisoft Entertainment.
+All Rights Reserved.
+Anno 1800, Ubisoft and the Ubisoft logo are registered or unregistered
+trademarks of Ubisoft Entertainment in the US and/or other countries.
+Anno, Blue Byte and the Blue Byte logo are registered or unregistered
+trademarks of Ubisoft GmbH in the US and/or other countries.
+© 2020 Franckh-Kosmos Verlags-GmbH & Co. KG
+Pfizerstr. 5-7, 70184 Stuttgart
+Telefon: +49 711 2191-0
+Fax: +49 711 2191-199
+info@kosmos.de
+kosmos.de
+Art.-Nr.: 680428
+Alle Rechte vorbehalten
+MADE IN GERMANY
+z
+z15
+PRODUKTION (Seite 4)
+• Vom Arbeitsplatz vorgegebenen Bevölkerungs-Stein setzen, um die abgebildete
+Ressource 1x zu produzieren und im selben Zug zu nutzen.
+• Direkt benötigte Bevölkerungs-Steine oder Marine-Plättchen werden erschöpft.
+HANDEL (Seite 5)
+• Anzahl Handels-Plättchen erschöpfen, um 1 Industrie eines Mitspielers
+zu nutzen. Die Anzahl wird durch die Bevölkerungs-Stufe bestimmt, die der
+Mitspieler benötigen würde, um diese Ressource zu produzieren.
+• Der Mitspieler erhält 1 Gold aus dem Vorrat.
+• Handel kann nicht verwehrt werden und nicht mit sich selbst stattfinden.
+• Besetzte Arbeitsplätze verhindern den Handel nicht.
+• Direkt benötigte Bevölkerungs-Steine, Marine-Plättchen und Ressourcen von
+Neue-Welt-Inseln können nicht gehandelt werden.
+SCHICHTENDE (Seite 5)
+• Gold entsprechend der Wohnviertel ausgeben, um Bevölkerungs-Steine von den
+Arbeitsplätzen und aus dem Erschöpft-Bereich zurück auf ihre Wohnviertel zu setzen.
+• Sofern ausreichend Gold vorhanden ist, können mehrere Bevölkerungs-Steine
+zurückgesetzt werden.
+AUSBAUEN (Industrien, Werften oder Schiffe) (Seite 6)
+• Ressourcen produzieren, um 1 Bau-Plättchen zu bauen.
+• Bis zu 1 Schiff pro Werft in einer Ausbauen-Aktion (Schiffs-Stärken der
+Werften bachten!)
+• Schiffe erhalten sofort Marine-Plättchen in Höhe ihrer Stärke.
+• Überbaute Bau-Plättchen zurück auf den Spielplan legen.
+• Industrien Landfelder, Werften Landfelder mit Küste, Schiffe Meeresfelder.
+• Jede Industrie kann maximal 1x gleichzeitig gebaut sein, Werften und Schiffe
+beliebig oft.
+BEVÖLKERUNGS-KARTEN AUSSPIELEN
+& AKTIVIEREN (Seite 7)
+• Ressourcen produzieren, um 1 Karte auszuspielen.
+• Beliebig viele Karten sind jederzeit im eigenen Zug aktivierbar - freie Aktion!
+Die Karten-Effekte sind einmalig.
+BEVÖLKERUNGS-KARTEN AUSTAUSCHEN (Seite 7)
+• Bis zu 3 Handkarten unter ihre jeweiligen Stapel schieben, danach von denselben
+Stapeln genauso viele Karten ziehen.
+ARBEITSKRAFT ERHÖHEN (Seite 8)
+• Ressourcen produzieren, um bis zu 3 neue Bevölkerungs-Steine auf ihre Wohnviertel
+zu legen und für jeden neuen Bevölkerungs-Stein 1 entsprechende Karte ziehen.
+• Ist der Bevölkerungs-Kartenstapel aufgebraucht, muss für jede nicht gezogene
+Karte Gold ausgegeben werden. Ist das nicht möglich, kann die Aktion nicht
+(vollständig) durchgeführt werden.
+AUFSTEIGEN (Seite 8)
+• Ressourcen produzieren, um bis zu 3 Verbesserungen durchzuführen.
+• Jeder Stufenwechsel ist 1 Verbesserung. Reihenfolge der Verbesserungen:
+Bauer Arbeiter Handwerker Ingenieur Investor.
+ALTE WELT ERSCHLIESSEN (Seite 9)
+• Erkundungs-Plättchen erschöpfen, um 1 Alte-Welt-Insel anzulegen und wenn möglich
+ihren Effekt durchzuführen.
+• 1/2/3/4 Erkundungs-Plättchen 1./2./3./4. Alte-Welt-Insel.
+• Maximal 4 Alte-Welt-Inseln pro Spieler.
+NEUE WELT ERKUNDEN (Seite 9)
+• Erkundungs-Plättchen erschöpfen, um 1 Neue-Welt-Insel anzulegen und
+3 Neue-Welt-Karten zu ziehen.
+• 1/2/3/4 Erkundungs-Plättchen 1./2./3./4. Neue-Welt-Insel.
+• Maximal 4 Neue-Welt-Inseln pro Spieler.
+• 1 Handels-Plättchen erschöpfen, um 1 eigene Neue-Welt-Ressource zu produzieren
+(nicht handelbar).
+EXPEDITIONS-KARTEN NEHMEN (Seite 10)
+• 2 Erkundungs-Plättchen erschöpfen, um bis zu 3 Expeditions-Karten zu ziehen
+und verdeckt abzulegen.
+• Eigene Expeditions-Karten dürfen jederzeit angesehen werden.
+STADTFEST FEIERN (Seite 10)
+• Alle Bevölkerungs-Steine und Marine-Plättchen von Arbeitsplätzen und aus dem
+Erschöpft-Bereich zurück auf ihre Wohnviertel bzw. auf ihre Schiffe setzen.
+AUFTRAGS-KARTEN AKTIVIEREN (Seite 12)
+• Den Effekt ausliegender Effekt-Auftrags-Karten nutzen - freie Aktion!
+• Alonso Graves, Aarhant und Der Redakteur können höchstens 1x pro Zug
+aktiviert werden.
+SPIELABLAUF
+• Reihum je 1 Aktion, bis ein Spieler keine Handkarten mehr hat.
+• Runde zu Ende spielen.
+• Eine weitere, letzte Runde spielen.
+• Einfluss-Punkte zählen.
+Meiste Einfluss-Punkte = Gewinner.
+EINFLUSS-PUNKTE ZÄHLEN (Seite 11)
+• Ausgespielte Bevölkerungs-Karten (offen und verdeckt) .
+• Besuchte Felder der Expeditions-Karten.
+• Je 3 Gold = 1 Einfluss-Punkt.
+• Feuerwerks-Plättchen = 7 Einfluss-Punkte.
+• Erfüllte Auftrags-Karten.
+SCHNELLÜBERSICHT
+z
+z16

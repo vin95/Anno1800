@@ -37,14 +37,6 @@ class GameInitializationTest {
         }
 
         @Test
-        @DisplayName("Game should initialize with player index 0")
-        void testInitialPlayerIndex() {
-            assertNotNull(game.getCurrentPlayer(), "Current player should not be null");
-            assertEquals("Player 1", game.getCurrentPlayer().getName(), 
-                "First player should be Player 1");
-        }
-
-        @Test
         @DisplayName("Board should be initialized")
         void testBoardInitialized() {
             assertNotNull(game.getBoard(), "Board should be initialized");

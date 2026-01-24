@@ -70,6 +70,9 @@ public class ActionGenerator {
         // Note: DrawResidentCard is not a player action - it's called internally by SettleResident and SwapResidentCards
         actions.addAll(generateActivateRewardActions(player, game));
         
+        // Free actions (do not consume action points)
+        actions.addAll(generateViewResidentCardsActions(player, game));
+        
         return actions;
     }
     
@@ -625,5 +628,21 @@ public class ActionGenerator {
         }
         
         return rewardActions;
+    }
+    
+    /**
+     * Generate ViewResidentCards action.
+     * This is always available as a free action.
+     */
+    private List<Action> generateViewResidentCardsActions(Player player, Game game) {
+        List<Action> viewActions = new ArrayList<>();
+        
+        Action.ViewResidentCards viewAction = new Action.ViewResidentCards();
+        
+        if (ActionValidator.canExecute(viewAction, player, game)) {
+            viewActions.add(viewAction);
+        }
+        
+        return viewActions;
     }
 }

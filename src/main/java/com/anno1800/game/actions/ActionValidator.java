@@ -48,6 +48,12 @@ public class ActionValidator {
             case Action.ChooseGoods chooseGoods -> true; // ChooseGoods is always valid if the reward exists
             case Action.DemolishFactory demolishFactory -> DemolishFactoryValidator.canDemolishFactory(demolishFactory, player, game);
             case Action.OverbuildDefaultFactory overbuildFactory -> OverbuildDefaultFactoryValidator.canOverbuildDefaultFactory(overbuildFactory, player, game);
+            case Action.ViewResidentCards viewResidentCards -> true; // ViewResidentCards is always valid (free action)
+            
+            // Objective Card Free Actions
+            case Action.UseExtraAction useExtraAction -> UseExtraActionValidator.canUseExtraAction(useExtraAction, player, game);
+            case Action.DiscardResidentCardAction discardCard -> DiscardResidentCardActionValidator.canDiscardResidentCard(discardCard, player, game);
+            case Action.InvestorGoldAction investorGold -> InvestorGoldActionValidator.canInvestorGoldAction(investorGold, player, game);
         };
     }
 }

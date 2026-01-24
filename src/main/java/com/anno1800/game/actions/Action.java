@@ -19,7 +19,8 @@ public sealed interface Action permits
         Action.Expedition, Action.Carneval, Action.DoOvertime,
         Action.ProduceGoods, Action.TradeGoods, Action.ActivateReward,
         Action.AssignWorker, Action.ExhaustWorker, Action.DrawResidentCard, Action.ImportGood, Action.ChooseGoods,
-        Action.DemolishFactory, Action.OverbuildDefaultFactory {
+        Action.DemolishFactory, Action.OverbuildDefaultFactory, Action.ViewResidentCards,
+        Action.UseExtraAction, Action.DiscardResidentCardAction, Action.InvestorGoldAction {
 
     /**
      * Action: Build a factory
@@ -191,5 +192,42 @@ public sealed interface Action permits
      * @param chosenGood The good chosen by the player/agent
      */
     record ChooseGoods(Reward.FreeGoodsChoice reward, Goods chosenGood) implements Action {
+    }
+
+    /**
+     * Action: View current ResidentCards (Free action - does not consume an action)
+     * This action displays all ResidentCards currently held by the player.
+     */
+    record ViewResidentCards() implements Action {
+    }
+
+    // ========== Objective Card Free Actions ==========
+
+    /**
+     * Action: Use Extra Action (Free action from ExtraAction ObjectiveCard)
+     * Pay 3 Gold + 3 Explorer Chips to take an additional action this turn.
+     * Can only be used once per turn.
+     */
+    record UseExtraAction() implements Action {
+    }
+
+    /**
+     * Action: Discard a Resident Card (Free action from DiscardResidentCard ObjectiveCard)
+     * Pay 2 Explorer Chips to return 1 Resident Card under its deck.
+     * Can only be used once per turn.
+     * 
+     * @param card The ResidentCard to discard
+     */
+    record DiscardResidentCardAction(ResidentCard card) implements Action {
+    }
+
+    /**
+     * Action: Investor Gold (Free action from InvestorExhaustForGold ObjectiveCard)
+     * Exhaust 1 Investor (must be Fit/non-exhausted) to gain 5 Gold.
+     * Can only be used once per turn.
+     * 
+     * @param investor The Investor resident to exhaust
+     */
+    record InvestorGoldAction(Resident investor) implements Action {
     }
 }

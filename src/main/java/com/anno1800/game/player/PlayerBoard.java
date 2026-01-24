@@ -24,8 +24,10 @@ import com.anno1800.game.rewards.Reward;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.anno1800.data.gamedata.ShipType;
 
@@ -46,7 +48,30 @@ public class PlayerBoard {
     int availableTradeChips = 0;
     int availableExplorerChips = 0;
 
-    boolean extraActionThisTurn = false;
+    /**
+     * Tracks whether the Extra Action free action has been used this turn.
+     * Rule: "Geht nur 1x pro Zug"
+     */
+    private boolean usedExtraActionThisTurn = false;
+    
+    /**
+     * Tracks whether the Discard Resident Card free action has been used this turn.
+     * Rule: "1x Pro Zug (freie Aktion)"
+     */
+    private boolean usedDiscardResidentCardThisTurn = false;
+    
+    /**
+     * Tracks whether the Investor Gold free action has been used this turn.
+     * Rule: "1x pro Zug"
+     */
+    private boolean usedInvestorGoldThisTurn = false;
+
+    /**
+     * Tracks which goods have been traded this turn.
+     * Rule: "Pro Spielzug kann dieselbe Ressource nur einmal erhandelt werden."
+     * Must be cleared at the end of each turn using clearTradedGoodsThisTurn().
+     */
+    private Set<Goods> tradedGoodsThisTurn = new HashSet<>();
 
     Plantation[] plantations = new Plantation[6];
 
@@ -91,6 +116,103 @@ public class PlayerBoard {
         // Default factories occupy land tiles
         numFactoriesOnLand = 10; // 10 start factories (5 GREEN + 5 RED)
     }
+
+    // ========== Trade Tracking Methods ==========
+
+    /**
+     * Checks if a good has already been traded this turn.
+     * Rule: "Pro Spielzug kann dieselbe Ressource nur einmal erhandelt werden."
+     * 
+     * @param good The good to check
+     * @return true if the good has already been traded this turn
+     */
+    public boolean hasAlreadyTradedThisTurn(Goods good) {
+        return tradedGoodsThisTurn.contains(good);
+    }
+
+    /**
+     * Registers a good as traded this turn.
+     * Should be called after a successful trade.
+     * 
+     * @param good The good that was traded
+     */
+    public void registerTradedGood(Goods good) {
+        tradedGoodsThisTurn.add(good);
+    }
+
+    /**
+     * Clears the set of traded goods for a new turn.
+     * Must be called at the end of each player's turn.
+     */
+    public void clearTradedGoodsThisTurn() {
+        tradedGoodsThisTurn.clear();
+    }
+    
+    /**
+     * Clears all "once per turn" free action flags.
+     * Must be called at the end of each player's turn.
+     */
+    public void clearFreeActionFlagsThisTurn() {
+        usedExtraActionThisTurn = false;
+        usedDiscardResidentCardThisTurn = false;
+        usedInvestorGoldThisTurn = false;
+    }
+    
+    // ========== Free Action Tracking Methods ==========
+    
+    /**
+     * Checks if the Extra Action free action has been used this turn.
+     */
+    public boolean hasUsedExtraActionThisTurn() {
+        return usedExtraActionThisTurn;
+    }
+    
+    /**
+     * Marks the Extra Action free action as used this turn.
+     */
+    public void markExtraActionUsed() {
+        usedExtraActionThisTurn = true;
+    }
+    
+    /**
+     * Checks if the Discard Resident Card free action has been used this turn.
+     */
+    public boolean hasUsedDiscardResidentCardThisTurn() {
+        return usedDiscardResidentCardThisTurn;
+    }
+    
+    /**
+     * Marks the Discard Resident Card free action as used this turn.
+     */
+    public void markDiscardResidentCardUsed() {
+        usedDiscardResidentCardThisTurn = true;
+    }
+    
+    /**
+     * Checks if the Investor Gold free action has been used this turn.
+     */
+    public boolean hasUsedInvestorGoldThisTurn() {
+        return usedInvestorGoldThisTurn;
+    }
+    
+    /**
+     * Marks the Investor Gold free action as used this turn.
+     */
+    public void markInvestorGoldUsed() {
+        usedInvestorGoldThisTurn = true;
+    }
+
+    /**
+     * Gets the set of goods that have been traded this turn.
+     * Useful for debugging and display purposes.
+     * 
+     * @return An unmodifiable view of the traded goods
+     */
+    public Set<Goods> getTradedGoodsThisTurn() {
+        return Set.copyOf(tradedGoodsThisTurn);
+    }
+
+    // ========== Getter Methods ==========
 
     public int getLandTiles() {
         return landTiles;
@@ -506,8 +628,26 @@ public class PlayerBoard {
         storedGoods.add(new ProducedGood(good, new GoodSource.FromReward()));
     }
 
-    public void setExtraActionThisTurn() {
-        extraActionThisTurn = true;
+    /**
+     * Reduce the player's gold by the specified amount.
+     * 
+     * @param amount The amount of gold to deduct
+     */
+    public void reduceGold(int amount) {
+        this.gold -= amount;
+        if (this.gold < 0) {
+            this.gold = 0;
+        }
+    }
+    
+    /**
+     * Add gold to the player's total (without taking from board).
+     * Used by ObjectiveCard free actions.
+     * 
+     * @param amount The amount of gold to add
+     */
+    public void gainGold(int amount) {
+        this.gold += amount;
     }
 
     // ========== Island Management Methods ==========
@@ -974,14 +1114,25 @@ public class PlayerBoard {
     /**
      * Finds a FIT resident of the specified population level.
      * Used during planning phase to check if production is possible.
+     * Excludes residents that are already planned for use in storedGoods.
      * 
      * @param populationLevel The required population level
      * @return A FIT resident, or null if none available
      */
     private Resident findFitResident(int populationLevel) {
+        // Collect all residents already planned for use
+        java.util.Set<Resident> plannedResidents = new java.util.HashSet<>();
+        for (ProducedGood pg : storedGoods) {
+            if (pg.source() instanceof GoodSource.Produced produced) {
+                plannedResidents.add(produced.resident());
+            }
+        }
+        
+        // Find a FIT resident that's not already planned
         for (Resident resident : residents) {
             if (resident.getPopulationLevel() == populationLevel && 
-                resident.getStatus() == com.anno1800.game.residents.ResidentStatus.FIT) {
+                resident.getStatus() == com.anno1800.game.residents.ResidentStatus.FIT &&
+                !plannedResidents.contains(resident)) {
                 return resident;
             }
         }
