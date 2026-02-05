@@ -61,8 +61,8 @@ public class GameStatePrinter {
             PlayerState player = state.players().get(i);
             System.out.println("    {");
             System.out.printf("      \"name\": \"%s\",%n", player.name());
-            System.out.printf("      \"factories\": %d,%n", player.factoryCount());
-            System.out.printf("      \"residents\": %d%n", player.residentCount());
+            System.out.printf("      \"factories\": %d,%n", player.buildings().factoryCount());
+            System.out.printf("      \"residents\": %d%n", player.residents().count());
             System.out.print("    }");
             if (i < state.players().size() - 1) {
                 System.out.println(",");
@@ -90,41 +90,41 @@ public class GameStatePrinter {
         System.out.println("+- Shared Board ----------------------------------------------------------------------+");
         System.out.println("| Factories & Buildings:                 | Ships:                                     |");
         System.out.printf("|   Available Factories:    %3d          |   Trade Ship Level 1:     %3d              |%n", 
-            board.availableFactories(), board.tradeShipLevel1Size());
+            board.factories().availableFactories(), board.ships().tradeShips().level1());
         System.out.printf("|   Shipyard Level 1:       %3d          |   Trade Ship Level 2:     %3d              |%n", 
-            board.shipyardLevel1Size(), board.tradeShipLevel2Size());
+            board.shipyards().level1(), board.ships().tradeShips().level2());
         System.out.printf("|   Shipyard Level 2:       %3d          |   Trade Ship Level 3:     %3d              |%n", 
-            board.shipyardLevel2Size(), board.tradeShipLevel3Size());
+            board.shipyards().level2(), board.ships().tradeShips().level3());
         System.out.printf("|   Shipyard Level 3:       %3d          |   Explorer Ship Level 1:  %3d              |%n", 
-            board.shipyardLevel3Size(), board.explorerShipLevel1Size());
+            board.shipyards().level3(), board.ships().explorerShips().level1());
         System.out.printf("|                                        |   Explorer Ship Level 2:  %3d              |%n", 
-            board.explorerShipLevel2Size());
+            board.ships().explorerShips().level2());
         System.out.printf("|                                        |   Explorer Ship Level 3:  %3d              |%n", 
-            board.explorerShipLevel3Size());
+            board.ships().explorerShips().level3());
         System.out.println("+----------------------------------------+--------------------------------------------+");
         System.out.println("| Cards:                                 | Islands:                                   |");
         System.out.printf("|   Resident Stack 1:       %3d          |   Old World Islands:      %3d              |%n", 
-            board.residentStack1Size(), board.oldWorldIslandsSize());
+            board.residentCards().stack1Size(), board.islands().oldWorldSize());
         System.out.printf("|   Resident Stack 2:       %3d          |   New World Islands:      %3d              |%n", 
-            board.residentStack2Size(), board.newWorldIslandsSize());
+            board.residentCards().stack2Size(), board.islands().newWorldSize());
         System.out.printf("|   Resident Stack 3:       %3d          |                                            |%n", 
-            board.residentStack3Size());
+            board.residentCards().stack3Size());
         System.out.printf("|   Total Resident Cards:   %3d          |                                            |%n", 
-            board.availableResidentCards());
+            board.residentCards().totalAvailable());
         System.out.printf("|   Expedition Cards:       %3d          |                                            |%n", 
-            board.expeditionStackSize());
+            board.expeditions().stackSize());
         System.out.println("+----------------------------------------+--------------------------------------------+");
         System.out.println("| Population Pool:                       | Resources:                                 |");
         System.out.printf("|   Farmers:                %3d          |   Gold Pool:              %3d              |%n", 
-            board.farmers(), board.gold());
+            board.resources().farmers(), board.resources().gold());
         System.out.printf("|   Workers:                %3d          |   Trade Chips:            %3d              |%n", 
-            board.workers(), board.tradeChips());
+            board.resources().workers(), board.resources().tradeChips());
         System.out.printf("|   Artisans:               %3d          |   Explorer Chips:         %3d              |%n", 
-            board.artisans(), board.explorerChips());
+            board.resources().artisans(), board.resources().explorerChips());
         System.out.printf("|   Engineers:              %3d          |                                            |%n", 
-            board.engineers());
+            board.resources().engineers());
         System.out.printf("|   Investors:              %3d          |                                            |%n", 
-            board.investors());
+            board.resources().investors());
         System.out.println("+-------------------------------------------------------------------------------------+");
     }
     
@@ -138,39 +138,39 @@ public class GameStatePrinter {
             System.out.printf("%s| Position: %2d                                                          |%n",
                 marker, player.position());
             System.out.printf("%s| Free Tiles:      Land: %2d | Coast: %2d | Sea: %2d                       |%n",
-                marker, player.freeLandTiles(), player.freeCoastTiles(), player.freeSeaTiles());
+                marker, player.tiles().freeLandTiles(), player.tiles().freeCoastTiles(), player.tiles().freeSeaTiles());
             System.out.printf("%s| Buildings:  Factories: %2d | Shipyards: %2d                             |%n",
-                marker, player.factoryCount(), player.shipyardCount());
+                marker, player.buildings().factoryCount(), player.buildings().shipyardCount());
             System.out.printf("%s| Ships:      Trade: %2d | Explorer: %2d                                  |%n",
-                marker, player.tradeShipCount(), player.explorerShipCount());
+                marker, player.ships().tradeShips().totalCount(), player.ships().explorerShips().totalCount());
             System.out.printf("%s|   Trade Ships:   L1: %2d | L2: %2d | L3: %2d                             |%n",
-                marker, player.tradeShipLevel1(), player.tradeShipLevel2(), player.tradeShipLevel3());
+                marker, player.ships().tradeShips().levels().level1(), player.ships().tradeShips().levels().level2(), player.ships().tradeShips().levels().level3());
             System.out.printf("%s|   Explorer Ships: L1: %2d | L2: %2d | L3: %2d                            |%n",
-                marker, player.explorerShipLevel1(), player.explorerShipLevel2(), player.explorerShipLevel3());
+                marker, player.ships().explorerShips().levels().level1(), player.ships().explorerShips().levels().level2(), player.ships().explorerShips().levels().level3());
                 System.out.printf("%s| Trade Chips:    %2d | Explorer Chips: %2d                               |%n",
-                marker, player.availableTradeChips(), player.availableExplorerChips());
+                marker, player.resources().availableTradeChips(), player.resources().availableExplorerChips());
                 System.out.printf("%s| Resources:      Gold: %2d                                              |%n",
-                marker, player.gold());
+                marker, player.resources().gold());
             System.out.printf("%s| Cards:   Resident Cards: %2d                                           |%n",
-                marker, player.residentCardCount());
+                marker, player.cards().residentCardCount());
             System.out.printf("%s| Residents:  Total: %2d                                                 |%n",
-                marker, player.residentCount());
+                marker, player.residents().count());
             
             // Print resident details
-            if (!player.residents().isEmpty()) {
+            if (!player.residents().residents().isEmpty()) {
                 System.out.printf("%s|   Level 1: %2d | Level 2: %2d | Level 3: %2d | Level 4: %2d | Level 5: %2d |%n",
                     marker,
-                    countResidentsByLevel(player.residents(), 1),
-                    countResidentsByLevel(player.residents(), 2),
-                    countResidentsByLevel(player.residents(), 3),
-                    countResidentsByLevel(player.residents(), 4),
-                    countResidentsByLevel(player.residents(), 5)
+                    countResidentsByLevel(player.residents().residents(), 1),
+                    countResidentsByLevel(player.residents().residents(), 2),
+                    countResidentsByLevel(player.residents().residents(), 3),
+                    countResidentsByLevel(player.residents().residents(), 4),
+                    countResidentsByLevel(player.residents().residents(), 5)
                 );
                 System.out.printf("%s|   Working: %2d | Fit: %2d | Exhausted: %2d                               |%n",
                     marker,
-                    countResidentsByStatus(player.residents(), "AT_WORK"),
-                    countResidentsByStatus(player.residents(), "FIT"),
-                    countResidentsByStatus(player.residents(), "EXHAUSTED")
+                    countResidentsByStatus(player.residents().residents(), "AT_WORK"),
+                    countResidentsByStatus(player.residents().residents(), "FIT"),
+                    countResidentsByStatus(player.residents().residents(), "EXHAUSTED")
                 );
             }
             

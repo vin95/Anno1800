@@ -1258,41 +1258,42 @@ public class TerminalGameUI {
      * Check if player state has changed.
      */
     private boolean hasPlayerStateChanged(GameState.PlayerState prev, GameState.PlayerState curr) {
-        return prev.gold() != curr.gold() ||
-               prev.factoryCount() != curr.factoryCount() ||
-               prev.residentCount() != curr.residentCount() ||
-               prev.residentCardCount() != curr.residentCardCount() ||
-               prev.tradeShipCount() != curr.tradeShipCount() ||
-               prev.explorerShipCount() != curr.explorerShipCount() ||
-               prev.shipyardCount() != curr.shipyardCount();
+        return prev.resources().gold() != curr.resources().gold() ||
+               prev.buildings().factoryCount() != curr.buildings().factoryCount() ||
+               prev.residents().count() != curr.residents().count() ||
+               prev.cards().residentCardCount() != curr.cards().residentCardCount() ||
+               prev.ships().tradeShips().totalCount() != curr.ships().tradeShips().totalCount() ||
+               prev.ships().explorerShips().totalCount() != curr.ships().explorerShips().totalCount() ||
+               prev.buildings().shipyardCount() != curr.buildings().shipyardCount();
     }
     
     /**
      * Print differences in player state.
      */
     private void printPlayerDifferences(GameState.PlayerState prev, GameState.PlayerState curr) {
-        if (prev.gold() != curr.gold()) {
-            System.out.printf("  Gold: %d → %d (%+d)\n", prev.gold(), curr.gold(), curr.gold() - prev.gold());
+        if (prev.resources().gold() != curr.resources().gold()) {
+            System.out.printf("  Gold: %d → %d (%+d)\n", prev.resources().gold(), curr.resources().gold(), 
+                curr.resources().gold() - prev.resources().gold());
         }
-        if (prev.factoryCount() != curr.factoryCount()) {
-            System.out.printf("  Factories: %d → %d (%+d)\n", prev.factoryCount(), curr.factoryCount(), 
-                curr.factoryCount() - prev.factoryCount());
+        if (prev.buildings().factoryCount() != curr.buildings().factoryCount()) {
+            System.out.printf("  Factories: %d → %d (%+d)\n", prev.buildings().factoryCount(), curr.buildings().factoryCount(), 
+                curr.buildings().factoryCount() - prev.buildings().factoryCount());
         }
-        if (prev.residentCount() != curr.residentCount()) {
-            System.out.printf("  Residents: %d → %d (%+d)\n", prev.residentCount(), curr.residentCount(), 
-                curr.residentCount() - prev.residentCount());
+        if (prev.residents().count() != curr.residents().count()) {
+            System.out.printf("  Residents: %d → %d (%+d)\n", prev.residents().count(), curr.residents().count(), 
+                curr.residents().count() - prev.residents().count());
         }
-        if (prev.residentCardCount() != curr.residentCardCount()) {
-            System.out.printf("  Resident Cards: %d → %d (%+d)\n", prev.residentCardCount(), curr.residentCardCount(), 
-                curr.residentCardCount() - prev.residentCardCount());
+        if (prev.cards().residentCardCount() != curr.cards().residentCardCount()) {
+            System.out.printf("  Resident Cards: %d → %d (%+d)\n", prev.cards().residentCardCount(), curr.cards().residentCardCount(), 
+                curr.cards().residentCardCount() - prev.cards().residentCardCount());
         }
-        if (prev.tradeShipCount() != curr.tradeShipCount()) {
-            System.out.printf("  Trade Ships: %d → %d (%+d)\n", prev.tradeShipCount(), curr.tradeShipCount(), 
-                curr.tradeShipCount() - prev.tradeShipCount());
+        if (prev.ships().tradeShips().totalCount() != curr.ships().tradeShips().totalCount()) {
+            System.out.printf("  Trade Ships: %d → %d (%+d)\n", prev.ships().tradeShips().totalCount(), curr.ships().tradeShips().totalCount(), 
+                curr.ships().tradeShips().totalCount() - prev.ships().tradeShips().totalCount());
         }
-        if (prev.explorerShipCount() != curr.explorerShipCount()) {
-            System.out.printf("  Explorer Ships: %d → %d (%+d)\n", prev.explorerShipCount(), curr.explorerShipCount(), 
-                curr.explorerShipCount() - prev.explorerShipCount());
+        if (prev.ships().explorerShips().totalCount() != curr.ships().explorerShips().totalCount()) {
+            System.out.printf("  Explorer Ships: %d → %d (%+d)\n", prev.ships().explorerShips().totalCount(), curr.ships().explorerShips().totalCount(), 
+                curr.ships().explorerShips().totalCount() - prev.ships().explorerShips().totalCount());
         }
     }
     
@@ -1300,28 +1301,28 @@ public class TerminalGameUI {
      * Check if board state has changed.
      */
     private boolean hasBoardStateChanged(GameState.BoardState prev, GameState.BoardState curr) {
-        return prev.gold() != curr.gold() ||
-               prev.farmers() != curr.farmers() ||
-               prev.workers() != curr.workers() ||
-               prev.availableFactories() != curr.availableFactories();
+        return prev.resources().gold() != curr.resources().gold() ||
+               prev.resources().farmers() != curr.resources().farmers() ||
+               prev.resources().workers() != curr.resources().workers() ||
+               prev.factories().availableFactories() != curr.factories().availableFactories();
     }
     
     /**
      * Print differences in board state.
      */
     private void printBoardDifferences(GameState.BoardState prev, GameState.BoardState curr) {
-        if (prev.gold() != curr.gold()) {
-            System.out.printf("  Gold pool: %d → %d (%+d)\n", prev.gold(), curr.gold(), curr.gold() - prev.gold());
+        if (prev.resources().gold() != curr.resources().gold()) {
+            System.out.printf("  Gold pool: %d → %d (%+d)\n", prev.resources().gold(), curr.resources().gold(), curr.resources().gold() - prev.resources().gold());
         }
-        if (prev.farmers() != curr.farmers()) {
-            System.out.printf("  Farmers: %d → %d (%+d)\n", prev.farmers(), curr.farmers(), curr.farmers() - prev.farmers());
+        if (prev.resources().farmers() != curr.resources().farmers()) {
+            System.out.printf("  Farmers: %d → %d (%+d)\n", prev.resources().farmers(), curr.resources().farmers(), curr.resources().farmers() - prev.resources().farmers());
         }
-        if (prev.workers() != curr.workers()) {
-            System.out.printf("  Workers: %d → %d (%+d)\n", prev.workers(), curr.workers(), curr.workers() - prev.workers());
+        if (prev.resources().workers() != curr.resources().workers()) {
+            System.out.printf("  Workers: %d → %d (%+d)\n", prev.resources().workers(), curr.resources().workers(), curr.resources().workers() - prev.resources().workers());
         }
-        if (prev.availableFactories() != curr.availableFactories()) {
-            System.out.printf("  Available Factories: %d → %d (%+d)\n", prev.availableFactories(), 
-                curr.availableFactories(), curr.availableFactories() - prev.availableFactories());
+        if (prev.factories().availableFactories() != curr.factories().availableFactories()) {
+            System.out.printf("  Available Factories: %d → %d (%+d)\n", prev.factories().availableFactories(), 
+                curr.factories().availableFactories(), curr.factories().availableFactories() - prev.factories().availableFactories());
         }
     }
     
@@ -1582,47 +1583,47 @@ public class TerminalGameUI {
                 // Complete Board State
                 writer.println("  \"boardState\": {");
                 writer.println("    \"factories\": {");
-                writer.printf("      \"availableFactories\": %d%n", state.boardState().availableFactories());
+                writer.printf("      \"availableFactories\": %d%n", state.boardState().factories().availableFactories());
                 writer.println("    },");
                 writer.println("    \"shipyards\": {");
-                writer.printf("      \"level1\": %d,%n", state.boardState().shipyardLevel1Size());
-                writer.printf("      \"level2\": %d,%n", state.boardState().shipyardLevel2Size());
-                writer.printf("      \"level3\": %d%n", state.boardState().shipyardLevel3Size());
+                writer.printf("      \"level1\": %d,%n", state.boardState().shipyards().level1());
+                writer.printf("      \"level2\": %d,%n", state.boardState().shipyards().level2());
+                writer.printf("      \"level3\": %d%n", state.boardState().shipyards().level3());
                 writer.println("    },");
                 writer.println("    \"ships\": {");
                 writer.println("      \"tradeShips\": {");
-                writer.printf("        \"level1\": %d,%n", state.boardState().tradeShipLevel1Size());
-                writer.printf("        \"level2\": %d,%n", state.boardState().tradeShipLevel2Size());
-                writer.printf("        \"level3\": %d%n", state.boardState().tradeShipLevel3Size());
+                writer.printf("        \"level1\": %d,%n", state.boardState().ships().tradeShips().level1());
+                writer.printf("        \"level2\": %d,%n", state.boardState().ships().tradeShips().level2());
+                writer.printf("        \"level3\": %d%n", state.boardState().ships().tradeShips().level3());
                 writer.println("      },");
                 writer.println("      \"explorerShips\": {");
-                writer.printf("        \"level1\": %d,%n", state.boardState().explorerShipLevel1Size());
-                writer.printf("        \"level2\": %d,%n", state.boardState().explorerShipLevel2Size());
-                writer.printf("        \"level3\": %d%n", state.boardState().explorerShipLevel3Size());
+                writer.printf("        \"level1\": %d,%n", state.boardState().ships().explorerShips().level1());
+                writer.printf("        \"level2\": %d,%n", state.boardState().ships().explorerShips().level2());
+                writer.printf("        \"level3\": %d%n", state.boardState().ships().explorerShips().level3());
                 writer.println("      }");
                 writer.println("    },");
                 writer.println("    \"cards\": {");
-                writer.printf("      \"residentStack1\": %d,%n", state.boardState().residentStack1Size());
-                writer.printf("      \"residentStack2\": %d,%n", state.boardState().residentStack2Size());
-                writer.printf("      \"residentStack3\": %d,%n", state.boardState().residentStack3Size());
-                writer.printf("      \"totalResidentCards\": %d,%n", state.boardState().availableResidentCards());
-                writer.printf("      \"expeditionCards\": %d%n", state.boardState().expeditionStackSize());
+                writer.printf("      \"residentStack1\": %d,%n", state.boardState().residentCards().stack1Size());
+                writer.printf("      \"residentStack2\": %d,%n", state.boardState().residentCards().stack2Size());
+                writer.printf("      \"residentStack3\": %d,%n", state.boardState().residentCards().stack3Size());
+                writer.printf("      \"totalResidentCards\": %d,%n", state.boardState().residentCards().totalAvailable());
+                writer.printf("      \"expeditionCards\": %d%n", state.boardState().expeditions().stackSize());
                 writer.println("    },");
                 writer.println("    \"islands\": {");
-                writer.printf("      \"oldWorldIslands\": %d,%n", state.boardState().oldWorldIslandsSize());
-                writer.printf("      \"newWorldIslands\": %d%n", state.boardState().newWorldIslandsSize());
+                writer.printf("      \"oldWorldIslands\": %d,%n", state.boardState().islands().oldWorldSize());
+                writer.printf("      \"newWorldIslands\": %d%n", state.boardState().islands().newWorldSize());
                 writer.println("    },");
                 writer.println("    \"populationPool\": {");
-                writer.printf("      \"farmers\": %d,%n", state.boardState().farmers());
-                writer.printf("      \"workers\": %d,%n", state.boardState().workers());
-                writer.printf("      \"artisans\": %d,%n", state.boardState().artisans());
-                writer.printf("      \"engineers\": %d,%n", state.boardState().engineers());
-                writer.printf("      \"investors\": %d%n", state.boardState().investors());
+                writer.printf("      \"farmers\": %d,%n", state.boardState().resources().farmers());
+                writer.printf("      \"workers\": %d,%n", state.boardState().resources().workers());
+                writer.printf("      \"artisans\": %d,%n", state.boardState().resources().artisans());
+                writer.printf("      \"engineers\": %d,%n", state.boardState().resources().engineers());
+                writer.printf("      \"investors\": %d%n", state.boardState().resources().investors());
                 writer.println("    },");
                 writer.println("    \"resources\": {");
-                writer.printf("      \"goldPool\": %d,%n", state.boardState().gold());
-                writer.printf("      \"tradeChips\": %d,%n", state.boardState().tradeChips());
-                writer.printf("      \"explorerChips\": %d%n", state.boardState().explorerChips());
+                writer.printf("      \"goldPool\": %d,%n", state.boardState().resources().gold());
+                writer.printf("      \"tradeChips\": %d,%n", state.boardState().resources().tradeChips());
+                writer.printf("      \"explorerChips\": %d%n", state.boardState().resources().explorerChips());
                 writer.println("    }");
                 writer.println("  },");
                 
@@ -1634,33 +1635,33 @@ public class TerminalGameUI {
                     writer.printf("      \"name\": \"%s\",%n", player.name());
                     writer.printf("      \"position\": %d,%n", player.position());
                     writer.println("      \"tiles\": {");
-                    writer.printf("        \"freeLand\": %d,%n", player.freeLandTiles());
-                    writer.printf("        \"freeCoast\": %d,%n", player.freeCoastTiles());
-                    writer.printf("        \"freeSea\": %d%n", player.freeSeaTiles());
+                    writer.printf("        \"freeLand\": %d,%n", player.tiles().freeLandTiles());
+                    writer.printf("        \"freeCoast\": %d,%n", player.tiles().freeCoastTiles());
+                    writer.printf("        \"freeSea\": %d%n", player.tiles().freeSeaTiles());
                     writer.println("      },");
                     writer.println("      \"buildings\": {");
-                    writer.printf("        \"factories\": %d,%n", player.factoryCount());
-                    writer.printf("        \"shipyards\": %d%n", player.shipyardCount());
+                    writer.printf("        \"factories\": %d,%n", player.buildings().factoryCount());
+                    writer.printf("        \"shipyards\": %d%n", player.buildings().shipyardCount());
                     writer.println("      },");
                     writer.println("      \"ships\": {");
-                    writer.printf("        \"tradeShips\": %d,%n", player.tradeShipCount());
-                    writer.printf("        \"explorerShips\": %d%n", player.explorerShipCount());
+                    writer.printf("        \"tradeShips\": %d,%n", player.ships().tradeShips().totalCount());
+                    writer.printf("        \"explorerShips\": %d%n", player.ships().explorerShips().totalCount());
                     writer.println("      },");
                     writer.println("      \"resources\": {");
-                    writer.printf("        \"gold\": %d,%n", player.gold());
-                    writer.printf("        \"tradeChips\": %d,%n", player.availableTradeChips());
-                    writer.printf("        \"explorerChips\": %d%n", player.availableExplorerChips());
+                    writer.printf("        \"gold\": %d,%n", player.resources().gold());
+                    writer.printf("        \"tradeChips\": %d,%n", player.resources().availableTradeChips());
+                    writer.printf("        \"explorerChips\": %d%n", player.resources().availableExplorerChips());
                     writer.println("      },");
                     writer.println("      \"cards\": {");
-                    writer.printf("        \"residentCards\": %d%n", player.residentCardCount());
+                    writer.printf("        \"residentCards\": %d%n", player.cards().residentCardCount());
                     writer.println("      },");
                     writer.println("      \"residents\": {");
-                    writer.printf("        \"total\": %d,%n", player.residentCount());
+                    writer.printf("        \"total\": %d,%n", player.residents().count());
                     
                     // Count residents by level
                     int[] levelCounts = new int[6]; // 0-5, we use 1-5
                     int onBoard = 0, working = 0, fit = 0, exhausted = 0;
-                    for (var resident : player.residents()) {
+                    for (var resident : player.residents().residents()) {
                         levelCounts[resident.level()]++;
                         switch (resident.status()) {
                             case "ON_BOARD" -> onBoard++;
