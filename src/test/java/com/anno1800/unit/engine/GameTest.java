@@ -1,4 +1,4 @@
-package com.anno1800.engine;
+package com.anno1800.unit.engine;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +16,7 @@ import com.anno1800.game.player.Player;
  * Tests verify that all game materials are properly initialized.
  */
 @DisplayName("Game Initialization Tests")
-class GameInitializationTest {
+class GameTest {
 
     private Game game;
     private static final int TEST_NUM_PLAYERS = 2;
