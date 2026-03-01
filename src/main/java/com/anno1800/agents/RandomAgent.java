@@ -17,7 +17,7 @@ public class RandomAgent implements Agent {
     
     public RandomAgent(String name) {
         this.name = name;
-        this.random = new Random();
+        this.random = new Random(42); // Fixed seed for reproducibility
     }
     
     public RandomAgent() {

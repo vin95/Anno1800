@@ -1,0 +1,24 @@
+package com.anno1800.unit.factories;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Test suite for FactoryManager.
+ */
+@DisplayName("FactoryManager Tests")
+class FactoryManagerTest {
+
+    @BeforeEach
+    void setUp() {
+        // Setup test fixtures
+    }
+
+    @Test
+    @DisplayName("Dummy test - always passes")
+    void dummyTest() {
+        assertTrue(true, "This test should always pass");
+    }
+}

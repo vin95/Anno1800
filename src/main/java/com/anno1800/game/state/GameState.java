@@ -55,128 +55,165 @@ public record GameState(
     /**
      * Represents the shared board state.
      * Contains all stacks and pools available to all players.
+     * 
+     * Uses nested records for logical grouping instead of a flat 25-parameter structure.
      */
     public record BoardState(
-        // Factory stacks - count available factories per stack
-        int availableFactories,
-        
-        // Resident card stacks
-        int residentStack1Size,
-        int residentStack2Size,
-        int residentStack3Size,
-        
-        int availableResidentCards,
-        
-        // Expedition cards
-        int expeditionStackSize,
-        
-        // Shipyard stacks
-        int shipyardLevel1Size,
-        int shipyardLevel2Size,
-        int shipyardLevel3Size,
-        
-        // Ship stacks
-        int tradeShipLevel1Size,
-        int tradeShipLevel2Size,
-        int tradeShipLevel3Size,
-        int explorerShipLevel1Size,
-        int explorerShipLevel2Size,
-        int explorerShipLevel3Size,
-        
-        // Island stacks
-        int oldWorldIslandsSize,
-        int newWorldIslandsSize,
-        
-        // Shared pools
-        int farmers,
-        int workers,
-        int artisans,
-        int engineers,
-        int investors,
-        int gold,
-        int tradeChips,
-        int explorerChips
+        FactoryState factories,
+        ResidentCardState residentCards,
+        ExpeditionState expeditions,
+        ShipyardState shipyards,
+        ShipState ships,
+        IslandState islands,
+        ResourcePoolState resources
     ) {
         /**
          * Creates a BoardState from the actual Board object.
          */
         public static BoardState fromBoard(Board board) {
-            // Count total available factories across all stacks
-            int totalFactories = board.getFactoryStacks().stream()
-                .mapToInt(stack -> stack.size())
-                .sum();
-            
-            int totalResidentCards = board.getResidentStack1().size() 
-                + board.getResidentStack2().size() 
-                + board.getResidentStack3().size();
-            
             return new BoardState(
-                totalFactories,
-                board.getResidentStack1().size(),
-                board.getResidentStack2().size(),
-                board.getResidentStack3().size(),
-                totalResidentCards,
-                board.getExpeditionStack().size(),
-                board.getShipyardLevel1().size(),
-                board.getShipyardLevel2().size(),
-                board.getShipyardLevel3().size(),
-                board.getTradeShipLevel1().size(),
-                board.getTradeShipLevel2().size(),
-                board.getTradeShipLevel3().size(),
-                board.getExplorerShipLevel1().size(),
-                board.getExplorerShipLevel2().size(),
-                board.getExplorerShipLevel3().size(),
-                board.getOldWorldIslands().size(),
-                board.getNewWorldIslands().size(),
-                board.getFarmers(),
-                board.getWorkers(),
-                board.getArtisans(),
-                board.getEngineers(),
-                board.getInvestors(),
-                board.getGold(),
-                board.getTradeChips(),
-                board.getExplorerChips()
+                FactoryState.fromBoard(board),
+                ResidentCardState.fromBoard(board),
+                ExpeditionState.fromBoard(board),
+                ShipyardState.fromBoard(board),
+                ShipState.fromBoard(board),
+                IslandState.fromBoard(board),
+                ResourcePoolState.fromBoard(board)
             );
+        }
+        
+        /**
+         * Factory stacks state.
+         */
+        public record FactoryState(int availableFactories) {
+            static FactoryState fromBoard(Board board) {
+                int total = board.getFactoryStacks().stream()
+                    .mapToInt(stack -> stack.size())
+                    .sum();
+                return new FactoryState(total);
+            }
+        }
+        
+        /**
+         * Resident card stacks state.
+         */
+        public record ResidentCardState(
+            int stack1Size,
+            int stack2Size,
+            int stack3Size,
+            int totalAvailable
+        ) {
+            static ResidentCardState fromBoard(Board board) {
+                int s1 = board.getResidentStack1().size();
+                int s2 = board.getResidentStack2().size();
+                int s3 = board.getResidentStack3().size();
+                return new ResidentCardState(s1, s2, s3, s1 + s2 + s3);
+            }
+        }
+        
+        /**
+         * Expedition card stack state.
+         */
+        public record ExpeditionState(int stackSize) {
+            static ExpeditionState fromBoard(Board board) {
+                return new ExpeditionState(board.getExpeditionStack().size());
+            }
+        }
+        
+        /**
+         * Shipyard stacks state (available shipyard tiles by level).
+         */
+        public record ShipyardState(int level1, int level2, int level3) {
+            static ShipyardState fromBoard(Board board) {
+                return new ShipyardState(
+                    board.getShipyardLevel1().size(),
+                    board.getShipyardLevel2().size(),
+                    board.getShipyardLevel3().size()
+                );
+            }
+        }
+        
+        /**
+         * Ship stacks state (available ships by type and level).
+         */
+        public record ShipState(
+            ShipLevelCounts tradeShips,
+            ShipLevelCounts explorerShips
+        ) {
+            static ShipState fromBoard(Board board) {
+                return new ShipState(
+                    new ShipLevelCounts(
+                        board.getTradeShipLevel1().size(),
+                        board.getTradeShipLevel2().size(),
+                        board.getTradeShipLevel3().size()
+                    ),
+                    new ShipLevelCounts(
+                        board.getExplorerShipLevel1().size(),
+                        board.getExplorerShipLevel2().size(),
+                        board.getExplorerShipLevel3().size()
+                    )
+                );
+            }
+            
+            /**
+             * Ship counts by level (1, 2, 3).
+             */
+            public record ShipLevelCounts(int level1, int level2, int level3) {}
+        }
+        
+        /**
+         * Island stacks state (available islands by world).
+         */
+        public record IslandState(int oldWorldSize, int newWorldSize) {
+            static IslandState fromBoard(Board board) {
+                return new IslandState(
+                    board.getOldWorldIslands().size(),
+                    board.getNewWorldIslands().size()
+                );
+            }
+        }
+        
+        /**
+         * Shared resource pools (residents, gold, chips).
+         */
+        public record ResourcePoolState(
+            int farmers,
+            int workers,
+            int artisans,
+            int engineers,
+            int investors,
+            int gold,
+            int tradeChips,
+            int explorerChips
+        ) {
+            static ResourcePoolState fromBoard(Board board) {
+                return new ResourcePoolState(
+                    board.getFarmers(),
+                    board.getWorkers(),
+                    board.getArtisans(),
+                    board.getEngineers(),
+                    board.getInvestors(),
+                    board.getGold(),
+                    board.getTradeChips(),
+                    board.getExplorerChips()
+                );
+            }
         }
     }
     
     /**
      * Represents a single player's state.
+     * Uses nested records for logical grouping instead of a flat 18-parameter structure.
      */
     public record PlayerState(
         String name,
         int position,
-        
-        // Board tiles
-        int freeLandTiles,
-        int freeCoastTiles,
-        int freeSeaTiles,
-        
-        // Buildings and ships
-        int factoryCount,
-        int shipyardCount,
-        int tradeShipCount,
-        int explorerShipCount,
-        
-        // Ship levels
-        int tradeShipLevel1,
-        int tradeShipLevel2,
-        int tradeShipLevel3,
-        int explorerShipLevel1,
-        int explorerShipLevel2,
-        int explorerShipLevel3,
-        
-        // Resources
-        int gold,
-        int availableTradeChips,
-        int availableExplorerChips,
-        
-        // Residents
-        int residentCount,
-        List<ResidentSummary> residents,
-        
-        // Cards
-        int residentCardCount
+        TileState tiles,
+        BuildingState buildings,
+        PlayerShipState ships,
+        PlayerResourceState resources,
+        ResidentState residents,
+        CardState cards
     ) {
         /**
          * Creates PlayerState list from Player array.
@@ -214,23 +251,96 @@ public record GameState(
             return new PlayerState(
                 player.getName(),
                 player.getPosition(),
-                board.getFreeLandTiles(),
-                board.getFreeCoastTiles(),
-                board.getFreeSeaTiles(),
-                board.getAllActiveFactories().size(),
-                board.getShipyards().size(),
-                board.getTradeShips().size(),
-                board.getExplorerShips().size(),
-                tradeL1, tradeL2, tradeL3,
-                explorerL1, explorerL2, explorerL3,
-                board.getGold(),
-                board.getAvailableTradeChips(),
-                board.getAvailableExplorerChips(),
-                board.getResidents().size(),
-                residents,
-                board.getResidentCards().size()
+                new TileState(
+                    board.getFreeLandTiles(),
+                    board.getFreeCoastTiles(),
+                    board.getFreeSeaTiles()
+                ),
+                new BuildingState(
+                    board.getAllActiveFactories().size(),
+                    board.getShipyards().size()
+                ),
+                new PlayerShipState(
+                    new PlayerShipState.ShipCountWithLevels(
+                        board.getTradeShips().size(),
+                        new BoardState.ShipState.ShipLevelCounts(tradeL1, tradeL2, tradeL3)
+                    ),
+                    new PlayerShipState.ShipCountWithLevels(
+                        board.getExplorerShips().size(),
+                        new BoardState.ShipState.ShipLevelCounts(explorerL1, explorerL2, explorerL3)
+                    )
+                ),
+                new PlayerResourceState(
+                    board.getGold(),
+                    board.getAvailableTradeChips(),
+                    board.getAvailableExplorerChips()
+                ),
+                new ResidentState(
+                    board.getResidents().size(),
+                    residents
+                ),
+                new CardState(
+                    board.getResidentCards().size()
+                )
             );
         }
+        
+        /**
+         * Player's tile state (free tiles on player board).
+         */
+        public record TileState(
+            int freeLandTiles,
+            int freeCoastTiles,
+            int freeSeaTiles
+        ) {}
+        
+        /**
+         * Player's building state (factories and shipyards).
+         */
+        public record BuildingState(
+            int factoryCount,
+            int shipyardCount
+        ) {}
+        
+        /**
+         * Player's ship state (trade and explorer ships with counts and levels).
+         */
+        public record PlayerShipState(
+            ShipCountWithLevels tradeShips,
+            ShipCountWithLevels explorerShips
+        ) {
+            /**
+             * Ship count and level breakdown.
+             */
+            public record ShipCountWithLevels(
+                int totalCount,
+                BoardState.ShipState.ShipLevelCounts levels
+            ) {}
+        }
+        
+        /**
+         * Player's resource state (gold and chips).
+         */
+        public record PlayerResourceState(
+            int gold,
+            int availableTradeChips,
+            int availableExplorerChips
+        ) {}
+        
+        /**
+         * Player's resident state (count and detailed list).
+         */
+        public record ResidentState(
+            int count,
+            List<ResidentSummary> residents
+        ) {}
+        
+        /**
+         * Player's card state.
+         */
+        public record CardState(
+            int residentCardCount
+        ) {}
     }
     
     /**

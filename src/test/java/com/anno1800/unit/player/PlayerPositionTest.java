@@ -1,4 +1,4 @@
-package com.anno1800.engine;
+package com.anno1800.unit.player;
 
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
