@@ -7,6 +7,8 @@ import com.anno1800.game.player.Player;
 import com.anno1800.game.player.PlayerBoard;
 import com.anno1800.game.residents.Resident;
 import com.anno1800.game.residents.ResidentCosts;
+import com.anno1800.data.gamedata.Goods;
+import java.util.ArrayList;
 
 /**
  * Upgrade a resident to the next population level.
@@ -37,67 +39,62 @@ public class UpgradeResident {
         }
         
         System.out.println("Upgrading " + residents.length + " resident(s)");
-        
-        // PHASE 1: Validate and plan all upgrades (accumulate resource planning)
+
+        // --- Validate residents and collect ALL costs into one combined array ---
+        // This is necessary because canObtainGoods + consumeGoods must be called
+        // exactly once each: consumeGoods clears storedGoods at the end, so calling
+        // it in a per-resident loop would wipe planned goods before later residents
+        // can consume theirs.
+        ArrayList<Goods> allCosts = new ArrayList<>();
         for (Resident oldResident : residents) {
             int currentLevel = oldResident.getPopulationLevel();
             int targetLevel = currentLevel + 1;
-            
-            // Validate
+
             if (currentLevel >= 5) {
                 throw new IllegalStateException("Cannot upgrade level 5 resident");
             }
-            
             if (!playerBoard.getResidents().contains(oldResident)) {
                 throw new IllegalStateException("Resident does not belong to player");
             }
-            
-            // Get required goods
+
             ResidentCosts.Cost cost = ResidentCosts.getUpgradeCost(targetLevel);
-            
-            if (cost.goods() != null && cost.goods().length > 0) {
-                System.out.println("  Planning upgrade for resident from level " + currentLevel + " to " + targetLevel);
-                System.out.println("    Requires: " + java.util.Arrays.toString(cost.goods()));
-                
-                // PLANNING PHASE: Determine how to obtain goods (accumulates in storedGoods)
-                if (!playerBoard.canObtainGoods(cost.goods())) {
-                    throw new IllegalStateException("Cannot obtain required goods for upgrade");
+            if (cost.goods() != null) {
+                for (Goods g : cost.goods()) {
+                    allCosts.add(g);
                 }
             }
         }
-        
-        // PHASE 2: Execute all upgrades (consume planned resources and transform residents)
+
+        // PHASE 1: Single combined planning pass
+        Goods[] combinedCosts = allCosts.toArray(new Goods[0]);
+        if (combinedCosts.length > 0) {
+            System.out.println("  Planning upgrade, requires: " + java.util.Arrays.toString(combinedCosts));
+            if (!playerBoard.canObtainGoods(combinedCosts, game)) {
+                throw new IllegalStateException("Cannot obtain required goods for upgrade");
+            }
+        }
+
+        // PHASE 2: Single combined execution pass (consumes storedGoods once)
+        if (combinedCosts.length > 0) {
+            playerBoard.consumeGoods(combinedCosts);
+        }
+
+        // PHASE 3: Transform residents (no resource changes, just board manipulation)
         for (Resident oldResident : residents) {
             int currentLevel = oldResident.getPopulationLevel();
             int targetLevel = currentLevel + 1;
-            
-            // Get required goods
-            ResidentCosts.Cost cost = ResidentCosts.getUpgradeCost(targetLevel);
-            
-            if (cost.goods() != null && cost.goods().length > 0) {
-                System.out.println("  Executing upgrade for resident from level " + currentLevel + " to " + targetLevel);
-                
-                // EXECUTION PHASE: Actually obtain and consume goods from storedGoods
-                playerBoard.consumeGoods(cost.goods());
-            }
-            
-            // Remove old resident from PlayerBoard
+
             playerBoard.getResidents().remove(oldResident);
             System.out.println("    Removed resident level " + currentLevel);
-            
-            // Take new resident from GameBoard
+
             Resident newResident = gameBoard.takeResident(targetLevel);
-            
-            // Copy status from old resident (if they were AT_WORK, new one should be too)
             newResident.setStatus(oldResident.getStatus());
-            
-            // Add new resident to PlayerBoard
             playerBoard.getResidents().add(newResident);
             System.out.println("    Added resident level " + targetLevel + " with status " + newResident.getStatus());
-            
+
             System.out.println("  Successfully upgraded resident from level " + currentLevel + " to " + targetLevel);
         }
-        
+
         System.out.println("All " + residents.length + " resident(s) upgraded successfully");
     }
 }

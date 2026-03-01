@@ -12,7 +12,8 @@ repositories {
 
 dependencies {
     // Testing dependencies
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.12.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 java {
@@ -21,7 +22,7 @@ java {
 }
 
 application {
-    mainClass.set("com.anno1800.JavaExample")
+    mainClass.set("com.anno1800.ui.TerminalGameUI")
 }
 
 tasks.test {

@@ -73,6 +73,11 @@ public class ActionGenerator {
         // Free actions (do not consume action points)
         actions.addAll(generateViewResidentCardsActions(player, game));
         
+        // ObjectiveCard free actions (only available when the card is active in the game)
+        actions.addAll(generateUseExtraActionActions(player, game));
+        actions.addAll(generateDiscardResidentCardActions(player, game));
+        actions.addAll(generateInvestorGoldActions(player, game));
+        
         return actions;
     }
     
@@ -644,5 +649,51 @@ public class ActionGenerator {
         }
         
         return viewActions;
+    }
+
+    // ========== ObjectiveCard Free Actions ==========
+
+    /**
+     * Generate UseExtraAction if the ExtraAction ObjectiveCard is active and requirements are met.
+     */
+    private List<Action> generateUseExtraActionActions(Player player, Game game) {
+        List<Action> actions = new ArrayList<>();
+        Action.UseExtraAction action = new Action.UseExtraAction();
+        if (ActionValidator.canExecute(action, player, game)) {
+            actions.add(action);
+        }
+        return actions;
+    }
+
+    /**
+     * Generate DiscardResidentCardAction for each card in hand,
+     * if the DiscardResidentCard ObjectiveCard is active and requirements are met.
+     */
+    private List<Action> generateDiscardResidentCardActions(Player player, Game game) {
+        List<Action> actions = new ArrayList<>();
+        for (com.anno1800.game.cards.ResidentCard card : player.getPlayerBoard().getResidentCards()) {
+            Action.DiscardResidentCardAction action = new Action.DiscardResidentCardAction(card);
+            if (ActionValidator.canExecute(action, player, game)) {
+                actions.add(action);
+            }
+        }
+        return actions;
+    }
+
+    /**
+     * Generate InvestorGoldAction for each eligible (FIT) Investor,
+     * if the InvestorExhaustForGold ObjectiveCard is active and requirements are met.
+     */
+    private List<Action> generateInvestorGoldActions(Player player, Game game) {
+        List<Action> actions = new ArrayList<>();
+        for (com.anno1800.game.residents.Resident resident : player.getPlayerBoard().getResidents()) {
+            if (resident.getPopulationLevel() == 5) {
+                Action.InvestorGoldAction action = new Action.InvestorGoldAction(resident);
+                if (ActionValidator.canExecute(action, player, game)) {
+                    actions.add(action);
+                }
+            }
+        }
+        return actions;
     }
 }

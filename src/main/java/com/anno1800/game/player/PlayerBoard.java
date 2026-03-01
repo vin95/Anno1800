@@ -73,7 +73,10 @@ public class PlayerBoard {
      */
     private Set<Goods> tradedGoodsThisTurn = new HashSet<>();
 
-    Plantation[] plantations = new Plantation[6];
+    // 4 NW-Inseln × 3 Plantagen = max. 12 Plantagen pro Spieler.
+    // Nur 6 verschiedene Typen existieren, daher hat ein Spieler nie mehr als
+    // 6 nützliche Plantagen, kann aber regelkonform bis zu 12 besitzen.
+    Plantation[] plantations = new Plantation[12];
 
     Factory[] factories = new Factory[15]; // listet nur alle Factories eines Spielers auf. Nicht für Logik zu benutzen,
                                            // da die Shipyards nicht berücksichtigt werden. Besser getFreeLandTiles etc.
@@ -357,7 +360,9 @@ public class PlayerBoard {
     public void initializePlayerBoard(Player player, Board gameBoard) {
         PlayerBoard board = player.getPlayerBoard();
 
-        board.addGold(player.getPosition(), gameBoard);
+        // Rule: Startspieler = 0 Gold, 2. Spieler = 1, 3. Spieler = 2, 4. Spieler = 3
+        // Position is 1-based, so subtract 1
+        board.addGold(player.getPosition() - 1, gameBoard);
 
         // Take farmer from board and add to player board
         for (int i = 0; i < 4; i++) {
@@ -1039,7 +1044,11 @@ public class PlayerBoard {
         }
         
         // Try 2: Trading (check if we have available trade chips AND another player can produce this good)
-        if (availableTradeChips > 0 && game != null) {
+        // Count trade chips already planned in storedGoods to avoid over-committing
+        int plannedTradeChips = (int) storedGoods.stream()
+                .filter(pg -> pg.source() instanceof GoodSource.Traded t && t.chipCost() == 1)
+                .count();
+        if ((availableTradeChips - plannedTradeChips) > 0 && game != null) {
             // Check if any other player has a factory that produces this good
             boolean otherPlayerCanProduce = false;
             for (Player otherPlayer : game.getPlayers()) {
@@ -1065,7 +1074,14 @@ public class PlayerBoard {
         }
         
         // Try 2b: If ExplorerTrader active, try using 2 explorer chips instead of 1 trade chip
-        if (explorerTraderActive && availableExplorerChips >= 2 && game != null) {
+        // Count chips already planned in storedGoods to avoid over-committing
+        int plannedExplorerChips2b = (int) storedGoods.stream()
+                .filter(pg -> pg.source() instanceof GoodSource.Traded t && t.chipCost() == 2)
+                .count() * 2
+                + (int) storedGoods.stream()
+                .filter(pg -> pg.source() instanceof GoodSource.Imported)
+                .count();
+        if (explorerTraderActive && (availableExplorerChips - plannedExplorerChips2b) >= 2 && game != null) {
             // Check if any other player has a factory that produces this good
             boolean otherPlayerCanProduce = false;
             for (Player otherPlayer : game.getPlayers()) {
@@ -1091,7 +1107,14 @@ public class PlayerBoard {
         }
         
         // Try 3: Import from new world (check if we have a plantation that produces this good)
-        if (isNewWorldGood(good) && availableExplorerChips > 0) {
+        // Count chips already planned in storedGoods to avoid over-committing
+        int plannedExplorerChips = (int) storedGoods.stream()
+                .filter(pg -> pg.source() instanceof GoodSource.Imported)
+                .count()
+                + (int) storedGoods.stream()
+                .filter(pg -> pg.source() instanceof GoodSource.Traded t && t.chipCost() == 2)
+                .count() * 2;
+        if (isNewWorldGood(good) && (availableExplorerChips - plannedExplorerChips) > 0) {
             // Check if player has a plantation that produces this good
             boolean hasPlantation = false;
             for (Plantation plantation : plantations) {
