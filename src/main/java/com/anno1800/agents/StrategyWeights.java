@@ -1,5 +1,7 @@
 package com.anno1800.agents;
 
+import com.anno1800.agents.AgentImpl.WeightedScoringAgent;
+
 /**
  * Defines per-action-type base weight multipliers for a strategy.
  * Higher values make the agent prefer that action category.
@@ -9,50 +11,29 @@ package com.anno1800.agents;
  *
  * Use the static factory methods for predefined strategies:
  * <ul>
- *   <li>{@link #vpRush()}        – Karten so schnell wie möglich ausspielen</li>
- *   <li>{@link #productionFocus()} – Wirtschaftliche Engine aus Fabriken aufbauen</li>
- *   <li>{@link #expansionFocus()} – Möglichst viele Inseln entdecken</li>
- *   <li>{@link #balanced()}      – Kein klarer Fokus, rein kontextbasiert</li>
+ *   <li>{@link #shipBuilding()}           – Viele Schiffe bauen</li>
+ *   <li>{@link #tradeShipFocus()}         – Viele Handelsschiffe bauen / viel handeln</li>
+ *   <li>{@link #explorationFocus()}       – Viele Expeditionschiffe / viele Inseln / viele Expeditionen</li>
+ *   <li>{@link #residentMassProduction()} – Viele Residents / viele Baumaterial-Fabriken</li>
+ *   <li>{@link #eliteResidentProduction()} – Hohe Resident-Levels / viele Baumaterial-Fabriken</li>
+ *   <li>{@link #adaptiveResidentStrategy()} – Angemessene Levelverteilung (early: Bauern/Arbeiter, late: Handwerker/Ingenieure/Investoren)</li>
+ *   <li>{@link #factoryVariety()}         – Große Variety an Factories</li>
+ *   <li>{@link #balanced()}               – Kein klarer Fokus, rein kontextbasiert</li>
  * </ul>
  */
 public record StrategyWeights(
         // === Main actions ===
+        double buildFactory,
+        double buildShipyard,
+        double buildShips,
         double fulfillNeeds,
         double settleResident,
         double upgradeResident,
-        double buildFactory,
-        double overbuildFactory,
-        double demolishFactory,
-        double buildShipyard,
-        double buildShips,
+        double swapResidentCards,
         double discoverOldWorldIsland,
         double discoverNewWorldIsland,
         double expedition,
-        double carneval,
-        double swapResidentCards,
-
-        // === Production / resource actions ===
-        double doOvertime,
-        double produceGoods,
-        double tradeGoods,
-        double importGood,
-
-        // === Card / reward actions ===
-        double drawResidentCard,
-        double activateReward,
-
-        // === Objective card free actions ===
-        double useExtraAction,
-        double discardResidentCard,
-        double investorGoldAction,
-
-        // === Worker assignment ===
-        double assignWorker,
-        double exhaustWorker,
-        double chooseGoods,
-
-        // === Info-only actions ===
-        double viewResidentCards
+        double carneval
 ) {
 
     // =========================================================================
@@ -60,107 +41,144 @@ public record StrategyWeights(
     // =========================================================================
 
     /**
-     * VP Rush: Möglichst schnell alle Bewohnerkarten ausspielen.
-     * Ziel: Spiel als erster beenden → 7 Feuerwerks-Bonuspunkte kassieren.
+     * Ship Building: Viele Schiffe bauen.
+     * Fokus: Maximale Schiffsproduktion durch viele Werften.
      */
-    public static StrategyWeights vpRush() {
+    public static StrategyWeights shipBuilding() {
         return new StrategyWeights(
-                10.0,  // fulfillNeeds          ← SEHR HOCH: Karten ausspielen = VP + Spielende
-                5.0,   // settleResident         ← Hoch: neue Karten aufnehmen
-                3.0,   // upgradeResident        ← Mittel: höhere Karten = mehr VP
-                2.0,   // buildFactory
-                2.0,   // overbuildFactory
-                0.5,   // demolishFactory
-                1.0,   // buildShipyard
-                1.0,   // buildShips
-                1.5,   // discoverOldWorldIsland
-                1.5,   // discoverNewWorldIsland
-                3.0,   // expedition             ← Expeditionskarten = VP am Spielende
-                2.0,   // carneval
-                6.0,   // swapResidentCards      ← Hoch: schlechte Karten loswerden
-                2.0,   // doOvertime
-                2.0,   // produceGoods
-                2.0,   // tradeGoods
-                2.0,   // importGood
-                4.0,   // drawResidentCard       ← Hoch: neue Karten für VP
-                3.0,   // activateReward
-                4.0,   // useExtraAction         ← Extra-Aktion für mehr Karten ausspielen
-                3.0,   // discardResidentCard    ← Unspielbare Karten wegwerfen
-                2.0,   // investorGoldAction
-                1.0,   // assignWorker
-                1.0,   // exhaustWorker
-                2.0,   // chooseGoods
-                0.1    // viewResidentCards      ← Keine Auswirkung
+                2.0,   // buildFactory           ← Niedrig: nicht Kern der Strategie
+                9.0,   // buildShipyard          ← SEHR HOCH: ohne Werften keine Schiffe
+                10.0,  // buildShips             ← SEHR HOCH: Hauptziel
+                6.0,   // fulfillNeeds           ← Mittel-Hoch: VP sammeln
+                5.0,   // settleResident         ← Mittel: Arbeiter für Werften
+                2.0,   // upgradeResident        ← Niedrig: nicht prioritär
+                2.0,   // swapResidentCards      ← Niedrig
+                6.0,   // discoverOldWorldIsland ← Mittel-Hoch: mehr Platz für Werften
+                4.0,   // discoverNewWorldIsland ← Mittel: zusätzlicher Platz
+                2.0,   // expedition             ← Niedrig: nicht Fokus
+                1.0    // carneval               ← Niedrig: situational
         );
     }
 
     /**
-     * Production Focus: Eine starke Produktionsbasis aus Fabriken aufbauen.
-     * Ziel: Immer genug Waren haben um jede Aktion bezahlen zu können.
+     * Trade Ship Focus: Viele Handelsschiffe bauen und viel handeln.
+     * Fokus: Handelsschiffe + Neue-Welt-Handel + Warenproduktion.
      */
-    public static StrategyWeights productionFocus() {
+    public static StrategyWeights tradeShipFocus() {
         return new StrategyWeights(
-                5.0,   // fulfillNeeds
-                4.0,   // settleResident         ← Hoch: Arbeitskräfte für Fabriken
-                6.0,   // upgradeResident        ← SEHR HOCH: höhere Stufe = bessere Fabriken
-                9.0,   // buildFactory           ← SEHR HOCH: Kern der Strategie
-                8.0,   // overbuildFactory       ← Hoch: Default-Fabriken verbessern
-                1.0,   // demolishFactory
-                4.0,   // buildShipyard
-                3.0,   // buildShips
-                5.0,   // discoverOldWorldIsland ← Hoch: mehr Bauplätze
-                2.0,   // discoverNewWorldIsland
-                2.0,   // expedition
-                2.0,   // carneval
-                3.0,   // swapResidentCards
-                5.0,   // doOvertime             ← Hoch: sofort Waren produzieren
-                7.0,   // produceGoods           ← SEHR HOCH
-                5.0,   // tradeGoods             ← Hoch
-                3.0,   // importGood
-                3.0,   // drawResidentCard
-                4.0,   // activateReward
-                3.0,   // useExtraAction
-                2.0,   // discardResidentCard
-                3.0,   // investorGoldAction
-                4.0,   // assignWorker           ← Hoch: Fabriken besetzt halten
-                3.0,   // exhaustWorker
-                3.0,   // chooseGoods
-                0.1    // viewResidentCards
+                6.0,   // buildFactory           ← Hoch: Waren zum Handeln produzieren
+                7.0,   // buildShipyard          ← Hoch: Trade Ships brauchen Werften
+                8.0,   // buildShips             ← SEHR HOCH: Trade Ships!
+                6.0,   // fulfillNeeds           ← Mittel-Hoch: VP sammeln
+                5.0,   // settleResident         ← Mittel: Arbeiter
+                3.0,   // upgradeResident        ← Niedrig-Mittel: nicht Priorität
+                3.0,   // swapResidentCards      ← Niedrig-Mittel
+                5.0,   // discoverOldWorldIsland ← Mittel: mehr Platz
+                9.0,   // discoverNewWorldIsland ← SEHR HOCH: Handel mit Neuer Welt
+                2.0,   // expedition             ← Niedrig
+                4.0    // carneval               ← Mittel: Ressourcen zurücksetzen
         );
     }
 
     /**
-     * Expansion Focus: Möglichst viele Inseln entdecken.
-     * Ziel: Maximale Bauplätze + Neue-Welt-Produktion als Vorteil nutzen.
+     * Exploration Focus: Viele Expeditionschiffe, viele Inseln, viele Expeditionen.
+     * Fokus: Maximale Entdeckungen + Expeditionskarten sammeln.
      */
-    public static StrategyWeights expansionFocus() {
+    public static StrategyWeights explorationFocus() {
         return new StrategyWeights(
-                4.0,   // fulfillNeeds
-                3.0,   // settleResident
-                3.0,   // upgradeResident
-                4.0,   // buildFactory
-                3.0,   // overbuildFactory
-                0.5,   // demolishFactory
-                6.0,   // buildShipyard          ← Hoch: Schiffe brauchen Werften
-                8.0,   // buildShips             ← SEHR HOCH: Schiffe für Entdeckungen
-                9.0,   // discoverOldWorldIsland ← SEHR HOCH
-                9.0,   // discoverNewWorldIsland ← SEHR HOCH
-                7.0,   // expedition             ← Hoch: Expeditionskarten = VP
-                3.0,   // carneval
-                2.0,   // swapResidentCards
-                3.0,   // doOvertime
-                3.0,   // produceGoods
-                4.0,   // tradeGoods
-                6.0,   // importGood             ← Hoch: Neue Welt ausnutzen
-                3.0,   // drawResidentCard
-                3.0,   // activateReward
-                3.0,   // useExtraAction
-                2.0,   // discardResidentCard
-                2.0,   // investorGoldAction
-                2.0,   // assignWorker
-                2.0,   // exhaustWorker
-                2.0,   // chooseGoods
-                0.1    // viewResidentCards
+                2.0,   // buildFactory           ← Niedrig: nicht Fokus
+                7.0,   // buildShipyard          ← Hoch: Expeditionsschiffe brauchen Werften
+                8.0,   // buildShips             ← SEHR HOCH: Expeditionsschiffe!
+                6.0,   // fulfillNeeds           ← Mittel-Hoch: VP sammeln
+                4.0,   // settleResident         ← Niedrig-Mittel
+                2.0,   // upgradeResident        ← Niedrig
+                2.0,   // swapResidentCards      ← Niedrig
+                10.0,  // discoverOldWorldIsland ← SEHR HOCH: Kern der Strategie
+                10.0,  // discoverNewWorldIsland ← SEHR HOCH: Kern der Strategie
+                10.0,  // expedition             ← SEHR HOCH: Expeditionskarten = VP
+                1.0    // carneval               ← Niedrig
+        );
+    }
+
+    /**
+     * Resident Mass Production: Viele Residents + viele Baumaterial-Fabriken.
+     * Fokus: Große Menge an Residents (alle Stufen) + Planks/Bricks/Steelbars/Windows/Coats/Coal.
+     */
+    public static StrategyWeights residentMassProduction() {
+        return new StrategyWeights(
+                8.0,   // buildFactory           ← SEHR HOCH: Baumaterial-Fabriken
+                2.0,   // buildShipyard          ← Niedrig: nicht Fokus
+                2.0,   // buildShips             ← Niedrig
+                8.0,   // fulfillNeeds           ← SEHR HOCH: Karten ausspielen für mehr Residents
+                10.0,  // settleResident         ← SEHR HOCH: Hauptziel
+                3.0,   // upgradeResident        ← Niedrig-Mittel: Masse statt Elite
+                5.0,   // swapResidentCards      ← Mittel: unpassende Karten wegwerfen
+                6.0,   // discoverOldWorldIsland ← Mittel-Hoch: mehr Platz
+                2.0,   // discoverNewWorldIsland ← Niedrig
+                2.0,   // expedition             ← Niedrig
+                4.0    // carneval               ← Mittel: Ressourcen zurücksetzen
+        );
+    }
+
+    /**
+     * Elite Resident Production: Hohe Resident-Levels + viele Baumaterial-Fabriken.
+     * Fokus: Upgraden zu Handwerker/Ingenieure/Investoren + hochwertige Factories.
+     */
+    public static StrategyWeights eliteResidentProduction() {
+        return new StrategyWeights(
+                8.0,   // buildFactory           ← SEHR HOCH: Baumaterial-Fabriken
+                2.0,   // buildShipyard          ← Niedrig
+                2.0,   // buildShips             ← Niedrig
+                7.0,   // fulfillNeeds           ← Hoch: Karten ausspielen
+                5.0,   // settleResident         ← Mittel: Basis legen
+                10.0,  // upgradeResident        ← SEHR HOCH: Hauptziel!
+                7.0,   // swapResidentCards      ← Hoch: schlechte Karten für bessere tauschen
+                6.0,   // discoverOldWorldIsland ← Mittel-Hoch: mehr Platz
+                2.0,   // discoverNewWorldIsland ← Niedrig
+                3.0,   // expedition             ← Niedrig-Mittel: VP Bonus
+                4.0    // carneval               ← Mittel
+        );
+    }
+
+    /**
+     * Adaptive Resident Strategy: Angemessene Levelverteilung je nach Spielphase.
+     * Early Game: Viele Bauern/Arbeiter
+     * Late Game: Viele Handwerker/Ingenieure/Investoren
+     * Fokus: Ausgewogenes Kartenmanagement + situatives Upgraden.
+     */
+    public static StrategyWeights adaptiveResidentStrategy() {
+        return new StrategyWeights(
+                6.0,   // buildFactory           ← Mittel-Hoch: angepasst an Residents
+                2.0,   // buildShipyard          ← Niedrig
+                2.0,   // buildShips             ← Niedrig
+                10.0,  // fulfillNeeds           ← SEHR HOCH: Karten ausspielen zentral
+                8.0,   // settleResident         ← SEHR HOCH: viele Residents
+                8.0,   // upgradeResident        ← SEHR HOCH: aber ausgewogen upgraden
+                8.0,   // swapResidentCards      ← SEHR HOCH: Kartenmanagement wichtig!
+                5.0,   // discoverOldWorldIsland ← Mittel: mehr Platz
+                3.0,   // discoverNewWorldIsland ← Niedrig-Mittel
+                3.0,   // expedition             ← Niedrig-Mittel: VP Bonus
+                4.0    // carneval               ← Mittel
+        );
+    }
+
+    /**
+     * Factory Variety: Große Variety an Factories.
+     * Fokus: Möglichst viele verschiedene Fabriken bauen + höhere Residents für Zugang zu mehr Factory-Typen.
+     */
+    public static StrategyWeights factoryVariety() {
+        return new StrategyWeights(
+                10.0,  // buildFactory           ← SEHR HOCH: Hauptziel!
+                3.0,   // buildShipyard          ← Niedrig-Mittel
+                3.0,   // buildShips             ← Niedrig-Mittel
+                7.0,   // fulfillNeeds           ← Mittel-Hoch: VP sammeln
+                5.0,   // settleResident         ← Mittel: Basis
+                8.0,   // upgradeResident        ← SEHR HOCH: höhere Residents = mehr Fabriken
+                5.0,   // swapResidentCards      ← Mittel: Kartenmanagement
+                8.0,   // discoverOldWorldIsland ← SEHR HOCH: mehr Platz für Fabriken!
+                5.0,   // discoverNewWorldIsland ← Mittel: Variety durch Neue Welt
+                2.0,   // expedition             ← Niedrig
+                4.0    // carneval               ← Mittel
         );
     }
 
@@ -170,32 +188,17 @@ public record StrategyWeights(
      */
     public static StrategyWeights balanced() {
         return new StrategyWeights(
-                5.0,   // fulfillNeeds
-                4.0,   // settleResident
-                4.0,   // upgradeResident
-                4.0,   // buildFactory
-                3.0,   // overbuildFactory
-                0.5,   // demolishFactory
-                3.0,   // buildShipyard
-                3.0,   // buildShips
-                4.0,   // discoverOldWorldIsland
-                4.0,   // discoverNewWorldIsland
-                4.0,   // expedition
-                3.0,   // carneval
-                3.0,   // swapResidentCards
-                3.0,   // doOvertime
-                3.0,   // produceGoods
-                3.0,   // tradeGoods
-                3.0,   // importGood
-                3.0,   // drawResidentCard
-                3.0,   // activateReward
-                3.0,   // useExtraAction
-                2.0,   // discardResidentCard
-                2.0,   // investorGoldAction
-                2.0,   // assignWorker
-                2.0,   // exhaustWorker
-                2.0,   // chooseGoods
-                0.1    // viewResidentCards
+                5.0,   // buildFactory
+                5.0,   // buildShipyard
+                5.0,   // buildShips
+                8.0,   // fulfillNeeds           ← Etwas höher: immer wichtig für VP
+                5.0,   // settleResident
+                5.0,   // upgradeResident
+                5.0,   // swapResidentCards
+                5.0,   // discoverOldWorldIsland
+                5.0,   // discoverNewWorldIsland
+                5.0,   // expedition
+                3.0    // carneval               ← Etwas niedriger: sehr situational
         );
     }
 }

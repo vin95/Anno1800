@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.anno1800.agents.RandomAgent;
+import com.anno1800.agents.AgentImpl.AgentRandom;
 import com.anno1800.game.actions.Action;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,18 +13,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Test suite for RandomAgent.
+ * Test suite for AgentRandom.
  */
-@DisplayName("RandomAgent Tests")
+@DisplayName("AgentRandom Tests")
 class RandomAgentTest {
 
-    private RandomAgent agent;
-    private RandomAgent namedAgent;
+    private AgentRandom agent;
+    private AgentRandom namedAgent;
 
     @BeforeEach
     void setUp() {
-        agent = new RandomAgent();
-        namedAgent = new RandomAgent("TestAgent");
+        agent = new AgentRandom();
+        namedAgent = new AgentRandom("TestAgent");
     }
 
     /**
@@ -33,9 +33,9 @@ class RandomAgentTest {
     @Test
     @DisplayName("Default constructor should create agent with default name")
     void testDefaultConstructor() {
-        RandomAgent defaultAgent = new RandomAgent();
+        AgentRandom defaultAgent = new AgentRandom();
         assertNotNull(defaultAgent, "Agent should not be null");
-        assertEquals("RandomAgent", defaultAgent.getName(), "Default name should be 'RandomAgent'");
+        assertEquals("AgentRandom", defaultAgent.getName(), "Default name should be 'AgentRandom'");
     }
 
     /**
@@ -141,18 +141,18 @@ class RandomAgentTest {
     @Test
     @DisplayName("getName should return the agent's name")
     void testGetName() {
-        assertEquals("RandomAgent", agent.getName(), "Default agent name should be 'RandomAgent'");
+        assertEquals("AgentRandom", agent.getName(), "Default agent name should be 'AgentRandom'");
         assertEquals("TestAgent", namedAgent.getName(), "Named agent should return custom name");
     }
 
     /**
-     * Tests that different RandomAgent instances make independent random choices.
+     * Tests that different AgentRandom instances make independent random choices.
      */
     @Test
-    @DisplayName("Different RandomAgent instances should be independent")
+    @DisplayName("Different AgentRandom instances should be independent")
     void testIndependence() {
-        RandomAgent agent1 = new RandomAgent();
-        RandomAgent agent2 = new RandomAgent();
+        AgentRandom agent1 = new AgentRandom();
+        AgentRandom agent2 = new AgentRandom();
         List<Action> actions = createMockActions(10);
         
         // It's very unlikely that two agents will make the same 10 choices

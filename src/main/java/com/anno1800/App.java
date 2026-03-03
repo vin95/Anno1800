@@ -1,6 +1,6 @@
 package com.anno1800;
 
-import com.anno1800.agents.RandomAgent;
+import com.anno1800.agents.AgentImpl.AgentRandom;
 import com.anno1800.game.engine.Game;
 
 public class App {
@@ -10,7 +10,7 @@ public class App {
         
         // Assign RandomAgents to all players
         for (int i = 0; i < numPlayers; i++) {
-            game.setAgent(i, new RandomAgent("RandomAgent-" + (i + 1)));
+            game.setAgent(i, new AgentRandom("RandomAgent-" + (i + 1)));
         }
         
         // Start the game

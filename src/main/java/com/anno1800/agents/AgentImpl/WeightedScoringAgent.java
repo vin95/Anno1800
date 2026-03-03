@@ -1,5 +1,8 @@
-package com.anno1800.agents;
+package com.anno1800.agents.AgentImpl;
 
+import com.anno1800.agents.GameContext;
+import com.anno1800.agents.ObjectiveContext;
+import com.anno1800.agents.StrategyWeights;
 import com.anno1800.game.actions.Action;
 import com.anno1800.game.state.GameState;
 import com.anno1800.game.player.Player;
@@ -12,6 +15,7 @@ import com.anno1800.game.player.Player;
  *   score(action) = basicRules(action, context)
  *                 + baseWeight(actionType)          ← from StrategyWeights
  *                 + contextBonus(action, context)   ← situation-specific
+ *                 + objectiveBonus(action)          ← from ObjectiveCards
  * </pre>
  *
  * Create agents with predefined strategies using the static factory methods:
@@ -27,7 +31,7 @@ import com.anno1800.game.player.Player;
  *   new WeightedScoringAgent("Custom", myWeights)
  * </pre>
  */
-public class WeightedScoringAgent extends StrategicScoringAgent {
+public class WeightedScoringAgent extends ScoringAgent {
 
     private final StrategyWeights weights;
 
@@ -70,8 +74,11 @@ public class WeightedScoringAgent extends StrategicScoringAgent {
     // =========================================================================
 
     @Override
-    protected double scoreStrategic(Action action, GameState gameState, Player player, GameContext context) {
-        return getBaseWeight(action) + getContextBonus(action, context);
+    protected double scoreAction(Action action, GameState gameState, Player player, 
+                                GameContext context, ObjectiveContext objectiveContext) {
+        return getBaseWeight(action) 
+             + getContextBonus(action, context, objectiveContext)
+             + getObjectiveBonus(action, objectiveContext);
     }
 
     // =========================================================================
@@ -113,16 +120,16 @@ public class WeightedScoringAgent extends StrategicScoringAgent {
     // Context bonuses: situation-specific additions on top of the base weight
     // =========================================================================
 
-    private double getContextBonus(Action action, GameContext context) {
+    private double getContextBonus(Action action, GameContext context, ObjectiveContext objectiveContext) {
         return switch (action) {
-            case Action.FulfillNeeds a                   -> bonusFulfillNeeds(a, context);
+            case Action.FulfillNeeds a                   -> bonusFulfillNeeds(a, context, objectiveContext);
             case Action.UpgradeResident a                -> bonusUpgradeResident(a, context);
             case Action.SettleResident a                 -> bonusSettleResident(a, context);
             case Action.BuildFactory ignored             -> bonusBuildFactory(context);
             case Action.OverbuildDefaultFactory ignored  -> bonusBuildFactory(context);
             case Action.BuildShipyard ignored            -> bonusBuildShipyard(context);
             case Action.DiscoverNewWorldIsland ignored   -> bonusDiscoverNewWorld(context);
-            case Action.DrawResidentCard a               -> bonusDrawResidentCard(a, context);
+            case Action.DrawResidentCard a               -> bonusDrawResidentCard(a, context, objectiveContext);
             case Action.Expedition ignored               -> bonusExpedition(context);
             default                                      -> 0.0;
         };
@@ -132,8 +139,10 @@ public class WeightedScoringAgent extends StrategicScoringAgent {
      * FulfillNeeds:
      * +VP-Wert der Karte (3/5/8 je nach Bevölkerungsstufe)
      * +15 wenn es die letzte Karte ist (7 Feuerwerks-Punkte + Spiel schnell beenden)
+     * Berücksichtigt ResidentCardsPenalty bei der Endspielentscheidung
      */
-    private double bonusFulfillNeeds(Action.FulfillNeeds action, GameContext context) {
+    private double bonusFulfillNeeds(Action.FulfillNeeds action, GameContext context, 
+                                     ObjectiveContext objectiveContext) {
         double bonus = 0.0;
         com.anno1800.game.cards.ResidentCard card = action.residentCard();
         if (card != null) {
@@ -145,8 +154,13 @@ public class WeightedScoringAgent extends StrategicScoringAgent {
             };
         }
         // Letzte Karte → Spielende einleiten + 7 Feuerwerks-Bonuspunkte
+        // Aber bedenke: Wenn ResidentCardsPenalty aktiv ist, ist es besser, ALLE
+        // Karten zu spielen bevor man endet
         if (context.myCardCount() <= 1) {
             bonus += 15.0;
+        } else if (context.myCardCount() <= 2 && objectiveContext.hasResidentCardPenalty()) {
+            // Mit Penalty-Karte: Extra Anreiz, vorletzte Karte zu spielen
+            bonus += 8.0;
         }
         return bonus;
     }
@@ -158,7 +172,7 @@ public class WeightedScoringAgent extends StrategicScoringAgent {
      */
     private double bonusUpgradeResident(Action.UpgradeResident action, GameContext context) {
         if (action.residents() == null) return 0.0;
-        double scale = context.isEndPhaseLikely() ? 0.3 : 1.0;
+        double scale = context.isEndPhase() ? 0.3 : 1.0;
         double bonus = 0.0;
         for (com.anno1800.game.residents.Resident r : action.residents()) {
             bonus += (r.getPopulationLevel() + 1) * 1.5 * scale;
@@ -171,7 +185,7 @@ public class WeightedScoringAgent extends StrategicScoringAgent {
      * +Stufe × 1.5. Weniger wert wenn Spiel fast vorbei.
      */
     private double bonusSettleResident(Action.SettleResident action, GameContext context) {
-        double scale = context.isEndPhaseLikely() ? 0.3 : 1.0;
+        double scale = context.isEndPhase() ? 0.3 : 1.0;
         return action.level() * 1.5 * scale;
     }
 
@@ -181,7 +195,7 @@ public class WeightedScoringAgent extends StrategicScoringAgent {
      */
     private double bonusBuildFactory(GameContext context) {
         if (context.freeLandTiles() <= 0) return -5.0;
-        return context.isEndPhaseLikely() ? 0.0 : 2.0;
+        return context.isEndPhase() ? 0.0 : 2.0;
     }
 
     /**
@@ -190,7 +204,7 @@ public class WeightedScoringAgent extends StrategicScoringAgent {
      */
     private double bonusBuildShipyard(GameContext context) {
         if (context.freeCoastTiles() <= 0) return -3.0;
-        return context.isEndPhaseLikely() ? 0.0 : 1.0;
+        return context.isEndPhase() ? 0.0 : 1.0;
     }
 
     /**
@@ -198,16 +212,24 @@ public class WeightedScoringAgent extends StrategicScoringAgent {
      * +3 wenn Entdecker-Schiffe vorhanden. -2 wenn Spiel fast vorbei.
      */
     private double bonusDiscoverNewWorld(GameContext context) {
-        if (context.isEndPhaseLikely()) return -2.0;
+        if (context.isEndPhase()) return -2.0;
         return context.canExplore() ? 3.0 : 0.0;
     }
 
     /**
      * DrawResidentCard:
      * +Stufe × 1.5. Kaum Wert wenn Spiel fast vorbei.
+     * Stark reduziert wenn ResidentCardsPenalty aktiv ist (jede Karte = -2 VP am Ende).
      */
-    private double bonusDrawResidentCard(Action.DrawResidentCard action, GameContext context) {
-        double scale = context.isEndPhaseLikely() ? 0.1 : 1.0;
+    private double bonusDrawResidentCard(Action.DrawResidentCard action, GameContext context,
+                                         ObjectiveContext objectiveContext) {
+        double scale = context.isEndPhase() ? 0.1 : 1.0;
+        
+        // Wenn ResidentCardsPenalty aktiv: Karten ziehen ist riskanter
+        if (objectiveContext.hasResidentCardPenalty() && !context.isEndPhase()) {
+            scale *= 0.6; // Reduziere Wert um 40%
+        }
+        
         return action.populationLevel() * 1.5 * scale;
     }
 
@@ -216,8 +238,71 @@ public class WeightedScoringAgent extends StrategicScoringAgent {
      * +2 wenn noch viele Runden verbleiben. -1 wenn Spiel fast vorbei.
      */
     private double bonusExpedition(GameContext context) {
-        if (context.isEndPhaseLikely()) return -1.0;
+        if (context.isEndPhase()) return -1.0;
         return context.estimatedRoundsLeft() >= 3 ? 2.0 : 0.0;
+    }
+
+    // =========================================================================
+    // Objective bonuses: strategy adjustments based on active ObjectiveCards
+    // =========================================================================
+
+    /**
+     * Adds bonuses based on active ObjectiveCards.
+     * This evaluates fixed parameters that were pre-computed at game start.
+     * 
+     * Examples:
+     * - If MostInvestors is active, boost UpgradeResident(5) actions
+     * - If NewWorldExplorer is active, boost DiscoverNewWorldIsland
+     * - If specific factory objectives are active, boost BuildFactory for those types
+     */
+    private double getObjectiveBonus(Action action, ObjectiveContext objectiveContext) {
+        double bonus = 0.0;
+        
+        // Example: Boost strategies aligned with active objectives
+        switch (action) {
+            case Action.UpgradeResident a -> {
+                // If MostInvestors objective is active, prioritize upgrading to level 5
+                if (objectiveContext.hasObjective(com.anno1800.game.cards.ObjectiveCard.MostInvestors.class)) {
+                    for (var resident : a.residents()) {
+                        if (resident.getPopulationLevel() == 4) { // Upgrading to Investor (5)
+                            bonus += 3.0;
+                        }
+                    }
+                }
+                // Similar for MostEngineers
+                if (objectiveContext.hasObjective(com.anno1800.game.cards.ObjectiveCard.MostEngineers.class)) {
+                    for (var resident : a.residents()) {
+                        if (resident.getPopulationLevel() == 3) { // Upgrading to Engineer (4)
+                            bonus += 3.0;
+                        }
+                    }
+                }
+            }
+            
+            case Action.DiscoverNewWorldIsland ignored -> {
+                // If NewWorldExplorer is active (6 VP per island), boost this action
+                if (objectiveContext.hasObjective(com.anno1800.game.cards.ObjectiveCard.NewWorldExplorer.class)) {
+                    bonus += 4.0;
+                }
+            }
+            
+            case Action.Expedition ignored -> {
+                // If expedition-related objectives are active, boost expeditions
+                if (objectiveContext.hasObjective(com.anno1800.game.cards.ObjectiveCard.MostExpeditionCards.class) ||
+                    objectiveContext.hasObjective(com.anno1800.game.cards.ObjectiveCard.ArtifactBonus.class) ||
+                    objectiveContext.hasObjective(com.anno1800.game.cards.ObjectiveCard.AnimalBonus.class)) {
+                    bonus += 3.0;
+                }
+            }
+            
+            // Note: Factory-specific bonuses would require knowing the factory type
+            // from the action, which may not be available in the Action object itself.
+            // These could be added in more detailed subclasses or with action introspection.
+            
+            default -> {}
+        }
+        
+        return bonus;
     }
 
     // =========================================================================

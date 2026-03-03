@@ -1,6 +1,6 @@
 package com.anno1800.simulation;
 
-import com.anno1800.agents.RandomAgent;
+import com.anno1800.agents.AgentImpl.AgentRandom;
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
 
@@ -29,8 +29,8 @@ class GameSimulationTest {
     @DisplayName("2-player game completes or throws known engine exception (maxRounds=2)")
     void twoPlayer_game_completesWithoutUnexpectedException() {
         Game game = new Game(2, true, 2);
-        game.setAgent(0, new RandomAgent("Agent-1"));
-        game.setAgent(1, new RandomAgent("Agent-2"));
+        game.setAgent(0, new AgentRandom("Agent-1"));
+        game.setAgent(1, new AgentRandom("Agent-2"));
         // Known pre-existing bug: some ActionHandlers throw IllegalStateException
         // when resource planning fails. We verify it's not an unexpected error type.
         try {
@@ -46,7 +46,7 @@ class GameSimulationTest {
     void threePlayer_game_completesWithoutUnexpectedException() {
         Game game = new Game(3, true, 1);
         for (int i = 0; i < 3; i++) {
-            game.setAgent(i, new RandomAgent("Agent-" + (i + 1)));
+            game.setAgent(i, new AgentRandom("Agent-" + (i + 1)));
         }
         try {
             game.start();
@@ -60,7 +60,7 @@ class GameSimulationTest {
     void fourPlayer_game_completesWithoutUnexpectedException() {
         Game game = new Game(4, true, 1);
         for (int i = 0; i < 4; i++) {
-            game.setAgent(i, new RandomAgent("Agent-" + (i + 1)));
+            game.setAgent(i, new AgentRandom("Agent-" + (i + 1)));
         }
         try {
             game.start();
@@ -75,8 +75,8 @@ class GameSimulationTest {
     @DisplayName("after start() completes normally, isGameOver returns true")
     void afterStart_gameIsOver() {
         Game game = new Game(2, true, 2);
-        game.setAgent(0, new RandomAgent());
-        game.setAgent(1, new RandomAgent());
+        game.setAgent(0, new AgentRandom());
+        game.setAgent(1, new AgentRandom());
         try { game.start(); } catch (IllegalStateException ignored) { }
         // isGameOver is true whenever we exit the game loop
         assertTrue(game.isGameOver() || game.getCurrentRound() > 0,
@@ -87,8 +87,8 @@ class GameSimulationTest {
     @DisplayName("after start() game has advanced (round >= 1)")
     void afterStart_roundAtLeastOne() {
         Game game = new Game(2, true, 2);
-        game.setAgent(0, new RandomAgent());
-        game.setAgent(1, new RandomAgent());
+        game.setAgent(0, new AgentRandom());
+        game.setAgent(1, new AgentRandom());
         // Known pre-existing bug: UpgradeResident.java line 64 throws ISE
         // when canObtainGoods is called without game context; start() may halt early
         try { game.start(); } catch (IllegalStateException ignored) { }
@@ -101,8 +101,8 @@ class GameSimulationTest {
     @DisplayName("all players have non-negative victory points after game")
     void afterGame_allPlayersHaveNonNegativeVP() {
         Game game = new Game(2, true, 2);
-        game.setAgent(0, new RandomAgent());
-        game.setAgent(1, new RandomAgent());
+        game.setAgent(0, new AgentRandom());
+        game.setAgent(1, new AgentRandom());
         try { game.start(); } catch (IllegalStateException ignored) { }
 
         for (Player p : game.getPlayers()) {
@@ -119,8 +119,8 @@ class GameSimulationTest {
     @DisplayName("all players have non-negative gold after game")
     void afterGame_allPlayersHaveNonNegativeGold() {
         Game game = new Game(2, true, 2);
-        game.setAgent(0, new RandomAgent());
-        game.setAgent(1, new RandomAgent());
+        game.setAgent(0, new AgentRandom());
+        game.setAgent(1, new AgentRandom());
         try { game.start(); } catch (IllegalStateException ignored) { }
 
         for (Player p : game.getPlayers()) {
@@ -133,8 +133,8 @@ class GameSimulationTest {
     @DisplayName("all players have non-negative explorer and trade chips after game")
     void afterGame_chipsAreNonNegative() {
         Game game = new Game(2, true, 2);
-        game.setAgent(0, new RandomAgent());
-        game.setAgent(1, new RandomAgent());
+        game.setAgent(0, new AgentRandom());
+        game.setAgent(1, new AgentRandom());
         try { game.start(); } catch (IllegalStateException ignored) { }
 
         for (Player p : game.getPlayers()) {
@@ -151,8 +151,8 @@ class GameSimulationTest {
     @DisplayName("board gold stays non-negative after full game")
     void afterGame_boardGoldNonNegative() {
         Game game = new Game(2, true, 2);
-        game.setAgent(0, new RandomAgent());
-        game.setAgent(1, new RandomAgent());
+        game.setAgent(0, new AgentRandom());
+        game.setAgent(1, new AgentRandom());
         try { game.start(); } catch (IllegalStateException ignored) { }
         assertTrue(game.getBoard().getGold() >= 0, "Board gold must be non-negative");
     }
@@ -161,8 +161,8 @@ class GameSimulationTest {
     @DisplayName("active objective cards list unchanged in size after full game")
     void afterGame_activeObjectiveCardsUnchanged() {
         Game game = new Game(2, true, 2);
-        game.setAgent(0, new RandomAgent());
-        game.setAgent(1, new RandomAgent());
+        game.setAgent(0, new AgentRandom());
+        game.setAgent(1, new AgentRandom());
         int initialCardCount = game.getActiveObjectiveCards().size();
         try { game.start(); } catch (IllegalStateException ignored) { }
         assertEquals(initialCardCount, game.getActiveObjectiveCards().size(),
@@ -176,8 +176,8 @@ class GameSimulationTest {
     void tenIndependentGames_allReachEndState() {
         for (int i = 0; i < 10; i++) {
             Game game = new Game(2, true, 2);
-            game.setAgent(0, new RandomAgent());
-            game.setAgent(1, new RandomAgent());
+            game.setAgent(0, new AgentRandom());
+            game.setAgent(1, new AgentRandom());
             // Known pre-existing bug: UpgradeResident.java line 64 throws ISE
             // when canObtainGoods is called without game context
             try { game.start(); } catch (IllegalStateException ignored) { }
@@ -193,7 +193,7 @@ class GameSimulationTest {
     @DisplayName("1-player, 1-round game: player takes a turn and game ends or advances")
     void onePlayer_oneRound_gameEnds() {
         Game game = new Game(1, true, 1);
-        game.setAgent(0, new RandomAgent());
+        game.setAgent(0, new AgentRandom());
         // Known pre-existing bug: UpgradeResident.java line 64 throws ISE
         // when canObtainGoods is called without game context
         try { game.start(); } catch (IllegalStateException ignored) { }

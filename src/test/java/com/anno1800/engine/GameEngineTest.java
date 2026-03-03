@@ -1,6 +1,6 @@
 package com.anno1800.engine;
 
-import com.anno1800.agents.RandomAgent;
+import com.anno1800.agents.AgentImpl.AgentRandom;
 import com.anno1800.game.cards.ObjectiveCard;
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
@@ -214,7 +214,7 @@ class GameEngineTest {
         void setAgent_invalidIndex_throwsIAE() {
             Game game = new Game(2, true, 5);
             assertThrows(IllegalArgumentException.class,
-                    () -> game.setAgent(5, new RandomAgent()));
+                    () -> game.setAgent(5, new AgentRandom()));
         }
 
         @Test
@@ -222,7 +222,7 @@ class GameEngineTest {
         void setAgent_negativeIndex_throwsIAE() {
             Game game = new Game(2, true, 5);
             assertThrows(IllegalArgumentException.class,
-                    () -> game.setAgent(-1, new RandomAgent()));
+                    () -> game.setAgent(-1, new AgentRandom()));
         }
 
         @Test
@@ -230,7 +230,7 @@ class GameEngineTest {
         void start_noAgents_throwsISE() {
             Game game = new Game(2, true, 5);
             // Only assign agent to player 0, not player 1 → should fail
-            game.setAgent(0, new RandomAgent());
+            game.setAgent(0, new AgentRandom());
             assertThrows(IllegalStateException.class, game::start);
         }
     }

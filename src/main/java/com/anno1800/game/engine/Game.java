@@ -1,6 +1,8 @@
 package com.anno1800.game.engine;
 
 import com.anno1800.agents.Agent;
+import com.anno1800.agents.ObjectiveContext;
+import com.anno1800.agents.AgentImpl.ScoringAgent;
 import com.anno1800.game.actions.Action;
 import com.anno1800.game.actions.ActionGenerator;
 import com.anno1800.game.actions.ActionHandler;
@@ -37,6 +39,9 @@ public class Game {
     
     // Active ObjectiveCards for this game (5 drawn at game start)
     private List<ObjectiveCard> activeObjectiveCards = new ArrayList<>();
+    
+    // Cached ObjectiveContext (computed once after ObjectiveCards are drawn)
+    private ObjectiveContext objectiveContext;
     
     public Game(int numPlayers) {
         this(numPlayers, false, 10);
@@ -87,6 +92,9 @@ public class Game {
         for (ObjectiveCard card : activeObjectiveCards) {
             System.out.println("  - " + card.getTitle() + ": " + card.getDescription());
         }
+        
+        // Compute and cache ObjectiveContext (fixed parameters, won't change during game)
+        this.objectiveContext = ObjectiveContext.compute(activeObjectiveCards);
     }
     
     /**
@@ -176,7 +184,8 @@ public class Game {
             board,
             players,
             currentRound,
-            currentPlayer
+            currentPlayer,
+            startPlayer
         );
     }
     
@@ -312,8 +321,11 @@ public class Game {
         if (playerIndex < 0 || playerIndex >= players.length) {
             throw new IllegalArgumentException("Invalid player index: " + playerIndex);
         }
-        this.agents[playerIndex] = agent;
-    }
+        this.agents[playerIndex] = agent;        
+        // If this is a ScoringAgent, inject the ObjectiveContext
+        if (agent instanceof ScoringAgent scoringAgent) {
+            scoringAgent.setObjectiveContext(objectiveContext);
+        }    }
 
     private void inicializeGame() {
         for (Player player : players) {

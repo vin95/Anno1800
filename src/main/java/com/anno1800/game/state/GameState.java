@@ -20,6 +20,7 @@ public record GameState(
     Instant timestamp,
     int round,
     int currentPlayerIndex,
+    int startingPlayerIndex,
     
     // Shared game board state
     BoardState boardState,
@@ -35,18 +36,21 @@ public record GameState(
      * @param players Array of all players
      * @param round Current round number
      * @param currentPlayerIndex Index of the current player
+     * @param startingPlayerIndex Index of the starting player
      * @return Immutable GameState snapshot
      */
     public static GameState createSnapshot(
         Board board, 
         Player[] players, 
         int round, 
-        int currentPlayerIndex
+        int currentPlayerIndex,
+        int startingPlayerIndex
     ) {
         return new GameState(
             Instant.now(),
             round,
             currentPlayerIndex,
+            startingPlayerIndex,
             BoardState.fromBoard(board),
             PlayerState.fromPlayers(players)
         );
@@ -65,7 +69,8 @@ public record GameState(
         ShipyardState shipyards,
         ShipState ships,
         IslandState islands,
-        ResourcePoolState resources
+        ResourcePoolState resources,
+        EndPhaseState endPhase
     ) {
         /**
          * Creates a BoardState from the actual Board object.
@@ -78,7 +83,8 @@ public record GameState(
                 ShipyardState.fromBoard(board),
                 ShipState.fromBoard(board),
                 IslandState.fromBoard(board),
-                ResourcePoolState.fromBoard(board)
+                ResourcePoolState.fromBoard(board),
+                EndPhaseState.fromBoard(board)
             );
         }
         
@@ -169,6 +175,27 @@ public record GameState(
                 return new IslandState(
                     board.getOldWorldIslands().size(),
                     board.getNewWorldIslands().size()
+                );
+            }
+        }
+        
+        /**
+         * End phase tracking.
+         * 
+         * @param isActive True if end phase has been triggered
+         * @param triggeredByPlayerIndex Index of the player who triggered end phase (-1 if not triggered)
+         * @param triggeredInRound Round number when end phase was triggered (0 if not triggered)
+         */
+        public record EndPhaseState(
+            boolean isActive,
+            int triggeredByPlayerIndex,
+            int triggeredInRound
+        ) {
+            static EndPhaseState fromBoard(Board board) {
+                return new EndPhaseState(
+                    board.isEndPhase(),
+                    board.getEndPhaseTriggeredByPlayer(),
+                    board.getEndPhaseTriggeredInRound()
                 );
             }
         }

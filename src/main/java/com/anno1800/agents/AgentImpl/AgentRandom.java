@@ -1,5 +1,6 @@
-package com.anno1800.agents;
+package com.anno1800.agents.AgentImpl;
 
+import com.anno1800.agents.Agent;
 import com.anno1800.game.actions.Action;
 import com.anno1800.game.state.GameState;
 import com.anno1800.game.player.Player;
@@ -10,18 +11,21 @@ import java.util.Random;
 /**
  * Simple agent that randomly selects from available actions.
  * Useful for testing and as a baseline for comparing other agents.
+ * 
+ * <p>This agent does NOT use scoring - it simply picks a random action.
+ * Use this as a baseline to measure how much better strategic agents perform.
  */
-public class RandomAgent implements Agent {
+public class AgentRandom implements Agent {
     private final String name;
     private final Random random;
     
-    public RandomAgent(String name) {
+    public AgentRandom(String name) {
         this.name = name;
         this.random = new Random(42); // Fixed seed for reproducibility
     }
     
-    public RandomAgent() {
-        this("RandomAgent");
+    public AgentRandom() {
+        this("AgentRandom");
     }
     
     @Override
