@@ -55,7 +55,7 @@ public record StrategyWeights(
                 2.0,   // swapResidentCards      ← Niedrig
                 6.0,   // discoverOldWorldIsland ← Mittel-Hoch: mehr Platz für Werften
                 4.0,   // discoverNewWorldIsland ← Mittel: zusätzlicher Platz
-                2.0,   // expedition             ← Niedrig: nicht Fokus
+                5.0,   // expedition             ← Mittel: follgt aus verfügbaren Schiffen
                 1.0    // carneval               ← Niedrig: situational
         );
     }
