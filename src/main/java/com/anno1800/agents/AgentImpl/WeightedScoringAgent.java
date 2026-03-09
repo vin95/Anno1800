@@ -4,8 +4,11 @@ import com.anno1800.agents.GameContext;
 import com.anno1800.agents.ObjectiveContext;
 import com.anno1800.agents.StrategyWeights;
 import com.anno1800.game.actions.Action;
-import com.anno1800.game.state.GameState;
+import com.anno1800.game.cards.ObjectiveCard;
+import com.anno1800.game.cards.ResidentCard;
 import com.anno1800.game.player.Player;
+import com.anno1800.game.residents.Resident;
+import com.anno1800.game.state.GameState;
 
 /**
  * Agent that scores actions using configurable {@link StrategyWeights} combined
@@ -33,35 +36,75 @@ import com.anno1800.game.player.Player;
  */
 public class WeightedScoringAgent extends ScoringAgent {
 
-    private final StrategyWeights weights;
+    private final StrategyWeights baseWeights;  // Original strategy weights
+    private StrategyWeights weights;             // Current weights (adjusted for objectives)
 
     public WeightedScoringAgent(String name, StrategyWeights weights, long seed) {
         super(name, seed);
-        this.weights = weights;
+        this.baseWeights = weights;
+        this.weights = weights;  // Start with base weights
     }
 
     public WeightedScoringAgent(String name, StrategyWeights weights) {
         super(name);
-        this.weights = weights;
+        this.baseWeights = weights;
+        this.weights = weights;  // Start with base weights
+    }
+
+    /**
+     * Override to adjust strategy weights based on active ObjectiveCards.
+     * This allows the agent to dynamically adapt its strategy to the game's scoring opportunities.
+     */
+    @Override
+    public void setObjectiveContext(ObjectiveContext objectiveContext) {
+        super.setObjectiveContext(objectiveContext);
+        
+        // Adjust weights based on objectives
+        this.weights = baseWeights.adjustForObjectives(objectiveContext);
+        
+        System.out.println("[" + getName() + "] Strategy weights adjusted for ObjectiveCards:");
+        System.out.println("  buildFactory: " + baseWeights.buildFactory() + " → " + weights.buildFactory());
+        System.out.println("  upgradeResident: " + baseWeights.upgradeResident() + " → " + weights.upgradeResident());
+        System.out.println("  fulfillNeeds: " + baseWeights.fulfillNeeds() + " → " + weights.fulfillNeeds());
     }
 
     // =========================================================================
     // Static factory methods
     // =========================================================================
 
-    /** VP Rush: Karten so schnell wie möglich ausspielen. */
-    public static WeightedScoringAgent vpRush(String name) {
-        return new WeightedScoringAgent(name, StrategyWeights.vpRush());
+    /** Ship Building: Viele Schiffe bauen. */
+    public static WeightedScoringAgent shipBuilding(String name) {
+        return new WeightedScoringAgent(name, StrategyWeights.shipBuilding());
     }
 
-    /** Production Focus: Starke Produktionsbasis aus Fabriken aufbauen. */
-    public static WeightedScoringAgent productionFocus(String name) {
-        return new WeightedScoringAgent(name, StrategyWeights.productionFocus());
+    /** Trade Ship Focus: Viele Handelsschiffe bauen und viel handeln. */
+    public static WeightedScoringAgent tradeShipFocus(String name) {
+        return new WeightedScoringAgent(name, StrategyWeights.tradeShipFocus());
     }
 
-    /** Expansion Focus: Möglichst viele Inseln entdecken. */
-    public static WeightedScoringAgent expansionFocus(String name) {
-        return new WeightedScoringAgent(name, StrategyWeights.expansionFocus());
+    /** Exploration Focus: Viele Expeditionschiffe / viele Inseln / viele Expeditionen. */
+    public static WeightedScoringAgent explorationFocus(String name) {
+        return new WeightedScoringAgent(name, StrategyWeights.explorationFocus());
+    }
+
+    /** Resident Mass Production: Viele Residents / viele Baumaterial-Fabriken. */
+    public static WeightedScoringAgent residentMassProduction(String name) {
+        return new WeightedScoringAgent(name, StrategyWeights.residentMassProduction());
+    }
+
+    /** Elite Resident Production: Hohe Resident-Levels / viele Baumaterial-Fabriken. */
+    public static WeightedScoringAgent eliteResidentProduction(String name) {
+        return new WeightedScoringAgent(name, StrategyWeights.eliteResidentProduction());
+    }
+
+    /** Adaptive Resident Strategy: Angemessene Levelverteilung je nach Spielphase. */
+    public static WeightedScoringAgent adaptiveResidentStrategy(String name) {
+        return new WeightedScoringAgent(name, StrategyWeights.adaptiveResidentStrategy());
+    }
+
+    /** Factory Variety: Große Variety an Factories. */
+    public static WeightedScoringAgent factoryVariety(String name) {
+        return new WeightedScoringAgent(name, StrategyWeights.factoryVariety());
     }
 
     /** Balanced: Kein klarer Fokus – Entscheidung hauptsächlich durch Kontext. */
@@ -85,14 +128,39 @@ public class WeightedScoringAgent extends ScoringAgent {
     // Base weights: map each action type to its configured weight
     // =========================================================================
 
+    /**
+     * Returns the base weight for an action from the strategy weights.
+     * 
+     * <p>Only the 11 main actions that the agent can directly choose from are weighted:
+     * <ol>
+     *   <li>FulfillNeeds</li>
+     *   <li>SettleResident</li>
+     *   <li>UpgradeResident</li>
+     *   <li>BuildFactory</li>
+     *   <li>BuildShipyard</li>
+     *   <li>BuildShips</li>
+     *   <li>DiscoverOldWorldIsland</li>
+     *   <li>DiscoverNewWorldIsland</li>
+     *   <li>Expedition</li>
+     *   <li>Carneval</li>
+     *   <li>SwapResidentCards</li>
+     * </ol>
+     * 
+     * <p>All other action types are sub-actions that are executed as part of the main actions
+     * and should never appear in the agent's choice list. If they do, it indicates a bug
+     * in the action generation logic.
+     * 
+     * @param action The action to get the weight for
+     * @return The base weight from the strategy
+     * @throws IllegalStateException if a sub-action is passed (should never happen)
+     */
     private double getBaseWeight(Action action) {
         return switch (action) {
+            // === 11 Main Actions: Direct agent choices ===
             case Action.FulfillNeeds ignored              -> weights.fulfillNeeds();
             case Action.SettleResident ignored            -> weights.settleResident();
             case Action.UpgradeResident ignored           -> weights.upgradeResident();
             case Action.BuildFactory ignored              -> weights.buildFactory();
-            case Action.OverbuildDefaultFactory ignored   -> weights.overbuildFactory();
-            case Action.DemolishFactory ignored           -> weights.demolishFactory();
             case Action.BuildShipyard ignored             -> weights.buildShipyard();
             case Action.BuildShips ignored                -> weights.buildShips();
             case Action.DiscoverOldWorldIsland ignored    -> weights.discoverOldWorldIsland();
@@ -100,19 +168,13 @@ public class WeightedScoringAgent extends ScoringAgent {
             case Action.Expedition ignored                -> weights.expedition();
             case Action.Carneval ignored                  -> weights.carneval();
             case Action.SwapResidentCards ignored         -> weights.swapResidentCards();
-            case Action.DoOvertime ignored                -> weights.doOvertime();
-            case Action.ProduceGoods ignored              -> weights.produceGoods();
-            case Action.TradeGoods ignored                -> weights.tradeGoods();
-            case Action.ImportGood ignored                -> weights.importGood();
-            case Action.DrawResidentCard ignored          -> weights.drawResidentCard();
-            case Action.ActivateReward ignored            -> weights.activateReward();
-            case Action.UseExtraAction ignored            -> weights.useExtraAction();
-            case Action.DiscardResidentCardAction ignored -> weights.discardResidentCard();
-            case Action.InvestorGoldAction ignored        -> weights.investorGoldAction();
-            case Action.AssignWorker ignored              -> weights.assignWorker();
-            case Action.ExhaustWorker ignored             -> weights.exhaustWorker();
-            case Action.ChooseGoods ignored               -> weights.chooseGoods();
-            case Action.ViewResidentCards ignored         -> weights.viewResidentCards();
+            
+            // === Sub-Actions: Should never reach agent choice (executed as part of main actions) ===
+            default -> throw new IllegalStateException(
+                "Unexpected action type in agent choice: " + action.getClass().getSimpleName() + 
+                ". This is a sub-action that should be handled internally by the game engine, " +
+                "not presented to the agent for scoring."
+            );
         };
     }
 
@@ -138,30 +200,77 @@ public class WeightedScoringAgent extends ScoringAgent {
     /**
      * FulfillNeeds:
      * +VP-Wert der Karte (3/5/8 je nach Bevölkerungsstufe)
-     * +15 wenn es die letzte Karte ist (7 Feuerwerks-Punkte + Spiel schnell beenden)
+     * +15 wenn dies meine letzte Karte ist (triggert Endphase + 7 Feuerwerks-Bonuspunkte)
      * Berücksichtigt ResidentCardsPenalty bei der Endspielentscheidung
+     * 
+     * <p>Spielende-Mechanik:
+     * - Wenn ein Spieler seine letzte Karte spielt (1 → 0 Karten), wird die Endphase ausgelöst
+     * - Die aktuelle Runde wird zu Ende gespielt, dann eine letzte volle Runde
+     * - Am Spielende: Feuerwerk gibt 7 VP für das Auslösen der Endphase
+     * - Aber: Mit ResidentCardsPenalty verliert man -2 VP pro Karte auf der Hand
      */
     private double bonusFulfillNeeds(Action.FulfillNeeds action, GameContext context, 
                                      ObjectiveContext objectiveContext) {
         double bonus = 0.0;
-        com.anno1800.game.cards.ResidentCard card = action.residentCard();
+        ResidentCard card = action.residentCard();
         if (card != null) {
-            bonus += switch (card.populationLevel()) {
+            // Base VP value of the card
+            double cardVP = switch (card.populationLevel()) {
                 case 2, 3 -> 3.0;  // Bauer/Arbeiter: 3 VP
                 case 4, 5 -> 8.0;  // Handwerker/Ingenieur/Investor: 8 VP
                 case 7    -> 5.0;  // Neue-Welt-Karten: 5 VP
                 default   -> 2.0;
             };
+            
+            // Scale VP value based on game phase
+            // Early game: VP less important (invest in engine building)
+            // Late game: VP critical (score aggressively)
+            double vpScale = calculateVPScale(context, objectiveContext);
+            bonus += cardVP * vpScale;
         }
-        // Letzte Karte → Spielende einleiten + 7 Feuerwerks-Bonuspunkte
-        // Aber bedenke: Wenn ResidentCardsPenalty aktiv ist, ist es besser, ALLE
-        // Karten zu spielen bevor man endet
+        
+        // Letzte Karte spielen → Endphase auslösen
+        // myCardCount() ist die Anzahl VOR dem Spielen, also:
+        // - myCardCount() == 1 bedeutet: Nach dieser Action habe ich 0 Karten → Endphase!
         if (context.myCardCount() <= 1) {
+            // Großer Bonus: 7 VP Feuerwerk + strategischer Vorteil (Gegner haben weniger Zeit)
             bonus += 15.0;
-        } else if (context.myCardCount() <= 2 && objectiveContext.hasResidentCardPenalty()) {
-            // Mit Penalty-Karte: Extra Anreiz, vorletzte Karte zu spielen
-            bonus += 8.0;
         }
+        
+        // ResidentCardsPenalty: -2 VP pro Karte auf der Hand am Spielende
+        // Je mehr Karten ich aktuell habe, desto wichtiger ist es, sie loszuwerden
+        if (objectiveContext.hasResidentCardPenalty()) {
+            int cardsAfterPlaying = context.myCardCount() - 1;
+            if (cardsAfterPlaying > 0) {
+                // Basis-Bonus: Spare 2 VP Malus + skaliert mit verbleibenden Karten
+                double penaltyBonus = 2.0 + (cardsAfterPlaying * 0.5);
+                
+                // Kompetitiver Bonus: Gegner-Handkarten berücksichtigen
+                double competitiveBonus = 0.0;
+                
+                // 1. Individueller Gegner-Bonus: Höchster Bonus wenn ein Gegner < 5 Karten hat
+                // Betrachtet nur den Gegner mit den wenigsten Karten (nicht alle aufsummiert)
+                double maxIndividualBonus = 0.0;
+                for (int opponentCards : context.opponentCardCounts()) {
+                    if (opponentCards < 5) {
+                        // 4 Karten → +0.5, 3 → +1.0, 2 → +1.5, 1 → +2.0, 0 → +2.5
+                        double individualBonus = (5 - opponentCards) * 0.5;
+                        maxIndividualBonus = Math.max(maxIndividualBonus, individualBonus);
+                    }
+                }
+                competitiveBonus += maxIndividualBonus;
+                
+                // 2. Durchschnitts-Bonus: 0 bei 9 Karten (neutral), linear skaliert
+                // Bei < 9 → positiv (Gegner spielen viel → ich sollte auch spielen)
+                // Bei > 9 → negativ (Gegner halten viele → vielleicht sollte ich auch halten)
+                double avgBonus = (9.0 - context.avgOpponentCardCount()) * 0.3;
+                competitiveBonus += avgBonus;
+                
+                // Individueller Bonus dominiert (Gewichtung 0.5 vs 0.3 pro Karte)
+                bonus += penaltyBonus + competitiveBonus;
+            }
+        }
+        
         return bonus;
     }
 
@@ -174,7 +283,7 @@ public class WeightedScoringAgent extends ScoringAgent {
         if (action.residents() == null) return 0.0;
         double scale = context.isEndPhase() ? 0.3 : 1.0;
         double bonus = 0.0;
-        for (com.anno1800.game.residents.Resident r : action.residents()) {
+        for (Resident r : action.residents()) {
             bonus += (r.getPopulationLevel() + 1) * 1.5 * scale;
         }
         return bonus;
@@ -243,6 +352,58 @@ public class WeightedScoringAgent extends ScoringAgent {
     }
 
     // =========================================================================
+    // Game Phase Analysis
+    // =========================================================================
+    
+    /**
+     * Calculate VP scaling factor based on game phase.
+     * 
+     * <p>Game phases:
+     * <ul>
+     *   <li><b>Early game (> 60% remaining)</b>: Scale 0.5-0.6 → prioritize engine building</li>
+     *   <li><b>Mid game (30-60% remaining)</b>: Scale 0.8-1.0 → balanced approach</li>
+     *   <li><b>Late game (10-30% remaining)</b>: Scale 1.2-1.4 → VP important</li>
+     *   <li><b>End game (< 10% remaining)</b>: Scale 1.5-1.8 → VP critical</li>
+     * </ul>
+     * 
+     * @param context Current game context (rounds left)
+     * @param objectiveContext Game setup context (expected game length)
+     * @return Scaling factor for VP bonuses (0.5 to 1.8)
+     */
+    private double calculateVPScale(GameContext context, ObjectiveContext objectiveContext) {
+        // If in end phase, use remaining turns for precise calculation
+        if (context.isEndPhase()) {
+            return switch (context.remainingTurns()) {
+                case 1 -> 1.8;  // Last turn: VP rush!
+                case 2 -> 1.5;  // Penultimate turn: VP very important
+                default -> 1.4; // End phase active but more turns left
+            };
+        }
+        
+        // Calculate game progress percentage
+        int expectedLength = objectiveContext.expectedGameLength();
+        int roundsLeft = context.estimatedRoundsLeft();
+        double progressPercent = 1.0 - ((double) roundsLeft / expectedLength);
+        
+        // Phase-based scaling
+        if (progressPercent < 0.4) {
+            // Early game: 0-40% progress → scale 0.5 to 0.7
+            return 0.5 + (progressPercent * 0.5);  // 0.5 at 0%, 0.7 at 40%
+        } else if (progressPercent < 0.7) {
+            // Mid game: 40-70% progress → scale 0.7 to 1.1
+            double midProgress = (progressPercent - 0.4) / 0.3;  // 0.0 to 1.0
+            return 0.7 + (midProgress * 0.4);  // 0.7 at 40%, 1.1 at 70%
+        } else if (progressPercent < 0.9) {
+            // Late game: 70-90% progress → scale 1.1 to 1.4
+            double lateProgress = (progressPercent - 0.7) / 0.2;  // 0.0 to 1.0
+            return 1.1 + (lateProgress * 0.3);  // 1.1 at 70%, 1.4 at 90%
+        } else {
+            // Very late game: 90%+ progress → scale 1.4 to 1.5
+            return 1.4 + ((progressPercent - 0.9) / 0.1 * 0.1);  // 1.4 at 90%, 1.5 at 100%
+        }
+    }
+
+    // =========================================================================
     // Objective bonuses: strategy adjustments based on active ObjectiveCards
     // =========================================================================
 
@@ -262,7 +423,7 @@ public class WeightedScoringAgent extends ScoringAgent {
         switch (action) {
             case Action.UpgradeResident a -> {
                 // If MostInvestors objective is active, prioritize upgrading to level 5
-                if (objectiveContext.hasObjective(com.anno1800.game.cards.ObjectiveCard.MostInvestors.class)) {
+                if (objectiveContext.hasObjective(ObjectiveCard.MostInvestors.class)) {
                     for (var resident : a.residents()) {
                         if (resident.getPopulationLevel() == 4) { // Upgrading to Investor (5)
                             bonus += 3.0;
@@ -270,7 +431,7 @@ public class WeightedScoringAgent extends ScoringAgent {
                     }
                 }
                 // Similar for MostEngineers
-                if (objectiveContext.hasObjective(com.anno1800.game.cards.ObjectiveCard.MostEngineers.class)) {
+                if (objectiveContext.hasObjective(ObjectiveCard.MostEngineers.class)) {
                     for (var resident : a.residents()) {
                         if (resident.getPopulationLevel() == 3) { // Upgrading to Engineer (4)
                             bonus += 3.0;
@@ -281,16 +442,16 @@ public class WeightedScoringAgent extends ScoringAgent {
             
             case Action.DiscoverNewWorldIsland ignored -> {
                 // If NewWorldExplorer is active (6 VP per island), boost this action
-                if (objectiveContext.hasObjective(com.anno1800.game.cards.ObjectiveCard.NewWorldExplorer.class)) {
+                if (objectiveContext.hasObjective(ObjectiveCard.NewWorldExplorer.class)) {
                     bonus += 4.0;
                 }
             }
             
             case Action.Expedition ignored -> {
                 // If expedition-related objectives are active, boost expeditions
-                if (objectiveContext.hasObjective(com.anno1800.game.cards.ObjectiveCard.MostExpeditionCards.class) ||
-                    objectiveContext.hasObjective(com.anno1800.game.cards.ObjectiveCard.ArtifactBonus.class) ||
-                    objectiveContext.hasObjective(com.anno1800.game.cards.ObjectiveCard.AnimalBonus.class)) {
+                if (objectiveContext.hasObjective(ObjectiveCard.MostExpeditionCards.class) ||
+                    objectiveContext.hasObjective(ObjectiveCard.ArtifactBonus.class) ||
+                    objectiveContext.hasObjective(ObjectiveCard.AnimalBonus.class)) {
                     bonus += 3.0;
                 }
             }

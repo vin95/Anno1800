@@ -10,6 +10,7 @@ import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.player.PlayerBoard;
 import com.anno1800.game.residents.Resident;
+import com.anno1800.game.residents.ResidentStatus;
 import com.anno1800.game.state.GameState;
 import com.anno1800.data.gamedata.ShipType;
 import com.anno1800.ui.output.GameStatePrinter;
@@ -818,7 +819,7 @@ public class TerminalGameUI {
             for (int i = 0; i < residents.size(); i++) {
                 Resident resident = residents.get(i);
                 String selectedMarker = selectedResidents.contains(resident) ? " [SELECTED]" : "";
-                String status = resident.getStatus() == com.anno1800.game.residents.ResidentStatus.FIT ? "FIT" : "EXHAUSTED";
+                String status = resident.getStatus() == ResidentStatus.FIT ? "FIT" : "EXHAUSTED";
                 System.out.printf("[%d] %s (Level %d, %s)%s%n", 
                     i + 1, 
                     resident.getClass().getSimpleName(),

@@ -157,7 +157,7 @@ Diese Actions nutzen das System:
    - Return: true
    ```
 3. **Agent** wählt Action
-4. **ActionExecutor** führt aus:
+4. **ActionHandler** führt aus:
    ```
    - canObtainGoods([COAL, BRICKS]) → plant wieder
    - consumeGoods([COAL, BRICKS]):

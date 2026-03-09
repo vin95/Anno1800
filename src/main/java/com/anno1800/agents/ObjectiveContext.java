@@ -24,7 +24,7 @@ import java.util.Map;
  * <h3>Usage:</h3>
  * <pre>
  * // At game start:
- * ObjectiveContext objCtx = ObjectiveContext.compute(game.getActiveObjectiveCards());
+ * ObjectiveContext objCtx = ObjectiveContext.compute(game.getActiveObjectiveCards(), game.getPlayers());
  * 
  * // Each turn (flexible parameters):
  * GameContext gameCtx = GameContext.compute(gameState, player);
@@ -77,10 +77,21 @@ public record ObjectiveContext(
         /**
          * Map of objective types to their scoring potential.
          * Used for estimating which strategies are more valuable in this game.
+         * Includes both positive (bonuses) and negative (penalties) values.
+         * Action-only cards with 0 potential are excluded.
          * 
-         * Example: "MostInvestors" → 10 (first place value)
+         * Example: "MostInvestors" → 10, "ResidentCardsPenalty" → -10
          */
-        Map<String, Integer> objectiveScoringPotential
+        Map<String, Integer> objectiveScoringPotential,
+        
+        /**
+         * Expected game length in rounds at game start.
+         * Based on minimum starting hand cards across all players.
+         * Used to scale VP-importance over the course of the game:
+         * - Early game: VP less valuable (invest instead)
+         * - Late game: VP very valuable (score aggressively)
+         */
+        int expectedGameLength
 
 ) {
 
@@ -89,13 +100,14 @@ public record ObjectiveContext(
     // =========================================================================
 
     /**
-     * Computes the ObjectiveContext from the list of active ObjectiveCards.
+     * Computes the ObjectiveContext from the list of active ObjectiveCards and game state.
      * This should be called once at game initialization.
      * 
      * @param activeObjectiveCards The 5 ObjectiveCards drawn at game start
+     * @param players Array of all players (used to calculate expected game length)
      * @return An immutable ObjectiveContext to be reused throughout the game
      */
-    public static ObjectiveContext compute(List<ObjectiveCard> activeObjectiveCards) {
+    public static ObjectiveContext compute(List<ObjectiveCard> activeObjectiveCards, com.anno1800.game.player.Player[] players) {
         
         // Check for ResidentCardsPenalty
         boolean hasResidentCardPenalty = activeObjectiveCards.stream()
@@ -115,14 +127,26 @@ public record ObjectiveContext(
         boolean hasInvestorExhaustForGold = activeObjectiveCards.stream()
                 .anyMatch(card -> card instanceof ObjectiveCard.InvestorExhaustForGold);
         
-        // Build scoring potential map
+        // Build scoring potential map (include both positive and negative values)
         Map<String, Integer> scoringPotential = new HashMap<>();
         for (ObjectiveCard card : activeObjectiveCards) {
             String cardType = card.getClass().getSimpleName();
             int potential = estimateScoringPotential(card);
-            if (potential > 0) {
+            if (potential != 0) {  // Include both bonuses and penalties, exclude action-only cards
                 scoringPotential.put(cardType, potential);
             }
+        }
+        
+        // Calculate expected game length: minimum starting hand cards across all players
+        // This assumes ~1 card played per round on average
+        int expectedGameLength = Integer.MAX_VALUE;
+        for (com.anno1800.game.player.Player player : players) {
+            int startCards = player.getPlayerBoard().cards().residentCardCount();
+            expectedGameLength = Math.min(expectedGameLength, startCards);
+        }
+        // Fallback if no players (shouldn't happen)
+        if (expectedGameLength == Integer.MAX_VALUE) {
+            expectedGameLength = 12; // Default assumption
         }
         
         return new ObjectiveContext(
@@ -133,7 +157,8 @@ public record ObjectiveContext(
                 hasExplorerTraderCard,
                 hasDiscardResidentCard,
                 hasInvestorExhaustForGold,
-                scoringPotential
+                scoringPotential,
+                expectedGameLength
         );
     }
 
@@ -144,9 +169,10 @@ public record ObjectiveContext(
     /**
      * Estimates the maximum scoring potential of an ObjectiveCard.
      * Used to help agents prioritize strategies aligned with active objectives.
+     * Returns positive values for bonuses, negative for penalties, 0 for action-only cards.
      * 
      * @param card The ObjectiveCard to evaluate
-     * @return Rough estimate of max points achievable (0 if not scoreable)
+     * @return Rough estimate of max points (positive/negative) or 0 if no direct scoring
      */
     private static int estimateScoringPotential(ObjectiveCard card) {
         return switch (card) {
@@ -221,9 +247,11 @@ public record ObjectiveContext(
 
     /**
      * Returns the estimated scoring potential for a given objective type.
+     * Can be positive (bonus), negative (penalty), or 0 (not active or action-only card).
+     * Use Math.abs() to determine strategic importance regardless of sign.
      * 
      * @param objectiveType Simple class name of the ObjectiveCard (e.g., "MostInvestors")
-     * @return Estimated max points (0 if not active or not scored)
+     * @return Estimated max points (positive/negative/0 if not active or action-only)
      */
     public int getScoringPotential(String objectiveType) {
         return objectiveScoringPotential.getOrDefault(objectiveType, 0);

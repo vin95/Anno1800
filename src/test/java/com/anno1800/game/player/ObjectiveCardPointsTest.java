@@ -1,5 +1,6 @@
 package com.anno1800.game.player;
 
+import com.anno1800.game.cards.ExpeditionCard;
 import com.anno1800.game.cards.ObjectiveCard;
 import com.anno1800.game.cards.ResidentCard;
 import com.anno1800.game.residents.*;
@@ -270,9 +271,9 @@ class ObjectiveCardPointsTest {
         @DisplayName("Spieler mit mehr Karten erhält 10 VP")
         void testMoreCardsGets10Points() {
             p0.getPlayerBoard().getExpeditionCards().add(
-                new com.anno1800.game.cards.ExpeditionCard(3, 4, 2, 3));
+                new ExpeditionCard(3, 4, 2, 3));
             p0.getPlayerBoard().getExpeditionCards().add(
-                new com.anno1800.game.cards.ExpeditionCard(3, 4, 2, 3));
+                new ExpeditionCard(3, 4, 2, 3));
 
             var points = new ObjectiveCard.MostExpeditionCards()
                 .calculateEndGamePoints(new Player[]{p0, p1});

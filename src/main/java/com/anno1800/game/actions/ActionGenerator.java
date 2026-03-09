@@ -37,8 +37,6 @@ public class ActionGenerator {
         
         // Factory actions
         actions.addAll(generateBuildFactoryActions(player, game));
-        // actions.addAll(generateDemolishFactoryActions(player, game)); // REMOVED: Called internally
-        // actions.addAll(generateOverbuildDefaultFactoryActions(player, game)); // REMOVED: Called internally during BuildFactory
         
         // Building actions
         actions.addAll(generateBuildShipyardActions(player, game));
@@ -50,16 +48,6 @@ public class ActionGenerator {
         actions.addAll(generateSwapResidentCardsActions(player, game));
         actions.addAll(generateFulfillNeedsActions(player, game));
         
-        // Worker actions (all internal - called during production)
-        // actions.addAll(generateAssignWorkerActions(player, game)); // REMOVED: Called internally
-        // actions.addAll(generateExhaustWorkerActions(player, game)); // REMOVED: Called internally
-        // actions.addAll(generateDoOvertimeActions(player, game)); // REMOVED: Called internally
-        
-        // Production actions (all internal - called during other actions)
-        // actions.addAll(generateProduceGoodsActions(player, game)); // REMOVED: Called internally
-        // actions.addAll(generateTradeGoodsActions(player, game)); // REMOVED: Called internally
-        // actions.addAll(generateImportGoodActions(player, game)); // REMOVED: Called internally
-        
         // Exploration actions
         actions.addAll(generateDiscoverOldWorldIslandActions(player, game));
         actions.addAll(generateDiscoverNewWorldIslandActions(player, game));
@@ -67,7 +55,6 @@ public class ActionGenerator {
         
         // Special actions
         actions.addAll(generateCarnevalActions(player, game));
-        // Note: DrawResidentCard is not a player action - it's called internally by SettleResident and SwapResidentCards
         actions.addAll(generateActivateRewardActions(player, game));
         
         // Free actions (do not consume action points)

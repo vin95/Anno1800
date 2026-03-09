@@ -1,6 +1,7 @@
 package com.anno1800.agents;
 
 import com.anno1800.agents.AgentImpl.WeightedScoringAgent;
+import com.anno1800.game.cards.ObjectiveCard;
 
 /**
  * Defines per-action-type base weight multipliers for a strategy.
@@ -199,6 +200,125 @@ public record StrategyWeights(
                 5.0,   // discoverNewWorldIsland
                 5.0,   // expedition
                 3.0    // carneval               ← Etwas niedriger: sehr situational
+        );
+    }
+
+    // =========================================================================
+    // Dynamic Adjustment based on ObjectiveCards
+    // =========================================================================
+
+    /**
+     * Creates adjusted weights based on active ObjectiveCards.
+     * This modifies the base strategy weights to align with scoring opportunities.
+     * 
+     * <p>Adjustment logic:
+     * <ul>
+     *   <li><b>ResidentCardsPenalty</b>: +3 fulfillNeeds (play cards faster)</li>
+     *   <li><b>Factory Objectives</b>: +2 to +4 buildFactory (based on scoring potential)</li>
+     *   <li><b>MostInvestors/Engineers</b>: +2 upgradeResident, +1 settleResident</li>
+     *   <li><b>Island/Expedition Objectives</b>: +2 to +3 discover/expedition</li>
+     *   <li><b>SingleIslandBonus</b>: -3 discover (avoid multiple islands)</li>
+     * </ul>
+     * 
+     * @param objectiveContext The objective context with active cards
+     * @return New StrategyWeights with adjustments applied
+     */
+    public StrategyWeights adjustForObjectives(ObjectiveContext objectiveContext) {
+        double adjBuildFactory = buildFactory;
+        double adjBuildShipyard = buildShipyard;
+        double adjBuildShips = buildShips;
+        double adjFulfillNeeds = fulfillNeeds;
+        double adjSettleResident = settleResident;
+        double adjUpgradeResident = upgradeResident;
+        double adjSwapResidentCards = swapResidentCards;
+        double adjDiscoverOld = discoverOldWorldIsland;
+        double adjDiscoverNew = discoverNewWorldIsland;
+        double adjExpedition = expedition;
+        double adjCarneval = carneval;
+
+        // === Penalty Cards: Encourage ending game faster ===
+        if (objectiveContext.hasResidentCardPenalty()) {
+            adjFulfillNeeds += 3.0;  // Play cards ASAP to avoid penalty
+            adjSwapResidentCards -= 1.0;  // Less swapping, more playing
+        }
+
+        // === Factory Objectives: Boost buildFactory ===
+        int luxuryPotential = objectiveContext.getScoringPotential("LuxuryFactories");
+        int newWorldPotential = objectiveContext.getScoringPotential("NewWorldProductFactories");
+        int artisanPotential = objectiveContext.getScoringPotential("ArtisanGoodsFactories");
+        int engineerPotential = objectiveContext.getScoringPotential("EngineerGoodsFactories");
+        int basicPotential = objectiveContext.getScoringPotential("BasicGoodsProducer");
+        int prestigePotential = objectiveContext.getScoringPotential("PrestigeFactories");
+        
+        int totalFactoryPotential = luxuryPotential + newWorldPotential + artisanPotential 
+                                   + engineerPotential + basicPotential + prestigePotential;
+        
+        if (totalFactoryPotential > 50) {
+            adjBuildFactory += 4.0;  // Very high factory focus
+        } else if (totalFactoryPotential > 25) {
+            adjBuildFactory += 2.5;  // Medium factory focus
+        } else if (totalFactoryPotential > 0) {
+            adjBuildFactory += 1.5;  // Some factory focus
+        }
+
+        // === Resident Objectives: Boost upgradeResident / settleResident ===
+        if (objectiveContext.hasObjective(ObjectiveCard.MostInvestors.class)) {
+            adjUpgradeResident += 2.5;
+            adjSettleResident += 1.5;  // Need base residents to upgrade
+        }
+        
+        if (objectiveContext.hasObjective(ObjectiveCard.MostEngineers.class)) {
+            adjUpgradeResident += 2.5;
+            adjSettleResident += 1.5;
+        }
+        
+        if (objectiveContext.hasObjective(ObjectiveCard.MostResidentsTotal.class)) {
+            adjSettleResident += 3.0;  // Mass production
+            adjUpgradeResident += 1.0;  // Some upgrades for variety
+        }
+
+        // === Exploration Objectives: Boost discovery and expedition ===
+        if (objectiveContext.hasObjective(ObjectiveCard.NewWorldExplorer.class)) {
+            adjDiscoverNew += 3.0;  // New World islands are priority
+            adjBuildShips += 1.5;   // Need ships to explore
+        }
+        
+        int expeditionPotential = objectiveContext.getScoringPotential("ArtifactBonus")
+                                + objectiveContext.getScoringPotential("AnimalBonus");
+        if (expeditionPotential > 0) {
+            adjExpedition += 2.0;
+            adjBuildShips += 1.0;  // Need explorer ships
+        }
+        
+        if (objectiveContext.hasObjective(ObjectiveCard.MostExpeditionCards.class)) {
+            adjExpedition += 2.5;
+            adjBuildShips += 1.5;
+        }
+
+        // === SingleIslandBonus: AVOID multiple islands ===
+        if (objectiveContext.hasObjective(ObjectiveCard.SingleIslandBonus.class)) {
+            adjDiscoverOld -= 3.0;  // Strong penalty for discovering
+            adjDiscoverNew -= 3.0;
+        }
+
+        // === Trade/Ship Objectives ===
+        if (objectiveContext.hasObjective(ObjectiveCard.MostTradeChips.class)) {
+            adjBuildShipyard += 1.5;
+            adjBuildShips += 2.0;  // Trade ships give chips
+        }
+
+        return new StrategyWeights(
+                Math.max(0.0, adjBuildFactory),
+                Math.max(0.0, adjBuildShipyard),
+                Math.max(0.0, adjBuildShips),
+                Math.max(0.0, adjFulfillNeeds),
+                Math.max(0.0, adjSettleResident),
+                Math.max(0.0, adjUpgradeResident),
+                Math.max(0.0, adjSwapResidentCards),
+                Math.max(0.0, adjDiscoverOld),
+                Math.max(0.0, adjDiscoverNew),
+                Math.max(0.0, adjExpedition),
+                Math.max(0.0, adjCarneval)
         );
     }
 }

@@ -33,6 +33,9 @@ public record GameContext(
 
         /** Average ResidentCard count across all opponents. */
         double avgOpponentCardCount,
+        
+        /** List of individual opponent card counts for detailed analysis. */
+        List<Integer> opponentCardCounts,
 
         /** Current round number. */
         int currentRound,
@@ -99,6 +102,10 @@ public record GameContext(
                 .mapToDouble(ps -> ps.cards().residentCardCount())
                 .average()
                 .orElse(Double.MAX_VALUE);
+        
+        List<Integer> opponentCardCounts = opponents.stream()
+                .map(ps -> ps.cards().residentCardCount())
+                .toList();
 
         boolean endPhase = my.cards().residentCardCount() <= 1
                 || minOpponentCards <= 1
@@ -116,6 +123,7 @@ public record GameContext(
                 my.cards().residentCardCount(),
                 minOpponentCards,
                 avgOpponentCards,
+                opponentCardCounts,
                 gameState.round(),
                 endPhase,
                 remainingTurns,

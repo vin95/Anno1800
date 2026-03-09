@@ -30,7 +30,7 @@ public class Game {
     private int currentRound;
     private final int startPlayer;
     private int currentPlayer;
-    private int endPhaseRoundsPlayed = 0; // Counts rounds played AFTER end phase triggered
+    private Integer endPhaseTriggeredInRound = null; // Track WHEN end phase was triggered
     
     // Game configuration
     private final int maxRounds; // Maximum rounds per game
@@ -94,7 +94,8 @@ public class Game {
         }
         
         // Compute and cache ObjectiveContext (fixed parameters, won't change during game)
-        this.objectiveContext = ObjectiveContext.compute(activeObjectiveCards);
+        this.objectiveContext = ObjectiveContext.compute(activeObjectiveCards, players);
+        System.out.println("Expected game length: ~" + objectiveContext.expectedGameLength() + " rounds");
     }
     
     /**
@@ -121,14 +122,22 @@ public class Game {
      * Called when all players have completed their turns.
      */
     public void nextRound() {
+        // Check if end phase was just triggered in the current round
+        if (board.isEndPhase() && endPhaseTriggeredInRound == null) {
+            endPhaseTriggeredInRound = currentRound;
+            System.out.println("*** END PHASE TRIGGERED in Round " + currentRound + " ***");
+            System.out.println("*** Game will end after 1 more complete round ***");
+        }
+        
         currentRound++;
         currentPlayer = 0;  // Reset to first player
         
-        // Track rounds played after end phase
-        if (board.isEndPhase()) {
-            endPhaseRoundsPlayed++;
-            System.out.println("=== Round " + currentRound + " begins (END PHASE - Round " + 
-                endPhaseRoundsPlayed + " after trigger) ===");
+        // Display round info
+        if (endPhaseTriggeredInRound != null) {
+            int roundsSinceTrigger = currentRound - endPhaseTriggeredInRound;
+            if (roundsSinceTrigger == 1) {
+                System.out.println("=== Round " + currentRound + " begins (FINAL ROUND) ===");
+            }
         } else {
             System.out.println("=== Round " + currentRound + " begins ===");
         }
@@ -195,8 +204,8 @@ public class Game {
      * 
      * End phase logic:
      * - When triggered in round N: finish round N, play round N+1, then game over
-     * - endPhaseRoundsPlayed counts COMPLETE rounds after trigger
-     * - Game ends when endPhaseRoundsPlayed >= 2 (current round finished + 1 final round)
+     * - Example: Triggered in round 5 → finish round 5 → play round 6 → game ends before round 7
+     * - Formula: Game ends when currentRound > endPhaseTriggeredInRound + 1
      * 
      * @return true if game is over
      */
@@ -206,10 +215,9 @@ public class Game {
             return true;
         }
         
-        // End phase triggered: finish current round + 1 more round
-        // endPhaseRoundsPlayed increments at START of new round
-        // So when endPhaseRoundsPlayed == 2, we've had the trigger round + 1 final round
-        if (board.isEndPhase() && endPhaseRoundsPlayed >= 2) {
+        // End phase triggered: check if we've completed trigger round + 1 final round
+        // currentRound > triggerRound + 1 means we're trying to start a 3rd round after trigger
+        if (endPhaseTriggeredInRound != null && currentRound > endPhaseTriggeredInRound + 1) {
             return true;
         }
         
