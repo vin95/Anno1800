@@ -22,28 +22,19 @@ public class BuildShips {
         
         // Get required goods per ship
         Goods[] costPerShip = ShipCosts.getShipCost(level);
-        
-        // PHASE 1: Validate and plan all ships (accumulate resource planning)
-        if (costPerShip != null && costPerShip.length > 0) {
-            for (int i = 0; i < amount; i++) {
-                System.out.println("Planning ship " + (i + 1) + "/" + amount + ": " + shipType + " level " + level);
-                System.out.println("  Requires: " + java.util.Arrays.toString(costPerShip));
-                
-                // PLANNING PHASE: Determine how to obtain goods (accumulates in storedGoods)
-                if (!board.canObtainGoods(costPerShip)) {
-                    throw new IllegalStateException("Cannot obtain required goods for ship " + (i + 1));
-                }
-            }
-        }
-        
-        // PHASE 2: Execute all ships (consume planned resources and build ships)
-        // Important: Ships are built one by one, so chips from previous ships
-        // are available for building the next ship
+
+        // Build ships sequentially: plan + consume for each ship.
+        // This keeps storedGoods consistent and allows state changes between ships.
         for (int i = 0; i < amount; i++) {
             System.out.println("Building ship " + (i + 1) + "/" + amount + ": " + shipType + " level " + level);
             
             if (costPerShip != null && costPerShip.length > 0) {
-                // EXECUTION PHASE: Actually obtain and consume goods from storedGoods
+                System.out.println("  Requires: " + java.util.Arrays.toString(costPerShip));
+
+                // Plan with full game context, then consume immediately.
+                if (!board.canObtainGoods(costPerShip, game)) {
+                    throw new IllegalStateException("Cannot obtain required goods for ship " + (i + 1));
+                }
                 board.consumeGoods(costPerShip);
             }
             

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Random;
 
 /**
  * Game board containing all card stacks
@@ -791,6 +792,75 @@ public class Board {
         List<T> list = new ArrayList<>(deque);
         Collections.shuffle(list);
         return new ArrayDeque<>(list);
+    }
+
+    /**
+     * Helper method to shuffle a Deque with a seeded Random for reproducibility.
+     */
+    private static <T> Deque<T> shuffleStack(Deque<T> deque, Random rng) {
+        List<T> list = new ArrayList<>(deque);
+        Collections.shuffle(list, rng);
+        return new ArrayDeque<>(list);
+    }
+
+    /**
+     * Initializes the game board with seeded randomness for reproducible games.
+     * @param numPlayers Number of players
+     * @param rng Seeded random number generator
+     */
+    @SuppressWarnings("unchecked")
+    public static Board initializeBoard(int numPlayers, Random rng) {
+        List<Deque<Factory>> factoryStacks = createFactoryStacks(numPlayers);
+
+        Deque<ResidentCard> residentStack1 = shuffleStack(getCardsForLevel(2), rng);
+        Deque<ResidentCard> residentStack2 = shuffleStack(getCardsForLevel(5), rng);
+        Deque<ResidentCard> residentStack3 = shuffleStack(getCardsForLevel(7), rng);
+
+        Deque<ExpeditionCard> expeditionStack = shuffleStack(createExpeditionCards(), rng);
+
+        List<ObjectiveCard> deckList = new ArrayList<>(ObjectiveCard.createDeck());
+        Collections.shuffle(deckList, rng);
+        Deque<ObjectiveCard> objectiveCardDeck = new ArrayDeque<>(deckList);
+        List<ObjectiveCard> activeObjectiveCards = new ArrayList<>();
+        for (int i = 0; i < 5 && !objectiveCardDeck.isEmpty(); i++) {
+            activeObjectiveCards.add(objectiveCardDeck.pollFirst());
+        }
+
+        Deque<Shipyard> shipyardLevel1 = createLevel1Shipyards(4);
+        Deque<Shipyard> shipyardLevel2 = createLevel2Shipyards(6);
+        Deque<Shipyard> shipyardLevel3 = createLevel3Shipyards(4);
+
+        Deque<TradeShip> tradeShipLevel1 = (Deque<TradeShip>) createShips(ShipType.TradeShip, 1, 6);
+        Deque<TradeShip> tradeShipLevel2 = (Deque<TradeShip>) createShips(ShipType.TradeShip, 2, 6);
+        Deque<TradeShip> tradeShipLevel3 = (Deque<TradeShip>) createShips(ShipType.TradeShip, 3, 6);
+
+        Deque<ExplorerShip> explorerShipLevel1 = (Deque<ExplorerShip>) createShips(ShipType.ExplorerShip, 1, 6);
+        Deque<ExplorerShip> explorerShipLevel2 = (Deque<ExplorerShip>) createShips(ShipType.ExplorerShip, 2, 6);
+        Deque<ExplorerShip> explorerShipLevel3 = (Deque<ExplorerShip>) createShips(ShipType.ExplorerShip, 3, 6);
+
+        Deque<OldWorldIsland> oldWorldIslands = shuffleStack(createOldWorldIslands(), rng);
+        Deque<NewWorldIsland> newWorldIslands = shuffleStack(createNewWorldIslands(), rng);
+
+        List<Farmer> residents_farmers = createFarmers();
+        List<Worker> residents_workers = createWorkers();
+        List<Artisan> residents_artisans = createArtisans();
+        List<Engineer> residents_engineers = createEngineers();
+        List<Investor> residents_investors = createInvestors();
+
+        return new Board(
+            factoryStacks,
+            residentStack1, residentStack2, residentStack3,
+            expeditionStack,
+            objectiveCardDeck,
+            activeObjectiveCards,
+            shipyardLevel1, shipyardLevel2, shipyardLevel3,
+            tradeShipLevel1, tradeShipLevel2, tradeShipLevel3,
+            explorerShipLevel1, explorerShipLevel2, explorerShipLevel3,
+            oldWorldIslands,
+            newWorldIslands,
+            residents_farmers, residents_workers, residents_artisans,
+            residents_engineers, residents_investors
+        );
     }
 
     /**

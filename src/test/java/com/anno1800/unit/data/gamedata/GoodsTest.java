@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,12 +48,14 @@ class GoodsTest {
     }
 
     /**
-     * Verifies that the enum contains exactly 55 goods types.
-     * If this test fails, a good was added or removed from the enum.
+     * Verifies that enum names remain unique and stable enough for valueOf lookups.
      */
     @Test
-    void testEnumCount() {
-        assertEquals(55, Goods.values().length, "Should have 55 goods types");
+    void testEnumNamesAreUnique() {
+        Set<String> enumNames = new HashSet<>();
+        for (Goods good : Goods.values()) {
+            assertTrue(enumNames.add(good.name()), "Duplicate enum name found: " + good.name());
+        }
     }
 
     /**

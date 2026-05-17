@@ -51,6 +51,9 @@ public class FulfillNeeds {
         player.addVictoryPoints(victoryPoints);
         System.out.println("  -> Victory Points awarded: " + victoryPoints + " (Level " + residentCard.populationLevel() + ")");
         
+        // Count this fulfill needs action
+        playerBoard.incrementFulfillNeedsCount();
+        
         // Remove the card from player's hand
         playerBoard.getResidentCards().remove(residentCard);
         

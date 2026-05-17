@@ -47,7 +47,7 @@ public class SettleResident {
             System.out.println("Settling resident level " + level + " requires: " + java.util.Arrays.toString(cost.goods()));
             
             // PLANNING PHASE: Determine how to obtain goods
-            if (!playerBoard.canObtainGoods(cost.goods())) {
+            if (!playerBoard.canObtainGoods(cost.goods(), game)) {
                 throw new IllegalStateException("Cannot obtain required goods for settling resident level " + level);
             }
             

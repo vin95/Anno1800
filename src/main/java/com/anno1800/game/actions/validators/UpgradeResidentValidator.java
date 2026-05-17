@@ -29,6 +29,31 @@ public class UpgradeResidentValidator {
         if (residents == null || residents.length == 0 || residents.length > 3) {
             return false;
         }
+
+        // Anti-deadlock guard: keep a minimal low-level workforce so players can
+        // continue producing core goods and settling residents.
+        // Without this, agents can self-sabotage by upgrading all level-1/2 residents.
+        long level1Before = playerBoard.getResidents().stream()
+            .filter(r -> r.getPopulationLevel() == 1)
+            .count();
+        long level2Before = playerBoard.getResidents().stream()
+            .filter(r -> r.getPopulationLevel() == 2)
+            .count();
+
+        long upgradingLevel1 = java.util.Arrays.stream(residents)
+            .filter(r -> r.getPopulationLevel() == 1)
+            .count();
+        long upgradingLevel2 = java.util.Arrays.stream(residents)
+            .filter(r -> r.getPopulationLevel() == 2)
+            .count();
+
+        long level1After = level1Before - upgradingLevel1;
+        long level2After = level2Before - upgradingLevel2 + upgradingLevel1;
+
+        // Keep at least one level-1 and one level-2 resident.
+        if (level1After < 1 || level2After < 1) {
+            return false;
+        }
         
         // Validate each resident and accumulate goods costs
         // IMPORTANT: We must not clear storedGoods between residents!

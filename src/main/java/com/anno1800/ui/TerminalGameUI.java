@@ -24,7 +24,9 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;import java.util.Map;import java.util.Scanner;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 /**
  * Terminal-based user interface for Anno 1800 board game.
@@ -88,6 +90,30 @@ public class TerminalGameUI {
         if (testMode) {
             saveTestGameState(currentState, "initial");
         }
+    }
+
+    /**
+     * Creates a seeded game for reproducible debug sessions.
+     * Game states are always saved after each action.
+     * @param numPlayers Number of players
+     * @param seed       Random seed for reproducible shuffling and start player
+     * @param maxRounds  Maximum rounds (game aborts after this many rounds)
+     */
+    public TerminalGameUI(int numPlayers, long seed, int maxRounds) {
+        this.game = new Game(numPlayers, seed, maxRounds);
+        this.scanner = new Scanner(System.in);
+        this.actionGenerator = new ActionGenerator();
+        this.statePrinter = new GameStatePrinter();
+        this.stateHistory = new ArrayList<>();
+
+        // Always save game states for seeded/debug games
+        this.testGameDir = createTestGameDirectory();
+        System.out.println("Game states will be saved to: " + testGameDir);
+
+        this.currentState = game.getState();
+        this.previousState = currentState;
+        this.stateHistory.add(currentState);
+        saveTestGameState(currentState, "initial");
     }
     
     /**
@@ -1706,8 +1732,28 @@ public class TerminalGameUI {
     
     /**
      * Main entry point for terminal game.
+     * 
+     * Supports CLI args for scripted/debug mode:
+     *   debug [seed] [numPlayers] [maxRounds]
+     *   Example: debug 42 3 200
+     * If no args are given, interactive mode is used.
      */
     public static void main(String[] args) {
+        // Check for debug/seeded mode via CLI args
+        if (args.length > 0 && args[0].equalsIgnoreCase("debug")) {
+            long seed = args.length > 1 ? Long.parseLong(args[1]) : System.currentTimeMillis();
+            int numPlayers = args.length > 2 ? Integer.parseInt(args[2]) : 3;
+            int maxRounds = args.length > 3 ? Integer.parseInt(args[3]) : 200;
+            System.out.println("=".repeat(80));
+            System.out.println("DEBUG MODE - Seeded Game");
+            System.out.printf("  Players: %d | Seed: %d | Max rounds: %d%n", numPlayers, seed, maxRounds);
+            System.out.println("=".repeat(80));
+            System.out.println("\nInitializing game...");
+            TerminalGameUI ui = new TerminalGameUI(numPlayers, seed, maxRounds);
+            ui.start();
+            return;
+        }
+
         Scanner scanner = new Scanner(System.in);
         
         // Ask for number of players

@@ -141,7 +141,7 @@ public record ObjectiveContext(
         // This assumes ~1 card played per round on average
         int expectedGameLength = Integer.MAX_VALUE;
         for (com.anno1800.game.player.Player player : players) {
-            int startCards = player.getPlayerBoard().cards().residentCardCount();
+              int startCards = player.getPlayerBoard().getResidentCards().size();
             expectedGameLength = Math.min(expectedGameLength, startCards);
         }
         // Fallback if no players (shouldn't happen)

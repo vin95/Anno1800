@@ -23,7 +23,7 @@ public class BuildFactory {
             System.out.println("Building factory requires: " + java.util.Arrays.toString(costs));
             
             // PLANNING PHASE: Determine how to obtain goods
-            if (!board.canObtainGoods(costs)) {
+            if (!board.canObtainGoods(costs, game)) {
                 throw new IllegalStateException("Cannot obtain required goods for " + factory.getType());
             }
             

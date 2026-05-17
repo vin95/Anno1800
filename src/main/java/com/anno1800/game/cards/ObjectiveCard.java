@@ -846,4 +846,13 @@ public sealed interface ObjectiveCard {
         Collections.shuffle(deck);
         return deck;
     }
+
+    /**
+     * Create a shuffled deck of all objective cards using a seeded Random.
+     */
+    static List<ObjectiveCard> createShuffledDeck(java.util.Random rng) {
+        List<ObjectiveCard> deck = createDeck();
+        Collections.shuffle(deck, rng);
+        return deck;
+    }
 }

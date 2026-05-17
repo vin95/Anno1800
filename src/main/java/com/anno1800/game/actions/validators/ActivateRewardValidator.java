@@ -112,7 +112,8 @@ public class ActivateRewardValidator {
                 yield true;
             }
             case Reward.FreeGoodsChoice freeGoodsChoice -> {
-                yield true;
+                // Must choose a good first via ChooseGoods action.
+                yield freeGoodsChoice.hasChoice();
             }
             case Reward.TradePoints tradePoints -> {
                 if (game.getBoard().getTradeChips() <= 0) {

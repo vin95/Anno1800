@@ -3,6 +3,7 @@ package com.anno1800.game.actions.validators;
 import com.anno1800.game.actions.Action;
 import com.anno1800.game.actions.actions.SettleResident;
 import com.anno1800.game.engine.Game;
+import com.anno1800.game.engine.Rules;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.player.PlayerBoard;
 import com.anno1800.game.residents.ResidentCosts;
@@ -21,6 +22,11 @@ public class SettleResidentValidator {
     public static boolean canSettleResident(Action.SettleResident action, Player player, Game game) {
         // Check basic requirements (resident availability)
         if (!SettleResident.canSettleResident(player, game, action.level())) {
+            return false;
+        }
+
+        // Check card-stack / gold fallback rule consistency with execution path.
+        if (!Rules.canSettleResident(game.getBoard(), player, action.level())) {
             return false;
         }
         

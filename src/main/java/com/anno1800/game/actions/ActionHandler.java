@@ -111,6 +111,9 @@ public class ActionHandler {
                 new ActionResult.GoodsResult(tradeGoods(player, good, playerId, game));
             case Action.ActivateReward(Reward reward) -> {
                 activateReward(player, reward, game);
+
+                // Rewards are single-use: remove from pending list after successful activation.
+                player.getPlayerBoard().removePendingReward(reward);
                 yield new ActionResult.NoResult();
             }
             case Action.AssignWorker(Factory factory, Resident resident, int slot) -> {
@@ -127,10 +130,19 @@ public class ActionHandler {
             }
             case Action.ImportGood(Goods good) ->
                 new ActionResult.GoodsResult(importGood(player, good));
-            case Action.ChooseGoods(Reward.FreeGoodsChoice reward, Goods chosenGood) ->
-                new ActionResult.RewardResult(chooseGoods(player, reward, chosenGood));
+            case Action.ChooseGoods(Reward.FreeGoodsChoice reward, Goods chosenGood) -> {
+                Reward.FreeGoodsChoice chosenReward = chooseGoods(player, reward, chosenGood);
+
+                // Replace unchosen pending reward with chosen variant.
+                // Activation will consume it later via ActivateReward.
+                player.getPlayerBoard().removePendingReward(reward);
+                player.getPlayerBoard().addPendingReward(chosenReward);
+
+                yield new ActionResult.RewardResult(chosenReward);
+            }
             case Action.ViewResidentCards viewAction -> {
                 viewResidentCards(player, game, viewAction);
+                player.getPlayerBoard().markViewResidentCardsUsed();
                 yield new ActionResult.NoResult();
             }
             

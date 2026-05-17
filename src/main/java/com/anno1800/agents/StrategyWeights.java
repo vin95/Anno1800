@@ -152,7 +152,7 @@ public record StrategyWeights(
                 6.0,   // buildFactory           ← Mittel-Hoch: angepasst an Residents
                 2.0,   // buildShipyard          ← Niedrig
                 2.0,   // buildShips             ← Niedrig
-                10.0,  // fulfillNeeds           ← SEHR HOCH: Karten ausspielen zentral
+                10000.0,  // fulfillNeeds           ← SEHR HOCH: Karten ausspielen zentral
                 8.0,   // settleResident         ← SEHR HOCH: viele Residents
                 8.0,   // upgradeResident        ← SEHR HOCH: aber ausgewogen upgraden
                 8.0,   // swapResidentCards      ← SEHR HOCH: Kartenmanagement wichtig!

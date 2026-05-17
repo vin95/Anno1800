@@ -169,12 +169,9 @@ public class WeightedScoringAgent extends ScoringAgent {
             case Action.Carneval ignored                  -> weights.carneval();
             case Action.SwapResidentCards ignored         -> weights.swapResidentCards();
             
-            // === Sub-Actions: Should never reach agent choice (executed as part of main actions) ===
-            default -> throw new IllegalStateException(
-                "Unexpected action type in agent choice: " + action.getClass().getSimpleName() + 
-                ". This is a sub-action that should be handled internally by the game engine, " +
-                "not presented to the agent for scoring."
-            );
+            // === Sub-Actions: If they appear, heavily penalize instead of crashing ===
+            // This keeps simulations robust even when utility/free actions are surfaced.
+            default -> -1000.0;
         };
     }
 

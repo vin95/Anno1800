@@ -48,7 +48,7 @@ public class ActionValidator {
             case Action.ChooseGoods chooseGoods -> true; // ChooseGoods is always valid if the reward exists
             case Action.DemolishFactory demolishFactory -> DemolishFactoryValidator.canDemolishFactory(demolishFactory, player, game);
             case Action.OverbuildDefaultFactory overbuildFactory -> OverbuildDefaultFactoryValidator.canOverbuildDefaultFactory(overbuildFactory, player, game);
-            case Action.ViewResidentCards viewResidentCards -> true; // ViewResidentCards is always valid (free action)
+            case Action.ViewResidentCards viewResidentCards -> !player.getPlayerBoard().hasUsedViewResidentCardsThisTurn();
             
             // Objective Card Free Actions
             case Action.UseExtraAction useExtraAction -> UseExtraActionValidator.canUseExtraAction(useExtraAction, player, game);

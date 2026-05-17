@@ -23,6 +23,7 @@ import com.anno1800.game.engine.Game;
 import com.anno1800.game.rewards.Reward;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,7 @@ public class PlayerBoard {
     int numOldWorldIslands = 0;
     int numNewWorldIslands = 0;
     int gold = 0;
+    int fulfillNeedsCount = 0;
 
     int availableTradeChips = 0;
     int availableExplorerChips = 0;
@@ -65,6 +67,12 @@ public class PlayerBoard {
      * Rule: "1x pro Zug"
      */
     private boolean usedInvestorGoldThisTurn = false;
+
+    /**
+     * Tracks whether ViewResidentCards free action has been used this turn.
+     * This avoids endless free-action loops.
+     */
+    private boolean usedViewResidentCardsThisTurn = false;
 
     /**
      * Tracks which goods have been traded this turn.
@@ -159,6 +167,7 @@ public class PlayerBoard {
         usedExtraActionThisTurn = false;
         usedDiscardResidentCardThisTurn = false;
         usedInvestorGoldThisTurn = false;
+        usedViewResidentCardsThisTurn = false;
     }
     
     // ========== Free Action Tracking Methods ==========
@@ -203,6 +212,20 @@ public class PlayerBoard {
      */
     public void markInvestorGoldUsed() {
         usedInvestorGoldThisTurn = true;
+    }
+
+    /**
+     * Checks if ViewResidentCards has already been used this turn.
+     */
+    public boolean hasUsedViewResidentCardsThisTurn() {
+        return usedViewResidentCardsThisTurn;
+    }
+
+    /**
+     * Marks ViewResidentCards as used for this turn.
+     */
+    public void markViewResidentCardsUsed() {
+        usedViewResidentCardsThisTurn = true;
     }
 
     /**
@@ -259,6 +282,14 @@ public class PlayerBoard {
 
     public int getGold() {
         return gold;
+    }
+
+    public int getFulfillNeedsCount() {
+        return fulfillNeedsCount;
+    }
+
+    public void incrementFulfillNeedsCount() {
+        fulfillNeedsCount++;
     }
 
     public int getAvailableTradeChips() {
@@ -403,6 +434,7 @@ public class PlayerBoard {
 
 
     private void addFactory(Factory factory) {
+        ensureFactoryCapacity();
         factories[numFactories] = factory;
         numFactoriesOnLand++;
         numFactories++;
@@ -410,8 +442,29 @@ public class PlayerBoard {
 
     private int numPlantations = 0;
     private void addPlantation(Plantation plantation) {
+        ensurePlantationCapacity();
         plantations[numPlantations] = plantation;
         numPlantations++;
+    }
+
+    /**
+     * Ensures there is room for at least one more factory entry.
+     */
+    private void ensureFactoryCapacity() {
+        if (numFactories >= factories.length) {
+            int newSize = Math.max(factories.length * 2, factories.length + 1);
+            factories = Arrays.copyOf(factories, newSize);
+        }
+    }
+
+    /**
+     * Ensures there is room for at least one more plantation entry.
+     */
+    private void ensurePlantationCapacity() {
+        if (numPlantations >= plantations.length) {
+            int newSize = Math.max(plantations.length * 2, plantations.length + 1);
+            plantations = Arrays.copyOf(plantations, newSize);
+        }
     }
 
     private void addShipyard(int level) {
@@ -467,6 +520,7 @@ public class PlayerBoard {
             throw new IllegalStateException("No free tiles available to place factory");
         }
 
+        ensureFactoryCapacity();
         factories[numFactories] = factory;
 
         // Prefer land tiles over coast tiles
@@ -554,7 +608,17 @@ public class PlayerBoard {
     }
 
     public void earnExpeditionCard(int amount, Board gameBoard) {
-        this.expeditionCards.add(gameBoard.drawExpeditionCard());
+        if (amount <= 0) {
+            return;
+        }
+
+        for (int i = 0; i < amount; i++) {
+            if (gameBoard.getExpeditionStack().isEmpty()) {
+                System.out.println("No expedition cards left in stack; stopping reward draw.");
+                break;
+            }
+            this.expeditionCards.add(gameBoard.drawExpeditionCard());
+        }
     }
 
     public void spendGold(int amount) {

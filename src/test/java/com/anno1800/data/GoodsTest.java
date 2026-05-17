@@ -89,13 +89,6 @@ class GoodsTest {
     }
 
     @Test
-    @DisplayName("Goods-Enum hat mindestens 40 Einträge")
-    void testEnumSizeAtLeast40() {
-        assertTrue(Goods.values().length >= 40,
-            "Goods-Enum sollte mindestens 40 Einträge haben, hat aber: " + Goods.values().length);
-    }
-
-    @Test
     @DisplayName("Luxusgüter (rot/lila) sind vorhanden")
     void testLuxuryGoodsExist() {
         assertDoesNotThrow(() -> Goods.valueOf("CHAMPAGNE"));

@@ -15,6 +15,8 @@ import com.anno1800.game.state.GameState;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+import java.util.function.BiConsumer;
 
 /**
  * Main game controller that manages the board and game state
@@ -42,11 +44,49 @@ public class Game {
     
     // Cached ObjectiveContext (computed once after ObjectiveCards are drawn)
     private ObjectiveContext objectiveContext;
+
+    // Optional callback invoked after each action (used for debug/state-save hooks)
+    private BiConsumer<Action, GameState> afterActionCallback = null;
+
+    /**
+     * Sets a callback that is invoked with the current GameState after every single action.
+     * Useful for saving game states in debug or analysis runs.
+     */
+    public void setAfterActionCallback(BiConsumer<Action, GameState> callback) {
+        this.afterActionCallback = callback;
+    }
     
     public Game(int numPlayers) {
         this(numPlayers, false, 10);
     }
-    
+
+    /**
+     * Creates a game with seeded randomness for reproducible games.
+     * Card stacks and start player are determined by the given seed.
+     * @param numPlayers Number of players
+     * @param seed       Random seed for reproducibility
+     * @param maxRounds  Maximum rounds before the game is aborted
+     */
+    public Game(int numPlayers, long seed, int maxRounds) {
+        this.testMode = false;
+        this.maxRounds = maxRounds;
+        Random rng = new Random(seed);
+        this.board = Board.initializeBoard(numPlayers, rng);
+        this.players = Player.initializePlayers(numPlayers, this.board);
+        this.agents = new Agent[numPlayers];
+        this.currentRound = 1;
+        this.startPlayer = rng.nextInt(numPlayers);
+        for (int i = 0; i < players.length; i++) {
+            int position = ((i - startPlayer + numPlayers) % numPlayers) + 1;
+            players[i].setPosition(position);
+        }
+        this.currentPlayer = this.startPlayer;
+        inicializeGame();
+        initializeObjectiveCards(rng);
+        this.actionHandler = new ActionHandler(this);
+        this.actionGenerator = new ActionGenerator();
+    }
+
     public Game(int numPlayers, boolean testMode, int maxRounds) {
         this.testMode = testMode;
         this.maxRounds = maxRounds;
@@ -94,6 +134,23 @@ public class Game {
         }
         
         // Compute and cache ObjectiveContext (fixed parameters, won't change during game)
+        this.objectiveContext = ObjectiveContext.compute(activeObjectiveCards, players);
+        System.out.println("Expected game length: ~" + objectiveContext.expectedGameLength() + " rounds");
+    }
+
+    /**
+     * Initialize the 5 active ObjectiveCards using a seeded Random for reproducibility.
+     */
+    private void initializeObjectiveCards(Random rng) {
+        List<ObjectiveCard> deck = ObjectiveCard.createShuffledDeck(rng);
+        int cardsToDraw = Math.min(5, deck.size());
+        for (int i = 0; i < cardsToDraw; i++) {
+            activeObjectiveCards.add(deck.get(i));
+        }
+        System.out.println("Active Objective Cards:");
+        for (ObjectiveCard card : activeObjectiveCards) {
+            System.out.println("  - " + card.getTitle() + ": " + card.getDescription());
+        }
         this.objectiveContext = ObjectiveContext.compute(activeObjectiveCards, players);
         System.out.println("Expected game length: ~" + objectiveContext.expectedGameLength() + " rounds");
     }
@@ -210,8 +267,8 @@ public class Game {
      * @return true if game is over
      */
     public boolean isGameOver() {
-        // Normal end: exceeded max rounds
-        if (currentRound > maxRounds) {
+        // Optional hard cap: only active when maxRounds > 0
+        if (maxRounds > 0 && currentRound > maxRounds) {
             return true;
         }
         
@@ -285,8 +342,10 @@ public class Game {
         
         System.out.println("\n--- Player " + (playerIndex + 1) + "'s Turn (Agent: " + agent.getName() + ") ---");
         
-        // Player can take multiple actions per turn
-        for (int actionNum = 0; actionNum < ACTIONS_PER_TURN; actionNum++) {
+        // Player can take multiple actions per turn.
+        // Free actions (e.g. ViewResidentCards) do not consume action points.
+        int consumedActions = 0;
+        while (consumedActions < ACTIONS_PER_TURN) {
             // Generate all possible actions
             List<Action> possibleActions = actionGenerator.getPossibleActions(player, this);
             
@@ -308,6 +367,15 @@ public class Game {
             System.out.println("  Executing: " + chosenAction);
             ActionResult result = executeAction(chosenAction);
             System.out.println("  Action executed. Result: " + result);
+
+            if (!isFreeAction(chosenAction)) {
+                consumedActions++;
+            }
+
+            // Notify callback (e.g. for state saving in debug runs)
+            if (afterActionCallback != null) {
+                afterActionCallback.accept(chosenAction, getState());
+            }
         }
         
         // Clear turn-specific state
@@ -316,6 +384,18 @@ public class Game {
         
         // Clear free action flags for ObjectiveCard actions
         player.getPlayerBoard().clearFreeActionFlagsThisTurn();
+    }
+
+    /**
+     * Free actions do not consume one of the regular action points per turn.
+     */
+    private boolean isFreeAction(Action action) {
+        return action instanceof Action.ViewResidentCards
+            || action instanceof Action.ActivateReward
+            || action instanceof Action.ChooseGoods
+            || action instanceof Action.UseExtraAction
+            || action instanceof Action.DiscardResidentCardAction
+            || action instanceof Action.InvestorGoldAction;
     }
     
     /**

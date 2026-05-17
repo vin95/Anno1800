@@ -45,7 +45,7 @@ public class ActionGenerator {
         // Resident actions
         actions.addAll(generateSettleResidentActions(player, game));
         actions.addAll(generateUpgradeResidentActions(player, game));
-        actions.addAll(generateSwapResidentCardsActions(player, game));
+        // actions.addAll(generateSwapResidentCardsActions(player, game));
         actions.addAll(generateFulfillNeedsActions(player, game));
         
         // Exploration actions

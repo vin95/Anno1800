@@ -38,7 +38,7 @@ public class BuildShipyardValidator {
         PlayerBoard board = player.getPlayerBoard();
         
         // PLANNING PHASE: Check if player can obtain required goods
-        boolean canObtain = board.canObtainGoods(ShipCosts.getShipyardCost(action.level()));
+        boolean canObtain = board.canObtainGoods(ShipCosts.getShipyardCost(action.level()), game);
         
         // Clear storedGoods after validation (rollback)
         board.clearStoredGoods();
