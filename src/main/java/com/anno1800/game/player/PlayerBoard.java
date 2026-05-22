@@ -121,8 +121,15 @@ public class PlayerBoard {
      */
     private List<ProducedGood> storedGoods;
 
+    /**
+     * Last consumed goods with source information from the most recently executed action.
+     * Used for debug/state export.
+     */
+    private List<ProducedGood> lastConsumedGoods;
+
     public PlayerBoard() {
         storedGoods = new ArrayList<>();
+        lastConsumedGoods = new ArrayList<>();
         initializeDefaultFactories();
         // Default factories occupy land tiles
         numFactoriesOnLand = 10; // 10 start factories (5 GREEN + 5 RED)
@@ -968,6 +975,22 @@ public class PlayerBoard {
     }
 
     /**
+     * Gets consumed goods (including source) of the last executed action.
+     *
+     * @return Snapshot list of last consumed goods
+     */
+    public List<ProducedGood> getLastConsumedGoods() {
+        return new ArrayList<>(lastConsumedGoods);
+    }
+
+    /**
+     * Clears tracked consumed goods of the last action.
+     */
+    public void clearLastConsumedGoods() {
+        lastConsumedGoods.clear();
+    }
+
+    /**
      * Helper method to determine if a producer is a StartFactory.
      * 
      * @param producer The producer to check
@@ -1107,77 +1130,86 @@ public class PlayerBoard {
                 .anyMatch(card -> card instanceof ObjectiveCard.ExplorerTrader);
         }
         
-        // Try 2: Trading (check if we have available trade chips AND another player can produce this good)
-        // Count trade chips already planned in storedGoods to avoid over-committing
-        int plannedTradeChips = (int) storedGoods.stream()
-                .filter(pg -> pg.source() instanceof GoodSource.Traded t && t.chipCost() == 1)
-                .count();
-        if ((availableTradeChips - plannedTradeChips) > 0 && game != null) {
-            // Check if any other player has a factory that produces this good
-            boolean otherPlayerCanProduce = false;
-            for (Player otherPlayer : game.getPlayers()) {
+        // Try 2: Trading from another player (cost depends on traded factory color via tradeCosts)
+        int plannedTradeChips = storedGoods.stream()
+                .map(ProducedGood::source)
+                .mapToInt(source -> {
+                    if (source instanceof GoodSource.Traded traded) {
+                        return traded.chipCost();
+                    }
+                    return 0;
+                })
+                .sum();
+
+        int plannedExplorerChipsForTrade = storedGoods.stream()
+                .map(ProducedGood::source)
+                .mapToInt(source -> {
+                    if (source instanceof GoodSource.TradedWithExplorer tradedWithExplorer) {
+                        return tradedWithExplorer.explorerChipCost();
+                    }
+                    return 0;
+                })
+                .sum();
+
+        int cheapestTradeCosts = Integer.MAX_VALUE;
+        int tradingPlayerIndex = -1;
+        int lowestTradingPartnerGold = Integer.MAX_VALUE;
+        if (game != null) {
+            Player[] players = game.getPlayers();
+            for (int i = 0; i < players.length; i++) {
+                Player otherPlayer = players[i];
                 if (otherPlayer.getPlayerBoard() == this) {
-                    continue; // Skip self
+                    continue;
                 }
-                
-                // Check if other player has a factory that produces this good
+
+                int partnerGold = otherPlayer.getPlayerBoard().getGold();
+
                 for (Factory factory : otherPlayer.getPlayerBoard().getAllActiveFactories()) {
                     if (factory.produces().equals(good)) {
-                        otherPlayerCanProduce = true;
-                        break;
+                        int tradeCosts = factory.getTradeCosts();
+                        if (tradeCosts < cheapestTradeCosts
+                                || (tradeCosts == cheapestTradeCosts && partnerGold < lowestTradingPartnerGold)) {
+                            cheapestTradeCosts = tradeCosts;
+                            tradingPlayerIndex = i;
+                            lowestTradingPartnerGold = partnerGold;
+                        }
                     }
                 }
-                if (otherPlayerCanProduce) break;
-            }
-            
-            if (otherPlayerCanProduce) {
-                // Note: We don't know which player has the good, so we simulate with player 0
-                storedGoods.add(new ProducedGood(good, new GoodSource.Traded(0, 1)));
-                return true;
             }
         }
-        
-        // Try 2b: If ExplorerTrader active, try using 2 explorer chips instead of 1 trade chip
-        // Count chips already planned in storedGoods to avoid over-committing
-        int plannedExplorerChips2b = (int) storedGoods.stream()
-                .filter(pg -> pg.source() instanceof GoodSource.Traded t && t.chipCost() == 2)
-                .count() * 2
-                + (int) storedGoods.stream()
-                .filter(pg -> pg.source() instanceof GoodSource.Imported)
-                .count();
-        if (explorerTraderActive && (availableExplorerChips - plannedExplorerChips2b) >= 2 && game != null) {
-            // Check if any other player has a factory that produces this good
-            boolean otherPlayerCanProduce = false;
-            for (Player otherPlayer : game.getPlayers()) {
-                if (otherPlayer.getPlayerBoard() == this) {
-                    continue; // Skip self
-                }
-                
-                // Check if other player has a factory that produces this good
-                for (Factory factory : otherPlayer.getPlayerBoard().getAllActiveFactories()) {
-                    if (factory.produces().equals(good)) {
-                        otherPlayerCanProduce = true;
-                        break;
-                    }
-                }
-                if (otherPlayerCanProduce) break;
-            }
-            
-            if (otherPlayerCanProduce) {
-                // Can use 2 explorer chips as 1 trade chip
-                storedGoods.add(new ProducedGood(good, new GoodSource.Traded(0, 2))); // costs 2 explorer chips
+
+        boolean foundTradeSource = tradingPlayerIndex >= 0 && cheapestTradeCosts != Integer.MAX_VALUE;
+        if (foundTradeSource && (availableTradeChips - plannedTradeChips) >= cheapestTradeCosts) {
+            storedGoods.add(new ProducedGood(good, new GoodSource.Traded(tradingPlayerIndex, cheapestTradeCosts)));
+            return true;
+        }
+
+        // Try 2b: ExplorerTrader can replace missing trade chips with explorer chips (2:1)
+        if (foundTradeSource && explorerTraderActive) {
+            int explorerChipCost = cheapestTradeCosts * 2;
+            if ((availableExplorerChips - plannedExplorerChipsForTrade) >= explorerChipCost) {
+                storedGoods.add(new ProducedGood(
+                    good,
+                    new GoodSource.TradedWithExplorer(tradingPlayerIndex, cheapestTradeCosts, explorerChipCost)
+                ));
                 return true;
             }
         }
         
         // Try 3: Import from new world (check if we have a plantation that produces this good)
         // Count chips already planned in storedGoods to avoid over-committing
-        int plannedExplorerChips = (int) storedGoods.stream()
-                .filter(pg -> pg.source() instanceof GoodSource.Imported)
-                .count()
-                + (int) storedGoods.stream()
-                .filter(pg -> pg.source() instanceof GoodSource.Traded t && t.chipCost() == 2)
-                .count() * 2;
+        int plannedExplorerChips = storedGoods.stream()
+                .map(ProducedGood::source)
+                .mapToInt(source -> {
+                    if (source instanceof GoodSource.Imported imported) {
+                        return imported.explorerChip();
+                    }
+                    if (source instanceof GoodSource.TradedWithExplorer tradedWithExplorer) {
+                        return tradedWithExplorer.explorerChipCost();
+                    }
+                    return 0;
+                })
+                .sum();
         if (isNewWorldGood(good) && (availableExplorerChips - plannedExplorerChips) > 0) {
             // Check if player has a plantation that produces this good
             boolean hasPlantation = false;
@@ -1244,6 +1276,8 @@ public class PlayerBoard {
      * @param required Array of goods to consume
      */
     public void consumeGoods(Goods[] required) {
+        lastConsumedGoods.clear();
+
         if (required == null || required.length == 0) {
             return;
         }
@@ -1265,6 +1299,9 @@ public class PlayerBoard {
             
             // Execute the actual action based on source
             executeGoodSource(producedGood);
+
+            // Track for debug/export output
+            lastConsumedGoods.add(producedGood);
             
             // Remove from storedGoods
             storedGoods.remove(producedGood);
@@ -1291,17 +1328,21 @@ public class PlayerBoard {
                 System.out.println("  -> Produced " + producedGood.good() + " in " + factory.getType());
             }
             case GoodSource.Traded(int fromPlayer, int chipCost) -> {
-                // chipCost = 1: Use 1 trade chip (standard)
-                // chipCost = 2: Use 2 explorer chips (ExplorerTrader alternative)
-                if (chipCost == 1) {
-                    availableTradeChips--;
-                    System.out.println("  -> Traded " + producedGood.good() + " from Player " + (fromPlayer + 1));
-                } else if (chipCost == 2) {
-                    availableExplorerChips -= 2; // ExplorerTrader: 2 explorer = 1 trade
-                    System.out.println("  -> Traded " + producedGood.good() + " from Player " + (fromPlayer + 1) + " (using 2 Explorer Chips via ExplorerTrader)");
-                } else {
+                if (chipCost <= 0 || availableTradeChips < chipCost) {
                     throw new IllegalStateException("Invalid chip cost for trading: " + chipCost);
                 }
+                availableTradeChips -= chipCost;
+                System.out.println("  -> Traded " + producedGood.good() + " from Player " + (fromPlayer + 1)
+                        + " (cost " + chipCost + " TradeChip" + (chipCost == 1 ? "" : "s") + ")");
+            }
+            case GoodSource.TradedWithExplorer(int fromPlayer, int tradeChipCost, int explorerChipCost) -> {
+                if (explorerChipCost <= 0 || availableExplorerChips < explorerChipCost) {
+                    throw new IllegalStateException("Invalid explorer chip cost for trading: " + explorerChipCost);
+                }
+                availableExplorerChips -= explorerChipCost;
+                System.out.println("  -> Traded " + producedGood.good() + " from Player " + (fromPlayer + 1)
+                        + " (ExplorerTrader, cost " + explorerChipCost + " ExplorerChips ~= "
+                        + tradeChipCost + " TradeChips)");
             }
             case GoodSource.Imported(int chip) -> {
                 // Use explorer chip

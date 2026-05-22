@@ -62,7 +62,7 @@ tasks.named<JavaExec>("run") {
 
 tasks.register<JavaExec>("debugGame") {
     group = "application"
-    description = "Startet eine seeded Agent-Simulation fuer Debug-Zwecke. Seed/Spieler/Runden konfigurierbar in debug-game.ps1"
+    description = "Startet eine seeded Agent-Simulation fuer Debug-Zwecke. Seed/Spieler/Runden konfigurierbar in Debugging/debug-game.ps1"
     dependsOn(tasks.named("classes"))
     mainClass.set("com.anno1800.debug.DebugGameRunner")
     classpath = sourceSets["main"].runtimeClasspath

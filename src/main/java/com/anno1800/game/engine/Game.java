@@ -432,6 +432,13 @@ public class Game {
     public Player[] getPlayers() {
         return players;
     }
+
+    public Agent getAgent(int playerIndex) {
+        if (playerIndex < 0 || playerIndex >= agents.length) {
+            throw new IllegalArgumentException("Invalid player index: " + playerIndex);
+        }
+        return agents[playerIndex];
+    }
     
     public boolean isTestMode() {
         return testMode;

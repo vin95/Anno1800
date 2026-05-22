@@ -1,0 +1,194 @@
+{
+  "timestamp": "2026-05-21T21:27:21.590655700Z",
+  "round": 93,
+  "currentPlayer": 1,
+  "label": "action_283",
+  "executedAction": "ActivateReward[reward=Gold[amount=4]]",
+  "executedByPlayer": "Player 2",
+  "executedActionDetails": null,
+  "agentStrategyName": "shipBuilding",
+  "agentMainActionScores": [
+    {
+      "mainAction": "ActivateReward",
+      "score": -1000.0000,
+      "selected": true,
+      "bestActionVariant": "ActivateReward[reward=Gold[amount=4]]"
+    },
+    {
+      "mainAction": "ViewResidentCards",
+      "score": -1499.9995,
+      "selected": false,
+      "bestActionVariant": "ViewResidentCards[]"
+    }
+  ],
+  "boardState": {
+    "factories": {
+      "availableFactories": 42
+    },
+    "shipyards": {
+      "level1": 0,
+      "level2": 0,
+      "level3": 4
+    },
+    "ships": {
+      "tradeShips": {
+        "level1": 3,
+        "level2": 1,
+        "level3": 6
+      },
+      "explorerShips": {
+        "level1": 0,
+        "level2": 4,
+        "level3": 6
+      }
+    },
+    "cards": {
+      "residentStack1": 3,
+      "residentStack2": 26,
+      "residentStack3": 0,
+      "totalResidentCards": 29,
+      "expeditionCards": 0
+    },
+    "islands": {
+      "oldWorldIslands": 4,
+      "newWorldIslands": 0
+    },
+    "populationPool": {
+      "farmers": 0,
+      "workers": 0,
+      "artisans": 0,
+      "engineers": 18,
+      "investors": 15
+    },
+    "resources": {
+      "goldPool": 997,
+      "tradeChips": 978,
+      "explorerChips": 987
+    }
+  },
+  "players": [
+    {
+      "name": "Player 1",
+      "position": 2,
+      "tiles": {
+        "freeLand": 0,
+        "freeCoast": 0,
+        "freeSea": 0
+      },
+      "buildings": {
+        "factories": 24,
+        "shipyards": 1
+      },
+      "ships": {
+        "tradeShips": 5,
+        "explorerShips": 5
+      },
+      "resources": {
+        "gold": 1,
+        "tradeChips": 7,
+        "explorerChips": 6
+      },
+      "cards": {
+        "residentCards": 18
+      },
+      "residents": {
+        "total": 17,
+        "byLevel": {
+          "level1": 1,
+          "level2": 9,
+          "level3": 7,
+          "level4": 0,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 4,
+          "fit": 13,
+          "exhausted": 0
+        }
+      }
+    },
+    {
+      "name": "Player 2",
+      "position": 3,
+      "tiles": {
+        "freeLand": 0,
+        "freeCoast": 0,
+        "freeSea": 0
+      },
+      "buildings": {
+        "factories": 19,
+        "shipyards": 11
+      },
+      "ships": {
+        "tradeShips": 7,
+        "explorerShips": 6
+      },
+      "resources": {
+        "gold": 6,
+        "tradeChips": 13,
+        "explorerChips": 7
+      },
+      "cards": {
+        "residentCards": 20
+      },
+      "residents": {
+        "total": 18,
+        "byLevel": {
+          "level1": 1,
+          "level2": 9,
+          "level3": 8,
+          "level4": 0,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 0,
+          "fit": 18,
+          "exhausted": 0
+        }
+      }
+    },
+    {
+      "name": "Player 3",
+      "position": 1,
+      "tiles": {
+        "freeLand": 0,
+        "freeCoast": 0,
+        "freeSea": 4
+      },
+      "buildings": {
+        "factories": 18,
+        "shipyards": 1
+      },
+      "ships": {
+        "tradeShips": 2,
+        "explorerShips": 1
+      },
+      "resources": {
+        "gold": 4,
+        "tradeChips": 2,
+        "explorerChips": 1
+      },
+      "cards": {
+        "residentCards": 11
+      },
+      "residents": {
+        "total": 17,
+        "byLevel": {
+          "level1": 1,
+          "level2": 4,
+          "level3": 10,
+          "level4": 2,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 0,
+          "fit": 17,
+          "exhausted": 0
+        }
+      }
+    }
+  ]
+}

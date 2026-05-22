@@ -8,7 +8,10 @@ import com.anno1800.game.cards.ResidentCard;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.state.GameState;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Random;
 
 /**
@@ -50,6 +53,8 @@ import java.util.Random;
  */
 public abstract class ScoringAgent implements Agent {
 
+    public record MainActionScore(String mainAction, double score, String bestActionVariant, boolean selected) {}
+
     private final String name;
     protected final Random random;
     
@@ -58,6 +63,7 @@ public abstract class ScoringAgent implements Agent {
      * Contains fixed parameters from ObjectiveCards that don't change during the game.
      */
     private ObjectiveContext objectiveContext;
+    private List<MainActionScore> lastMainActionScores = List.of();
 
     protected ScoringAgent(String name, long seed) {
         this.name = name;
@@ -106,11 +112,20 @@ public abstract class ScoringAgent implements Agent {
                 : ObjectiveContext.compute(List.of(), new com.anno1800.game.player.Player[0]);
         Action bestAction = null;
         double bestScore = Double.NEGATIVE_INFINITY;
+        Map<String, Double> bestScoreByMainAction = new LinkedHashMap<>();
+        Map<String, String> bestVariantByMainAction = new LinkedHashMap<>();
 
         for (Action action : possibleActions) {
             double score = applyBasicRules(action, context, objContext)
                          + scoreAction(action, gameState, player, context, objContext)
                          + random.nextDouble() * 0.001; // tie-breaker noise
+
+            String mainAction = getMainActionName(action);
+            Double previousBest = bestScoreByMainAction.get(mainAction);
+            if (previousBest == null || score > previousBest) {
+                bestScoreByMainAction.put(mainAction, score);
+                bestVariantByMainAction.put(mainAction, action.toString());
+            }
 
             if (score > bestScore) {
                 bestScore = score;
@@ -118,7 +133,31 @@ public abstract class ScoringAgent implements Agent {
             }
         }
 
+        String selectedMainAction = bestAction == null ? null : getMainActionName(bestAction);
+        List<MainActionScore> summarizedScores = new ArrayList<>();
+        for (Map.Entry<String, Double> entry : bestScoreByMainAction.entrySet()) {
+            String mainAction = entry.getKey();
+            summarizedScores.add(
+                new MainActionScore(
+                    mainAction,
+                    entry.getValue(),
+                    bestVariantByMainAction.get(mainAction),
+                    mainAction.equals(selectedMainAction)
+                )
+            );
+        }
+        summarizedScores.sort((left, right) -> Double.compare(right.score(), left.score()));
+        lastMainActionScores = List.copyOf(summarizedScores);
+
         return bestAction;
+    }
+
+    public List<MainActionScore> getLastMainActionScores() {
+        return lastMainActionScores;
+    }
+
+    private String getMainActionName(Action action) {
+        return action.getClass().getSimpleName();
     }
 
     // =========================================================================

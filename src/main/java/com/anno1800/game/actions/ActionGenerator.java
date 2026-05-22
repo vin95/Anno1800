@@ -466,22 +466,52 @@ public class ActionGenerator {
      */
     private List<Action> generateTradeGoodsActions(Player player, Game game) {
         List<Action> tradeActions = new ArrayList<>();
-        
-        // For each other player
+
         Player[] allPlayers = game.getPlayers();
-        for (int i = 0; i < allPlayers.length; i++) {
-            if (allPlayers[i] == player) continue; // Skip self
-            
-            // Try trading each type of good
-            for (Goods good : Goods.values()) {
-                Action.TradeGoods tradeAction = new Action.TradeGoods(good, i);
-                
+
+        // Generate at most one canonical TradeGoods action per good:
+        // cheapest partner; tie-break by partner with less gold; then lower player index.
+        for (Goods good : Goods.values()) {
+            int bestPartnerIndex = -1;
+            int lowestTradeCosts = Integer.MAX_VALUE;
+            int lowestPartnerGold = Integer.MAX_VALUE;
+
+            for (int i = 0; i < allPlayers.length; i++) {
+                Player partner = allPlayers[i];
+                if (partner == player) {
+                    continue;
+                }
+
+                int partnerCheapestCost = Integer.MAX_VALUE;
+                for (Factory factory : partner.getPlayerBoard().getAllActiveFactories()) {
+                    if (factory != null && factory.produces() == good) {
+                        partnerCheapestCost = Math.min(partnerCheapestCost, factory.getTradeCosts());
+                    }
+                }
+
+                if (partnerCheapestCost == Integer.MAX_VALUE) {
+                    continue;
+                }
+
+                int partnerGold = partner.getPlayerBoard().getGold();
+                if (partnerCheapestCost < lowestTradeCosts
+                        || (partnerCheapestCost == lowestTradeCosts && partnerGold < lowestPartnerGold)
+                        || (partnerCheapestCost == lowestTradeCosts && partnerGold == lowestPartnerGold
+                            && (bestPartnerIndex < 0 || i < bestPartnerIndex))) {
+                    lowestTradeCosts = partnerCheapestCost;
+                    lowestPartnerGold = partnerGold;
+                    bestPartnerIndex = i;
+                }
+            }
+
+            if (bestPartnerIndex >= 0) {
+                Action.TradeGoods tradeAction = new Action.TradeGoods(good, bestPartnerIndex);
                 if (ActionValidator.canExecute(tradeAction, player, game)) {
                     tradeActions.add(tradeAction);
                 }
             }
         }
-        
+
         return tradeActions;
     }
     

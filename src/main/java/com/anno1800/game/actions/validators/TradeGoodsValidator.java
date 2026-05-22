@@ -54,28 +54,26 @@ public class TradeGoodsValidator {
             return false;
         }
 
-        // Check all other players to find the one with the cheapest factory that produces the
-        // requested good
+        int partnerIndex = action.player();
+        Player[] players = game.getPlayers();
+        if (partnerIndex < 0 || partnerIndex >= players.length) {
+            return false;
+        }
+
+        Player selectedPartner = players[partnerIndex];
+        if (selectedPartner == player) {
+            return false;
+        }
+
+        // Check only the selected partner and find the cheapest matching factory there.
         Factory cheapestFactory = null;
         int lowestTradeCosts = Integer.MAX_VALUE;
-
-        for (Player otherPlayer : game.getPlayers()) {
-            // Skip the current player (cannot trade with yourself)
-            if (otherPlayer == player) {
-                continue;
-            }
-
-            // Check if this player has a factory that produces the requested good
-            for (Producer producer : otherPlayer.getPlayerBoard().getFactories()) {
-                if (producer instanceof Factory factory) {
-                    if (factory != null && factory.produces() == action.good()) {
-                        int tradeCosts = factory.getTradeCosts();
-                        // Keep track of the cheapest factory
-                        if (tradeCosts < lowestTradeCosts) {
-                            cheapestFactory = factory;
-                            lowestTradeCosts = tradeCosts;
-                        }
-                    }
+        for (Factory factory : selectedPartner.getPlayerBoard().getAllActiveFactories()) {
+            if (factory != null && factory.produces() == action.good()) {
+                int tradeCosts = factory.getTradeCosts();
+                if (tradeCosts < lowestTradeCosts) {
+                    cheapestFactory = factory;
+                    lowestTradeCosts = tradeCosts;
                 }
             }
         }

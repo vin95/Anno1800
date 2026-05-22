@@ -1,9 +1,16 @@
 package com.anno1800.debug;
 
 import com.anno1800.agents.AgentImpl.WeightedScoringAgent;
+import com.anno1800.agents.Agent;
+import com.anno1800.agents.AgentImpl.ScoringAgent;
+import com.anno1800.data.gamedata.Goods;
 import com.anno1800.game.actions.Action;
 import com.anno1800.game.engine.Game;
+import com.anno1800.game.player.Player;
+import com.anno1800.game.player.PlayerBoard;
+import com.anno1800.game.player.ProducedGood;
 import com.anno1800.game.state.GameState;
+import com.anno1800.game.tiles.Factory;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -15,6 +22,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -29,7 +39,7 @@ import java.util.function.BiConsumer;
  * Aufruf via Gradle:
  *   ./gradlew.bat debugGame
  * Oder per Skript:
- *   .\debug-game.ps1
+ *   .\Debugging\debug-game.ps1
  */
 public class DebugGameRunner {
 
@@ -122,9 +132,18 @@ public class DebugGameRunner {
             int n = actionCounter.incrementAndGet();
             String executedAction = action == null ? null : action.toString();
             String executedByPlayer = null;
+            String executedActionDetails = null;
+            String agentStrategyName = null;
+            List<ScoringAgent.MainActionScore> mainActionScores = List.of();
             int playerIndex = state.currentPlayerIndex();
             if (playerIndex >= 0 && playerIndex < state.players().size()) {
                 executedByPlayer = state.players().get(playerIndex).name();
+                executedActionDetails = buildExecutedActionDetails(action, game, playerIndex, executedByPlayer);
+                agentStrategyName = chosenStrategies[playerIndex];
+                Agent actingAgent = game.getAgent(playerIndex);
+                if (actingAgent instanceof ScoringAgent scoringAgent) {
+                    mainActionScores = scoringAgent.getLastMainActionScores();
+                }
             }
 
             // Keep simulation output concise: one line per executed action.
@@ -136,12 +155,21 @@ public class DebugGameRunner {
                 executedAction == null ? "UnknownAction" : executedAction
             );
 
-            saveGameState(state, "action_" + n, gameDir, executedAction, executedByPlayer);
+            saveGameState(
+                state,
+                "action_" + n,
+                gameDir,
+                executedAction,
+                executedByPlayer,
+                executedActionDetails,
+                agentStrategyName,
+                mainActionScores
+            );
         };
         game.setAfterActionCallback(stateCallback);
 
         // Initialzustand speichern
-        saveGameState(game.getState(), "initial", gameDir, null, null);
+        saveGameState(game.getState(), "initial", gameDir, null, null, null, null, List.of());
 
         // ---------------------------------------------------------------
         // Spiel starten
@@ -169,6 +197,125 @@ public class DebugGameRunner {
             System.setOut(originalOut);
             System.setErr(originalErr);
         }
+    }
+
+    private static String summarizeConsumedGoods(List<ProducedGood> consumedGoods) {
+        if (consumedGoods == null || consumedGoods.isEmpty()) {
+            return null;
+        }
+
+        List<String> segments = new ArrayList<>();
+        int tradeChips = 0;
+        int explorerChips = 0;
+
+        for (ProducedGood producedGood : consumedGoods) {
+            String sourceText;
+            switch (producedGood.source()) {
+                case ProducedGood.GoodSource.Produced(var factory, var resident) ->
+                    sourceText = String.format("produziert (%s, Bewohnerstufe %d)", factory.getType(), resident.getPopulationLevel());
+                case ProducedGood.GoodSource.Traded(var fromPlayer, var chipCost) -> {
+                    tradeChips += chipCost;
+                    String playerText = fromPlayer >= 0 ? "Spieler " + (fromPlayer + 1) : "Spieler unbekannt";
+                    sourceText = String.format("gehandelt (%s, Kosten %d Chip%s)", playerText, chipCost, chipCost == 1 ? "" : "s");
+                }
+                case ProducedGood.GoodSource.TradedWithExplorer(var fromPlayer, var tradeChipCost, var explorerChipCost) -> {
+                    explorerChips += explorerChipCost;
+                    String playerText = fromPlayer >= 0 ? "Spieler " + (fromPlayer + 1) : "Spieler unbekannt";
+                    sourceText = String.format(
+                        "gehandelt (%s, Kosten %d Explorerchips via ExplorerTrader ~= %d Tradechips)",
+                        playerText,
+                        explorerChipCost,
+                        tradeChipCost
+                    );
+                }
+                case ProducedGood.GoodSource.Imported(var chip) -> {
+                    explorerChips += chip;
+                    sourceText = String.format("importiert (Explorerchips %d)", chip);
+                }
+                case ProducedGood.GoodSource.FromReward() -> sourceText = "aus Belohnung";
+                case ProducedGood.GoodSource.Other(var desc) -> sourceText = desc;
+            }
+            segments.add(String.format("1x %s [%s]", producedGood.good(), sourceText));
+        }
+
+        if (tradeChips > 0 || explorerChips > 0) {
+            segments.add(String.format("Chips verwendet: Tradechips=%d, Explorerchips=%d", tradeChips, explorerChips));
+        }
+
+        return String.join("; ", segments);
+    }
+
+    private static String buildExecutedActionDetails(Action action, Game game, int playerIndex, String executedByPlayer) {
+        if (action == null || playerIndex < 0 || playerIndex >= game.getPlayers().length) {
+            return null;
+        }
+
+        PlayerBoard board = game.getPlayers()[playerIndex].getPlayerBoard();
+
+        return switch (action) {
+            case Action.TradeGoods(Goods good, int partnerPlayerIndex) -> {
+                Player[] players = game.getPlayers();
+                if (partnerPlayerIndex < 0 || partnerPlayerIndex >= players.length) {
+                    yield String.format("Handel: 1x %s (Tradechips: unbekannt, mit Spieler %d)", good, partnerPlayerIndex + 1);
+                }
+
+                Player selectedPartner = players[partnerPlayerIndex];
+                int cheapestTradeCosts = Integer.MAX_VALUE;
+                for (Factory factory : selectedPartner.getPlayerBoard().getAllActiveFactories()) {
+                    if (factory != null && factory.produces() == good) {
+                        cheapestTradeCosts = Math.min(cheapestTradeCosts, factory.getTradeCosts());
+                    }
+                }
+
+                if (cheapestTradeCosts == Integer.MAX_VALUE) {
+                    yield String.format("Handel: 1x %s (Tradechips: unbekannt, mit Spieler %d)", good, partnerPlayerIndex + 1);
+                }
+                yield String.format("Handel: 1x %s (Tradechips: %d, mit Spieler %d)", good, cheapestTradeCosts, partnerPlayerIndex + 1);
+            }
+            case Action.BuildFactory ignored -> {
+                String summary = summarizeConsumedGoods(board.getLastConsumedGoods());
+                if (summary == null) {
+                    yield null;
+                }
+                yield "Verbrauch fuer Aktion: " + summary;
+            }
+            case Action.BuildShipyard ignored -> {
+                String summary = summarizeConsumedGoods(board.getLastConsumedGoods());
+                if (summary == null) {
+                    yield null;
+                }
+                yield "Verbrauch fuer Aktion: " + summary;
+            }
+            case Action.BuildShips ignored -> {
+                String summary = summarizeConsumedGoods(board.getLastConsumedGoods());
+                if (summary == null) {
+                    yield null;
+                }
+                yield "Verbrauch fuer Aktion: " + summary;
+            }
+            case Action.UpgradeResident ignored -> {
+                String summary = summarizeConsumedGoods(board.getLastConsumedGoods());
+                if (summary == null) {
+                    yield null;
+                }
+                yield "Verbrauch fuer Aktion: " + summary;
+            }
+            case Action.SettleResident ignored -> {
+                String summary = summarizeConsumedGoods(board.getLastConsumedGoods());
+                if (summary == null) {
+                    yield null;
+                }
+                yield "Verbrauch fuer Aktion: " + summary;
+            }
+            case Action.FulfillNeeds ignored -> {
+                String summary = summarizeConsumedGoods(board.getLastConsumedGoods());
+                if (summary == null) {
+                    yield null;
+                }
+                yield "Verbrauch fuer Aktion: " + summary;
+            }
+            default -> null;
+        };
     }
 
     // ===================================================================
@@ -200,7 +347,10 @@ public class DebugGameRunner {
         String label,
         String dir,
         String executedAction,
-        String executedByPlayer
+        String executedByPlayer,
+        String executedActionDetails,
+        String agentStrategyName,
+        List<ScoringAgent.MainActionScore> mainActionScores
     ) {
         if (dir == null) return;
         try {
@@ -224,6 +374,39 @@ public class DebugGameRunner {
                 } else {
                     String escapedPlayer = executedByPlayer.replace("\\", "\\\\").replace("\"", "\\\"");
                     w.printf("  \"executedByPlayer\": \"%s\",%n", escapedPlayer);
+                }
+                if (executedActionDetails == null) {
+                    w.println("  \"executedActionDetails\": null,");
+                } else {
+                    String escapedDetails = executedActionDetails.replace("\\", "\\\\").replace("\"", "\\\"");
+                    w.printf("  \"executedActionDetails\": \"%s\",%n", escapedDetails);
+                }
+                if (agentStrategyName == null) {
+                    w.println("  \"agentStrategyName\": null,");
+                } else {
+                    String escapedStrategy = agentStrategyName.replace("\\", "\\\\").replace("\"", "\\\"");
+                    w.printf("  \"agentStrategyName\": \"%s\",%n", escapedStrategy);
+                }
+                if (mainActionScores == null || mainActionScores.isEmpty()) {
+                    w.println("  \"agentMainActionScores\": [],");
+                } else {
+                    w.println("  \"agentMainActionScores\": [");
+                    for (int i = 0; i < mainActionScores.size(); i++) {
+                        ScoringAgent.MainActionScore score = mainActionScores.get(i);
+                        String escapedMainAction = score.mainAction().replace("\\", "\\\\").replace("\"", "\\\"");
+                        String escapedVariant = score.bestActionVariant() == null
+                            ? ""
+                            : score.bestActionVariant().replace("\\", "\\\\").replace("\"", "\\\"");
+                        String scoreText = String.format(Locale.US, "%.4f", score.score());
+                        w.println("    {");
+                        w.printf("      \"mainAction\": \"%s\",%n", escapedMainAction);
+                        w.printf("      \"score\": %s,%n", scoreText);
+                        w.printf("      \"selected\": %s,%n", score.selected() ? "true" : "false");
+                        w.printf("      \"bestActionVariant\": \"%s\"%n", escapedVariant);
+                        w.print("    }");
+                        w.println(i < mainActionScores.size() - 1 ? "," : "");
+                    }
+                    w.println("  ],");
                 }
 
                 // Board State

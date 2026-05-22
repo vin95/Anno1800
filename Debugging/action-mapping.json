@@ -1,0 +1,43 @@
+{
+  "exact": {
+    "Carneval[]": "Karneval",
+    "Expedition[]": "Expedition starten",
+    "DiscoverOldWorldIsland[]": "Alte-Welt-Insel entdecken",
+    "DiscoverNewWorldIsland[]": "Neue-Welt-Insel entdecken"
+  },
+  "prefix": {
+    "UpgradeResident[": "Bewohner aufwerten",
+    "SettleResident[": "Bewohner ansiedeln",
+    "BuildShipyard[": "Werft bauen",
+    "BuildFactory[": "Fabrik bauen",
+    "BuildShips[": "Schiffe bauen",
+    "FulfillNeeds[": "Beduerfnisse erfuellen",
+    "TradeGoods[": "Gueter handeln",
+    "ProduceGoods[": "Gueter produzieren",
+    "DrawResidentCard[": "Bewohnerkarte ziehen",
+    "InvestorGoldAction[": "Investoren-Goldaktion",
+    "DiscardResidentCardAction[": "Bewohnerkarte abwerfen"
+  },
+  "regex": [
+    {
+      "pattern": "^SettleResident\\[level=(?P<level>\\d+)\\]$",
+      "template": "Bewohner ansiedeln (Stufe {level})"
+    },
+    {
+      "pattern": "^BuildShipyard\\[level=(?P<level>\\d+)\\]$",
+      "template": "Werft bauen (Stufe {level})"
+    },
+    {
+      "pattern": "^BuildShips\\[shipType=(?P<shipType>[^,\\]]+), level=(?P<level>\\d+), amount=(?P<amount>\\d+)\\]$",
+      "template": "Schiffe bauen ({shipType}, Stufe {level}, Anzahl {amount})"
+    },
+    {
+      "pattern": "^UpgradeResident\\[residents=.*\\]$",
+      "template": "Bewohner aufwerten"
+    },
+    {
+      "pattern": "^TradeGoods\\[good=(?P<good>[^,\\]]+), player=(?P<player>\\d+)\\]$",
+      "template": "Gueter handeln ({good}, Spielerindex {player})"
+    }
+  ]
+}

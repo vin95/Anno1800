@@ -29,9 +29,18 @@ public record ProducedGood(
          * Good was traded from another player.
          * 
          * @param fromPlayer The player index to trade from
-         * @param chipCost The cost in chips: 1 = 1 trade chip (standard), 2 = 2 explorer chips (ExplorerTrader)
+         * @param chipCost The cost in trade chips based on traded factory color.
          */
         record Traded(int fromPlayer, int chipCost) implements GoodSource {}
+
+        /**
+         * Good was traded from another player but paid via ExplorerTrader with explorer chips.
+         *
+         * @param fromPlayer The player index to trade from
+         * @param tradeChipCost Equivalent trade-chip cost of the selected factory
+         * @param explorerChipCost Actual explorer chips paid (usually tradeChipCost * 2)
+         */
+        record TradedWithExplorer(int fromPlayer, int tradeChipCost, int explorerChipCost) implements GoodSource {}
         
         /**
          * Good was imported from the new world using a plantation.
@@ -63,6 +72,9 @@ public record ProducedGood(
                 "produced in " + factory.getType() + " by resident L" + resident.getPopulationLevel();
             case GoodSource.Traded(var player, var chip) -> 
                 "traded from Player " + (player + 1) + " using chip " + chip;
+            case GoodSource.TradedWithExplorer(var player, var tradeChipCost, var explorerChipCost) ->
+                "traded from Player " + (player + 1) + " using " + explorerChipCost
+                    + " explorer chips (trade cost " + tradeChipCost + ")";
             case GoodSource.Imported(var chip) -> 
                 "imported using chip " + chip;
             case GoodSource.FromReward() -> 

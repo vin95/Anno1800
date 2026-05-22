@@ -52,6 +52,8 @@ public class ActionHandler {
      * @return ActionResult containing the result of the action execution
      */
     public ActionResult execute(Action action, Player player) {
+        player.getPlayerBoard().clearLastConsumedGoods();
+
         return switch (action) {
             case Action.BuildFactory(Factory factory) -> {
                 buildFactory(player, factory, game);
