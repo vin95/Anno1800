@@ -489,13 +489,31 @@ public class DebugGameRunner {
 
                     int[] levels = new int[6];
                     int onBoard = 0, working = 0, fit = 0, exhausted = 0;
+                    int[] fitByLevel = new int[6];
+                    int[] workingByLevel = new int[6];
+                    int[] exhaustedByLevel = new int[6];
                     for (var r : p.residents().residents()) {
                         if (r.level() >= 1 && r.level() <= 5) levels[r.level()]++;
                         switch (r.status()) {
                             case "ON_BOARD"  -> onBoard++;
-                            case "AT_WORK"   -> working++;
-                            case "FIT"       -> fit++;
-                            case "EXHAUSTED" -> exhausted++;
+                            case "AT_WORK"   -> {
+                                working++;
+                                if (r.level() >= 1 && r.level() <= 5) {
+                                    workingByLevel[r.level()]++;
+                                }
+                            }
+                            case "FIT"       -> {
+                                fit++;
+                                if (r.level() >= 1 && r.level() <= 5) {
+                                    fitByLevel[r.level()]++;
+                                }
+                            }
+                            case "EXHAUSTED" -> {
+                                exhausted++;
+                                if (r.level() >= 1 && r.level() <= 5) {
+                                    exhaustedByLevel[r.level()]++;
+                                }
+                            }
                         }
                     }
                     w.println("        \"byLevel\": {");
@@ -510,6 +528,29 @@ public class DebugGameRunner {
                     w.printf ("          \"working\": %d,%n",   working);
                     w.printf ("          \"fit\": %d,%n",       fit);
                     w.printf ("          \"exhausted\": %d%n",  exhausted);
+                    w.println("        },");
+                    w.println("        \"byStatusByLevel\": {");
+                    w.println("          \"fit\": {");
+                    w.printf ("            \"level1\": %d,%n", fitByLevel[1]);
+                    w.printf ("            \"level2\": %d,%n", fitByLevel[2]);
+                    w.printf ("            \"level3\": %d,%n", fitByLevel[3]);
+                    w.printf ("            \"level4\": %d,%n", fitByLevel[4]);
+                    w.printf ("            \"level5\": %d%n",  fitByLevel[5]);
+                    w.println("          },");
+                    w.println("          \"working\": {");
+                    w.printf ("            \"level1\": %d,%n", workingByLevel[1]);
+                    w.printf ("            \"level2\": %d,%n", workingByLevel[2]);
+                    w.printf ("            \"level3\": %d,%n", workingByLevel[3]);
+                    w.printf ("            \"level4\": %d,%n", workingByLevel[4]);
+                    w.printf ("            \"level5\": %d%n",  workingByLevel[5]);
+                    w.println("          },");
+                    w.println("          \"exhausted\": {");
+                    w.printf ("            \"level1\": %d,%n", exhaustedByLevel[1]);
+                    w.printf ("            \"level2\": %d,%n", exhaustedByLevel[2]);
+                    w.printf ("            \"level3\": %d,%n", exhaustedByLevel[3]);
+                    w.printf ("            \"level4\": %d,%n", exhaustedByLevel[4]);
+                    w.printf ("            \"level5\": %d%n",  exhaustedByLevel[5]);
+                    w.println("          }");
                     w.println("        }");
                     w.println("      }");
                     w.print("    }");

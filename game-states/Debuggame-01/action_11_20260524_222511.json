@@ -1,0 +1,287 @@
+{
+  "timestamp": "2026-05-24T20:25:11.413869Z",
+  "round": 4,
+  "currentPlayer": 0,
+  "label": "action_11",
+  "executedAction": "Carneval[]",
+  "executedByPlayer": "Player 1",
+  "executedActionDetails": null,
+  "agentStrategyName": "adaptiveResidentStrategy",
+  "agentMainActionScores": [
+    {
+      "mainAction": "Carneval",
+      "score": 4.0005,
+      "selected": true,
+      "bestActionVariant": "Carneval[]"
+    },
+    {
+      "mainAction": "BuildFactory",
+      "score": 3.5007,
+      "selected": false,
+      "bestActionVariant": "BuildFactory[factory=com.anno1800.game.tiles.Factory@35f983a6]"
+    },
+    {
+      "mainAction": "DiscoverNewWorldIsland",
+      "score": 3.0003,
+      "selected": false,
+      "bestActionVariant": "DiscoverNewWorldIsland[]"
+    },
+    {
+      "mainAction": "BuildShipyard",
+      "score": 3.0000,
+      "selected": false,
+      "bestActionVariant": "BuildShipyard[level=1]"
+    },
+    {
+      "mainAction": "DiscoverOldWorldIsland",
+      "score": 2.0003,
+      "selected": false,
+      "bestActionVariant": "DiscoverOldWorldIsland[]"
+    },
+    {
+      "mainAction": "ViewResidentCards",
+      "score": -1499.9999,
+      "selected": false,
+      "bestActionVariant": "ViewResidentCards[]"
+    }
+  ],
+  "boardState": {
+    "factories": {
+      "availableFactories": 70
+    },
+    "shipyards": {
+      "level1": 4,
+      "level2": 6,
+      "level3": 4
+    },
+    "ships": {
+      "tradeShips": {
+        "level1": 6,
+        "level2": 6,
+        "level3": 6
+      },
+      "explorerShips": {
+        "level1": 4,
+        "level2": 6,
+        "level3": 6
+      }
+    },
+    "cards": {
+      "residentStack1": 23,
+      "residentStack2": 24,
+      "residentStack3": 24,
+      "totalResidentCards": 71,
+      "expeditionCards": 19
+    },
+    "islands": {
+      "oldWorldIslands": 12,
+      "newWorldIslands": 8
+    },
+    "populationPool": {
+      "farmers": 11,
+      "workers": 28,
+      "artisans": 17,
+      "engineers": 20,
+      "investors": 15
+    },
+    "resources": {
+      "goldPool": 997,
+      "tradeChips": 994,
+      "explorerChips": 995
+    }
+  },
+  "players": [
+    {
+      "name": "Player 1",
+      "position": 2,
+      "tiles": {
+        "freeLand": 0,
+        "freeCoast": 4,
+        "freeSea": 2
+      },
+      "buildings": {
+        "factories": 10,
+        "shipyards": 1
+      },
+      "ships": {
+        "tradeShips": 2,
+        "explorerShips": 1
+      },
+      "resources": {
+        "gold": 1,
+        "tradeChips": 2,
+        "explorerChips": 1
+      },
+      "cards": {
+        "residentCards": 11
+      },
+      "residents": {
+        "total": 11,
+        "byLevel": {
+          "level1": 4,
+          "level2": 3,
+          "level3": 4,
+          "level4": 0,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 0,
+          "fit": 11,
+          "exhausted": 0
+        },
+        "byStatusByLevel": {
+          "fit": {
+            "level1": 4,
+            "level2": 3,
+            "level3": 4,
+            "level4": 0,
+            "level5": 0
+          },
+          "working": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          },
+          "exhausted": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "Player 2",
+      "position": 3,
+      "tiles": {
+        "freeLand": 0,
+        "freeCoast": 4,
+        "freeSea": 0
+      },
+      "buildings": {
+        "factories": 10,
+        "shipyards": 1
+      },
+      "ships": {
+        "tradeShips": 2,
+        "explorerShips": 3
+      },
+      "resources": {
+        "gold": 2,
+        "tradeChips": 1,
+        "explorerChips": 1
+      },
+      "cards": {
+        "residentCards": 9
+      },
+      "residents": {
+        "total": 9,
+        "byLevel": {
+          "level1": 4,
+          "level2": 3,
+          "level3": 2,
+          "level4": 0,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 3,
+          "fit": 6,
+          "exhausted": 0
+        },
+        "byStatusByLevel": {
+          "fit": {
+            "level1": 3,
+            "level2": 3,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          },
+          "working": {
+            "level1": 1,
+            "level2": 0,
+            "level3": 2,
+            "level4": 0,
+            "level5": 0
+          },
+          "exhausted": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "Player 3",
+      "position": 1,
+      "tiles": {
+        "freeLand": 0,
+        "freeCoast": 4,
+        "freeSea": 2
+      },
+      "buildings": {
+        "factories": 10,
+        "shipyards": 1
+      },
+      "ships": {
+        "tradeShips": 2,
+        "explorerShips": 1
+      },
+      "resources": {
+        "gold": 0,
+        "tradeChips": 1,
+        "explorerChips": 1
+      },
+      "cards": {
+        "residentCards": 11
+      },
+      "residents": {
+        "total": 11,
+        "byLevel": {
+          "level1": 3,
+          "level2": 6,
+          "level3": 2,
+          "level4": 0,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 0,
+          "fit": 11,
+          "exhausted": 0
+        },
+        "byStatusByLevel": {
+          "fit": {
+            "level1": 3,
+            "level2": 6,
+            "level3": 2,
+            "level4": 0,
+            "level5": 0
+          },
+          "working": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          },
+          "exhausted": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          }
+        }
+      }
+    }
+  ]
+}

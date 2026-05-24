@@ -1,0 +1,269 @@
+{
+  "timestamp": "2026-05-24T20:26:23.861589500Z",
+  "round": 17,
+  "currentPlayer": 1,
+  "label": "action_51",
+  "executedAction": "BuildFactory[factory=com.anno1800.game.tiles.Factory@35f983a6]",
+  "executedByPlayer": "Player 2",
+  "executedActionDetails": "Verbrauch fuer Aktion: 1x Pigs [produziert (Pig Farm, Bewohnerstufe 1)]; 1x Steel Bars [produziert (Steel Works Red, Bewohnerstufe 3)]",
+  "agentStrategyName": "shipBuilding",
+  "agentMainActionScores": [
+    {
+      "mainAction": "BuildFactory",
+      "score": 6.5008,
+      "selected": true,
+      "bestActionVariant": "BuildFactory[factory=com.anno1800.game.tiles.Factory@35f983a6]"
+    },
+    {
+      "mainAction": "Carneval",
+      "score": 1.0005,
+      "selected": false,
+      "bestActionVariant": "Carneval[]"
+    },
+    {
+      "mainAction": "ViewResidentCards",
+      "score": -1499.9992,
+      "selected": false,
+      "bestActionVariant": "ViewResidentCards[]"
+    }
+  ],
+  "boardState": {
+    "factories": {
+      "availableFactories": 68
+    },
+    "shipyards": {
+      "level1": 0,
+      "level2": 6,
+      "level3": 4
+    },
+    "ships": {
+      "tradeShips": {
+        "level1": 6,
+        "level2": 6,
+        "level3": 6
+      },
+      "explorerShips": {
+        "level1": 4,
+        "level2": 6,
+        "level3": 6
+      }
+    },
+    "cards": {
+      "residentStack1": 12,
+      "residentStack2": 24,
+      "residentStack3": 21,
+      "totalResidentCards": 57,
+      "expeditionCards": 16
+    },
+    "islands": {
+      "oldWorldIslands": 11,
+      "newWorldIslands": 7
+    },
+    "populationPool": {
+      "farmers": 0,
+      "workers": 20,
+      "artisans": 16,
+      "engineers": 20,
+      "investors": 15
+    },
+    "resources": {
+      "goldPool": 997,
+      "tradeChips": 994,
+      "explorerChips": 995
+    }
+  },
+  "players": [
+    {
+      "name": "Player 1",
+      "position": 2,
+      "tiles": {
+        "freeLand": 0,
+        "freeCoast": 4,
+        "freeSea": 2
+      },
+      "buildings": {
+        "factories": 10,
+        "shipyards": 1
+      },
+      "ships": {
+        "tradeShips": 2,
+        "explorerShips": 1
+      },
+      "resources": {
+        "gold": 1,
+        "tradeChips": 0,
+        "explorerChips": 1
+      },
+      "cards": {
+        "residentCards": 15
+      },
+      "residents": {
+        "total": 15,
+        "byLevel": {
+          "level1": 4,
+          "level2": 7,
+          "level3": 4,
+          "level4": 0,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 0,
+          "fit": 15,
+          "exhausted": 0
+        },
+        "byStatusByLevel": {
+          "fit": {
+            "level1": 4,
+            "level2": 7,
+            "level3": 4,
+            "level4": 0,
+            "level5": 0
+          },
+          "working": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          },
+          "exhausted": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "Player 2",
+      "position": 3,
+      "tiles": {
+        "freeLand": 0,
+        "freeCoast": 2,
+        "freeSea": 2
+      },
+      "buildings": {
+        "factories": 12,
+        "shipyards": 5
+      },
+      "ships": {
+        "tradeShips": 2,
+        "explorerShips": 3
+      },
+      "resources": {
+        "gold": 2,
+        "tradeChips": 0,
+        "explorerChips": 0
+      },
+      "cards": {
+        "residentCards": 16
+      },
+      "residents": {
+        "total": 14,
+        "byLevel": {
+          "level1": 8,
+          "level2": 3,
+          "level3": 3,
+          "level4": 0,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 3,
+          "fit": 11,
+          "exhausted": 0
+        },
+        "byStatusByLevel": {
+          "fit": {
+            "level1": 7,
+            "level2": 2,
+            "level3": 2,
+            "level4": 0,
+            "level5": 0
+          },
+          "working": {
+            "level1": 1,
+            "level2": 1,
+            "level3": 1,
+            "level4": 0,
+            "level5": 0
+          },
+          "exhausted": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "Player 3",
+      "position": 1,
+      "tiles": {
+        "freeLand": 0,
+        "freeCoast": 4,
+        "freeSea": 2
+      },
+      "buildings": {
+        "factories": 10,
+        "shipyards": 1
+      },
+      "ships": {
+        "tradeShips": 2,
+        "explorerShips": 1
+      },
+      "resources": {
+        "gold": 0,
+        "tradeChips": 2,
+        "explorerChips": 1
+      },
+      "cards": {
+        "residentCards": 14
+      },
+      "residents": {
+        "total": 14,
+        "byLevel": {
+          "level1": 2,
+          "level2": 10,
+          "level3": 2,
+          "level4": 0,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 0,
+          "fit": 14,
+          "exhausted": 0
+        },
+        "byStatusByLevel": {
+          "fit": {
+            "level1": 2,
+            "level2": 10,
+            "level3": 2,
+            "level4": 0,
+            "level5": 0
+          },
+          "working": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          },
+          "exhausted": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          }
+        }
+      }
+    }
+  ]
+}

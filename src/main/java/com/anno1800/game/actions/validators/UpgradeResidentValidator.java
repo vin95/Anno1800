@@ -24,6 +24,7 @@ public class UpgradeResidentValidator {
     public static boolean canUpgradeResident(Action.UpgradeResident action, Player player, Game game) {
         Resident[] residents = action.residents();
         PlayerBoard playerBoard = player.getPlayerBoard();
+        com.anno1800.game.board.Board board = game.getBoard();
         
         // Check array size (1-3 residents)
         if (residents == null || residents.length == 0 || residents.length > 3) {
@@ -54,6 +55,17 @@ public class UpgradeResidentValidator {
         if (level1After < 1 || level2After < 1) {
             return false;
         }
+
+        // Reserve target residents on the board so combined upgrades cannot
+        // oversubscribe the shared resident pool during execution.
+        int[] availableResidentsByLevel = {
+            0,
+            board.getFarmers(),
+            board.getWorkers(),
+            board.getArtisans(),
+            board.getEngineers(),
+            board.getInvestors()
+        };
         
         // Validate each resident and accumulate goods costs
         // IMPORTANT: We must not clear storedGoods between residents!
@@ -74,6 +86,12 @@ public class UpgradeResidentValidator {
             }
             
             int targetLevel = currentLevel + 1;
+
+            if (availableResidentsByLevel[targetLevel] <= 0) {
+                playerBoard.clearStoredGoods();
+                return false;
+            }
+            availableResidentsByLevel[targetLevel]--;
             
             // Check if higher level resident is available on GameBoard
             if (!hasResidentAvailable(game, targetLevel)) {

@@ -715,12 +715,20 @@ public class TerminalGameUI {
         Player currentPlayer = game.getCurrentPlayer();
         PlayerBoard board = currentPlayer.getPlayerBoard();
         int numShipyards = board.getShipyards().size();
+        int currentTradeShips = board.getTradeShips().size();
+        int currentExplorerShips = board.getExplorerShips().size();
+        int highestTradeShipLevel = highestShipLevel(board.getTradeShips());
+        int highestExplorerShipLevel = highestShipLevel(board.getExplorerShips());
         
         System.out.println("\\n" + "=".repeat(80));
         System.out.println("BUILD SHIPS - Interactive Selection");
         System.out.println("=".repeat(80));
         System.out.println("You have " + numShipyards + " shipyard(s).");
         System.out.println("You can build up to " + numShipyards + " ship(s) per action.");
+        System.out.println("Trade Ship rule: only build it if you still have at least 2 Trade Ships after the action.");
+        System.out.println("Ship level rule: only pick a level higher than your current highest ship of that type.");
+        System.out.println("Current Trade Ships: " + currentTradeShips + " (highest level: " + highestTradeShipLevel + ")");
+        System.out.println("Current Explorer Ships: " + currentExplorerShips + " (highest level: " + highestExplorerShipLevel + ")");
         System.out.println();
         
         // Step 1: Select ship type
@@ -753,6 +761,7 @@ public class TerminalGameUI {
         System.out.println("[1] Level 1 (costs: Planks, Sails)");
         System.out.println("[2] Level 2 (costs: Planks, Sails, Steelbars)");
         System.out.println("[3] Level 3 (costs: Planks, Sails, Steelbars, Cannons)");
+        System.out.println("(The selected level must be higher than the highest ship level you already own.)");
         
         int selectedLevel = 0;
         while (selectedLevel == 0) {
@@ -812,6 +821,26 @@ public class TerminalGameUI {
         System.out.println("\nError: Could not find matching BuildShips action!");
         System.out.println("(The selected combination may not be valid)");
         return null;
+    }
+
+    private int highestShipLevel(java.util.List<?> ships) {
+        int highest = 0;
+        for (Object ship : ships) {
+            if (ship == null) {
+                continue;
+            }
+
+            try {
+                java.lang.reflect.Method getLevel = ship.getClass().getMethod("getLevel");
+                Object levelValue = getLevel.invoke(ship);
+                if (levelValue instanceof Integer level) {
+                    highest = Math.max(highest, level);
+                }
+            } catch (ReflectiveOperationException ignored) {
+                // Fallback: if a ship implementation does not expose getLevel(), keep the UI usable.
+            }
+        }
+        return highest;
     }
     
     /**

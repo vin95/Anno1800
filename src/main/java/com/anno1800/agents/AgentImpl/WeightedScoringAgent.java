@@ -3,11 +3,15 @@ package com.anno1800.agents.AgentImpl;
 import com.anno1800.agents.GameContext;
 import com.anno1800.agents.ObjectiveContext;
 import com.anno1800.agents.StrategyWeights;
+import com.anno1800.data.gamedata.Producers;
+import com.anno1800.data.gamedata.ShipType;
 import com.anno1800.game.actions.Action;
 import com.anno1800.game.cards.ObjectiveCard;
 import com.anno1800.game.cards.ResidentCard;
 import com.anno1800.game.player.Player;
+import com.anno1800.game.player.PlayerBoard;
 import com.anno1800.game.residents.Resident;
+import com.anno1800.game.tiles.Factory;
 import com.anno1800.game.state.GameState;
 
 /**
@@ -119,9 +123,160 @@ public class WeightedScoringAgent extends ScoringAgent {
     @Override
     protected double scoreAction(Action action, GameState gameState, Player player, 
                                 GameContext context, ObjectiveContext objectiveContext) {
-        return getBaseWeight(action) 
+        return getBaseWeight(action)
              + getContextBonus(action, context, objectiveContext)
-             + getObjectiveBonus(action, objectiveContext);
+             + getObjectiveBonus(action, objectiveContext)
+             + applySafetyRules(action, gameState, player);
+    }
+
+    /**
+     * Hard safety rules that keep the agent from breaking its own production base.
+     * These rules intentionally override the normal strategy weights.
+     */
+    private double applySafetyRules(Action action, GameState gameState, Player player) {
+        if (player == null) {
+            return 0.0;
+        }
+
+        PlayerBoard playerBoard = player.getPlayerBoard();
+        long farmerCount = countResidentsAtLevel(playerBoard, 1);
+        long workerCount = countResidentsAtLevel(playerBoard, 2);
+        boolean hasGreenSawmill = hasFactoryType(playerBoard, Producers.SAWMILL_GREEN);
+        boolean hasBlueSawmill = hasFactoryType(playerBoard, Producers.SAWMILL_BLUE);
+
+        return switch (action) {
+            case Action.BuildShips buildShips -> {
+                int currentCount = shipCount(gameState, player, buildShips.shipType());
+                int desiredLevel = buildShips.level();
+                int currentHighestLevel = highestShipLevel(gameState, player, buildShips.shipType());
+
+                if (currentHighestLevel >= desiredLevel && currentCount > 0) {
+                    yield -1000.0;
+                }
+
+                if (buildShips.shipType() == ShipType.TradeShip && currentCount + buildShips.amount() < 2) {
+                    yield -1000.0;
+                }
+
+                yield 0.0;
+            }
+
+            case Action.UpgradeResident upgradeResident -> {
+                boolean upgradesFarmers = false;
+                boolean upgradesWorkers = false;
+                for (Resident resident : upgradeResident.residents()) {
+                    if (resident == null) {
+                        continue;
+                    }
+                    if (resident.getPopulationLevel() == 1) {
+                        upgradesFarmers = true;
+                    }
+                    if (resident.getPopulationLevel() == 2) {
+                        upgradesWorkers = true;
+                    }
+                }
+
+                if (upgradesFarmers && farmerCount <= 2) {
+                    yield -1000.0;
+                }
+
+                if (upgradesWorkers && workerCount <= 2) {
+                    yield -1000.0;
+                }
+
+                if (upgradesWorkers && !hasGreenSawmill && !hasBlueSawmill) {
+                    yield -1000.0;
+                }
+
+                yield 0.0;
+            }
+
+            case Action.OverbuildDefaultFactory overbuildDefaultFactory -> {
+                Factory defaultFactory = overbuildDefaultFactory.defaultFactory();
+                if (defaultFactory != null
+                    && defaultFactory.getType() == Producers.SAWMILL_GREEN
+                    && !hasBlueSawmill) {
+                    yield -1000.0;
+                }
+
+                if (defaultFactory != null
+                    && defaultFactory.getType() == Producers.SAWMILL_GREEN
+                    && hasBlueSawmill
+                    && workerCount <= 2) {
+                    yield -1000.0;
+                }
+
+                yield 0.0;
+            }
+
+            default -> 0.0;
+        };
+    }
+
+    private long countResidentsAtLevel(PlayerBoard playerBoard, int populationLevel) {
+        return playerBoard.getResidents().stream()
+            .filter(resident -> resident.getPopulationLevel() == populationLevel)
+            .count();
+    }
+
+    private boolean hasFactoryType(PlayerBoard playerBoard, Producers type) {
+        for (Factory factory : playerBoard.getFactories()) {
+            if (factory != null && factory.getType() == type) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int shipCount(GameState gameState, Player player, ShipType shipType) {
+        var playerState = findPlayerState(gameState, player);
+        if (playerState == null) {
+            return 0;
+        }
+
+        return switch (shipType) {
+            case TradeShip -> playerState.ships().tradeShips().totalCount();
+            case ExplorerShip -> playerState.ships().explorerShips().totalCount();
+        };
+    }
+
+    private int highestShipLevel(GameState gameState, Player player, ShipType shipType) {
+        var playerState = findPlayerState(gameState, player);
+        if (playerState == null) {
+            return 0;
+        }
+
+        return switch (shipType) {
+            case TradeShip -> highestLevelFromCounts(playerState.ships().tradeShips().levels());
+            case ExplorerShip -> highestLevelFromCounts(playerState.ships().explorerShips().levels());
+        };
+    }
+
+    private int highestLevelFromCounts(GameState.BoardState.ShipState.ShipLevelCounts levels) {
+        if (levels.level3() > 0) {
+            return 3;
+        }
+        if (levels.level2() > 0) {
+            return 2;
+        }
+        if (levels.level1() > 0) {
+            return 1;
+        }
+        return 0;
+    }
+
+    private GameState.PlayerState findPlayerState(GameState gameState, Player player) {
+        if (gameState == null || player == null) {
+            return null;
+        }
+
+        for (GameState.PlayerState playerState : gameState.players()) {
+            if (player.getName().equals(playerState.name())) {
+                return playerState;
+            }
+        }
+
+        return null;
     }
 
     // =========================================================================

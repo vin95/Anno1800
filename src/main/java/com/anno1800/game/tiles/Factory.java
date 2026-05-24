@@ -13,6 +13,7 @@ public class Factory extends Producer {
     private final Goods[] costs;
     private final Goods produces;
     private final int populationLevel;
+    private final int factoryLevel;
     private Resident slot1;
     private Resident slot2;
     private int tradeCosts;
@@ -22,9 +23,27 @@ public class Factory extends Producer {
         this.costs = costs;
         this.produces = produces;
         this.populationLevel = populationLevel;
+        this.factoryLevel = inferFactoryLevel(type);
         this.tradeCosts = tradeCosts;
         this.slot1 = null;
         this.slot2 = null;
+    }
+
+    private int inferFactoryLevel(Producers type) {
+        String name = type.name();
+        if (name.endsWith("_GREEN")) {
+            return 1;
+        }
+        if (name.endsWith("_BLUE")) {
+            return 2;
+        }
+        if (name.endsWith("_RED")) {
+            return 3;
+        }
+        if (name.endsWith("_PURPLE")) {
+            return 4;
+        }
+        return 0;
     }
 
     public Goods[] costs() {
@@ -37,6 +56,10 @@ public class Factory extends Producer {
 
     public int populationLevel() {
         return populationLevel;
+    }
+
+    public int factoryLevel() {
+        return factoryLevel;
     }
 
     public Resident getSlot1() {

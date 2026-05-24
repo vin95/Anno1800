@@ -103,6 +103,171 @@ def load_action_mappings(path: Path = ACTION_MAPPING_FILE) -> dict[str, Any]:
 
 ACTION_MAPPINGS = load_action_mappings()
 
+GOOD_ICON_NAMES: dict[str, str] = {
+    "beer": "beer.png",
+    "big berta": "big_berta.png",
+    "brass": "brass.png",
+    "bread": "bread.png",
+    "bricks": "bricks.png",
+    "cacao": "cacao.png",
+    "canned meat": "canned_meat.png",
+    "cannons": "cannons.png",
+    "cars": "cars.png",
+    "champagne": "champagne.png",
+    "chocolate": "chocolate.png",
+    "cigars": "cigars.png",
+    "coal": "coal.png",
+    "coats": "coats.png",
+    "coffee": "coffee.png",
+    "coffee beans": "coffee_beans.png",
+    "cotton": "cotton.png",
+    "cotton fabric": "cotton_fabric.png",
+    "dynamite": "dynamite.png",
+    "glass": "glass.png",
+    "glasses": "glasses.png",
+    "gold": "gold.png",
+    "goods": "goods.png",
+    "grain": "grain.png",
+    "gramophones": "gramophones.png",
+    "highbikes": "highbikes.png",
+    "light bulbs": "light_bulbs.png",
+    "pigs": "pigs.png",
+    "planks": "planks.png",
+    "pocketwatches": "pocketwatches.png",
+    "potatoes": "potatoes.png",
+    "rubber": "rubber.png",
+    "rum": "rum.png",
+    "sails": "sails.png",
+    "sausages": "sausages.png",
+    "sewing machines": "sewing_machines.png",
+    "snaps": "snaps.png",
+    "soap": "soap.png",
+    "steam gears": "steam_gears.png",
+    "steel bars": "steel_bars.png",
+    "sugarcane": "sugarcane.png",
+    "tobacco": "tobacco.png",
+    "windows": "windows.png",
+    "wool": "wool.png",
+    "work clothes": "work_clothes.png",
+}
+
+RESOURCE_ICON_NAMES: dict[str, str] = {
+    "gold": "gold.png",
+    "tradechips": "tradechip.png",
+    "explorerchips": "explorerchip.png",
+    "residentcards": "residentcard_lv_2.png",
+}
+
+WORKFORCE_ICON_NAMES: dict[str, str] = {
+    "level1": "workforce_level_1.png",
+    "level2": "workforce_level_2.png",
+    "level3": "workforce_level_3.png",
+    "level4": "workforce_level_4.png",
+    "level5": "workforce_level_5.png",
+}
+
+WORKFORCE_LABEL_ICON_NAMES: dict[str, str] = {
+    "farmer": WORKFORCE_ICON_NAMES["level1"],
+    "workers": WORKFORCE_ICON_NAMES["level2"],
+    "worker": WORKFORCE_ICON_NAMES["level2"],
+    "artisans": WORKFORCE_ICON_NAMES["level3"],
+    "artisan": WORKFORCE_ICON_NAMES["level3"],
+    "engineers": WORKFORCE_ICON_NAMES["level4"],
+    "engineer": WORKFORCE_ICON_NAMES["level4"],
+    "investors": WORKFORCE_ICON_NAMES["level5"],
+    "investor": WORKFORCE_ICON_NAMES["level5"],
+}
+
+FACTORY_COLOR_SQUARE_NAMES: dict[str, str] = {
+    "red": "red_square",
+    "blue": "blue_square",
+    "green": "green_square",
+    "yellow": "yellow_square",
+    "orange": "orange_square",
+    "purple": "purple_square",
+    "black": "black_square",
+    "white": "white_square",
+}
+
+COUNTED_GOOD_PATTERN = re.compile(
+    rf"(\b\d+x\s+)({'|'.join(sorted((re.escape(name) for name in GOOD_ICON_NAMES), key=len, reverse=True))})\b",
+    flags=re.IGNORECASE,
+)
+
+GOOD_ICON_TOKEN_PREFIX = "goodicon_"
+GOOD_ICON_TOKENS: dict[str, str] = {
+    f"{GOOD_ICON_TOKEN_PREFIX}{key.replace(' ', '_')}": icon_name for key, icon_name in GOOD_ICON_NAMES.items()
+}
+
+
+def icon_name_for_good(value: str) -> str:
+    key = value.strip().lower()
+    return GOOD_ICON_NAMES.get(key, f"{key.replace(' ', '_')}.png")
+
+
+def format_factory_name(value: str) -> str:
+    text_value = value.strip()
+    if not text_value:
+        return text_value
+
+    parts = text_value.rsplit(" ", 1)
+    if len(parts) == 2:
+        base_name, color_name = parts[0].strip(), parts[1].strip().lower()
+        if base_name and color_name in FACTORY_COLOR_SQUARE_NAMES:
+            return f"{base_name} {FACTORY_COLOR_SQUARE_NAMES[color_name]}"
+
+    return text_value
+
+
+def replace_text_tokens_with_icons(text: str, mapping: dict[str, str]) -> str:
+    if not text or not mapping:
+        return text
+
+    pattern = re.compile(
+        "|".join(sorted((re.escape(name) for name in mapping), key=len, reverse=True)),
+        flags=re.IGNORECASE,
+    )
+
+    def replacer(match: re.Match[str]) -> str:
+        token = match.group(0).lower()
+        return mapping.get(token, match.group(0))
+
+    return pattern.sub(replacer, text)
+
+
+def replace_counted_goods_with_icons(text: str) -> str:
+    if not text:
+        return text
+
+    def replacer(match: re.Match[str]) -> str:
+        prefix = match.group(1)
+        good_name = match.group(2)
+        token_name = f"{GOOD_ICON_TOKEN_PREFIX}{good_name.strip().lower().replace(' ', '_')}"
+        return f"{prefix}{token_name}"
+
+    return COUNTED_GOOD_PATTERN.sub(replacer, text)
+
+
+def iconize_output_text(text: str | None) -> str | None:
+    if text is None:
+        return None
+
+    normalized = str(text)
+
+    normalized = replace_counted_goods_with_icons(normalized)
+
+    for resource_name, icon_name in RESOURCE_ICON_NAMES.items():
+        normalized = re.sub(
+            rf"(?<![A-Za-z]){resource_name}(?![A-Za-z])",
+            f"{resource_name} {icon_name}",
+            normalized,
+            flags=re.IGNORECASE,
+        )
+
+    normalized = replace_text_tokens_with_icons(normalized, WORKFORCE_LABEL_ICON_NAMES)
+
+    return normalized
+
 
 def humanize_action(raw_action: Any) -> str | None:
     if raw_action is None:
@@ -310,7 +475,15 @@ def is_primitive(value: Any) -> bool:
 
 def should_skip_diff(prefix: str) -> bool:
     # Noise reduction: population pool changes are intentionally hidden.
-    return prefix.startswith("boardState.populationPool.") or prefix == "timestamp"
+    return (
+        prefix.startswith("boardState.populationPool.")
+        or prefix == "timestamp"
+        or prefix.startswith("agentMainActionScores")
+        or prefix.startswith("agentStrategyName")
+        or prefix.startswith("executedActionDetails")
+        or ".residents.byStatus." in prefix
+        or ".residents.byStatusByLevel." in prefix
+    )
 
 
 def format_diff_label(prefix: str) -> str:
@@ -325,7 +498,16 @@ def format_diff_label(prefix: str) -> str:
     for level_key, level_label in level_labels.items():
         marker = f".residents.byLevel.{level_key}"
         if marker in label:
-            label = label.replace(marker, f".{level_label}")
+            label = label.replace(marker, f" {level_label}")
+
+    for resource_name, icon_name in RESOURCE_ICON_NAMES.items():
+        if resource_name in label:
+            label = re.sub(
+                rf"(?<![A-Za-z]){resource_name}(?![A-Za-z])",
+                f"{resource_name} {icon_name}",
+                label,
+                flags=re.IGNORECASE,
+            )
 
     label = re.sub(r"players\[(\d+)\]", lambda m: f"Spieler {int(m.group(1)) + 1}", label)
     return label
@@ -366,7 +548,9 @@ def summarize_goods(values: list[str]) -> str:
     counts: dict[str, int] = {}
     for value in values:
         counts[value] = counts.get(value, 0) + 1
-    return ", ".join(f"{count}x {good}" for good, count in sorted(counts.items()))
+    return ", ".join(
+        f"{count}x {icon_name_for_good(good)}" for good, count in sorted(counts.items())
+    )
 
 
 def summarize_factories(values: list[str]) -> str:
@@ -376,9 +560,10 @@ def summarize_factories(values: list[str]) -> str:
     counts: dict[str, int] = {}
     order: list[str] = []
     for value in values:
-        if value not in counts:
-            order.append(value)
-        counts[value] = counts.get(value, 0) + 1
+        formatted_value = format_factory_name(value)
+        if formatted_value not in counts:
+            order.append(formatted_value)
+        counts[formatted_value] = counts.get(formatted_value, 0) + 1
 
     parts: list[str] = []
     for value in order:
@@ -386,6 +571,10 @@ def summarize_factories(values: list[str]) -> str:
         parts.append(f"{count}x {value}" if count > 1 else value)
 
     return ", ".join(parts)
+
+
+def summarize_resource_chips(count: int, icon_name: str) -> str:
+    return f"{count}x {icon_name}"
 
 
 def with_umlauts(text: str | None) -> str | None:
@@ -403,12 +592,8 @@ def with_umlauts(text: str | None) -> str | None:
         "Beduerfnisse": "Bedürfnisse",
         "Gueter": "Güter",
         "gueter": "güter",
-        "oe": "ö",
-        "Oe": "Ö",
-        "ae": "ä",
-        "Ae": "Ä",
-        "ue": "ü",
-        "Ue": "Ü",
+        "Schiffe baün": "Schiffe bauen",
+        "schiffe baün": "schiffe bauen",
     }
     for old, new in replacements.items():
         normalized = normalized.replace(old, new)
@@ -435,7 +620,342 @@ def clean_goods_detail_entry(entry: str) -> str:
         if cleaned.startswith(prefix):
             cleaned = cleaned[len(prefix) :].strip()
             break
+
+    # Render production factories as "FactoryName color_square" and remove resident level text.
+    production_pattern = re.compile(r"\[produziert\s*\(([^,\]]+),\s*Bewohnerstufe\s*\d+\)\]")
+
+    def production_replacer(match: re.Match[str]) -> str:
+        factory_text = format_factory_name(match.group(1).strip())
+        return f"(produziert in {factory_text})"
+
+    trade_pattern = re.compile(r"\[gehandelt\s*\(\s*Spieler\s*(\d+)\s*,\s*Kosten\s*(\d+)\s*Chip(?:s)?\s*\)\]")
+
+    def trade_replacer(match: re.Match[str]) -> str:
+        player = match.group(1)
+        cost = match.group(2)
+        return f"(gehandelt mit Spieler {player}, Kosten {cost} tradechip.png)"
+
+    cleaned = production_pattern.sub(production_replacer, cleaned)
+    cleaned = trade_pattern.sub(trade_replacer, cleaned)
     return cleaned
+
+
+def summarize_status_by_level(status_map: dict[str, Any], status_key: str) -> str | None:
+    by_level = status_map.get(status_key)
+    if not isinstance(by_level, dict):
+        return None
+
+    parts: list[str] = []
+    for level_key in ("level1", "level2", "level3", "level4", "level5"):
+        value = by_level.get(level_key)
+        if isinstance(value, int) and value > 0:
+            icon_name = WORKFORCE_ICON_NAMES[level_key]
+            parts.append(f"{value}x {icon_name}")
+
+    if not parts:
+        return None
+
+    return f"Residents.{status_key}: {', '.join(parts)}"
+
+
+def build_resident_status_level_diffs(
+    current_state: dict[str, Any],
+    previous_state: dict[str, Any] | None,
+) -> list[str]:
+    if previous_state is None:
+        return []
+
+    cur_players = current_state.get("players")
+    prev_players = previous_state.get("players")
+    if not isinstance(cur_players, list) or not isinstance(prev_players, list):
+        return []
+
+    lines: list[str] = []
+    for index, cur_player in enumerate(cur_players):
+        if not isinstance(cur_player, dict):
+            continue
+        if index >= len(prev_players) or not isinstance(prev_players[index], dict):
+            continue
+
+        prev_player = prev_players[index]
+        cur_residents = cur_player.get("residents") if isinstance(cur_player.get("residents"), dict) else {}
+        prev_residents = prev_player.get("residents") if isinstance(prev_player.get("residents"), dict) else {}
+        cur_status_map = cur_residents.get("byStatusByLevel") if isinstance(cur_residents.get("byStatusByLevel"), dict) else {}
+        prev_status_map = prev_residents.get("byStatusByLevel") if isinstance(prev_residents.get("byStatusByLevel"), dict) else {}
+
+        if not cur_status_map or not prev_status_map:
+            continue
+
+        player_label = f"Spieler {index + 1}"
+        for status_key in ("fit", "working", "exhausted"):
+            cur_summary = summarize_status_by_level(cur_status_map, status_key)
+            prev_summary = summarize_status_by_level(prev_status_map, status_key)
+            if cur_summary != prev_summary and cur_summary is not None:
+                lines.append(f"{player_label} {cur_summary}")
+
+    return lines
+
+
+def get_status_by_level_for_player(player: dict[str, Any]) -> dict[str, dict[str, int]]:
+    residents = player.get("residents") if isinstance(player, dict) else None
+    if not isinstance(residents, dict):
+        return {}
+
+    by_status_by_level = residents.get("byStatusByLevel")
+    if not isinstance(by_status_by_level, dict):
+        return {}
+
+    extracted: dict[str, dict[str, int]] = {}
+    for status_key in ("fit", "working", "exhausted"):
+        per_level = by_status_by_level.get(status_key)
+        if not isinstance(per_level, dict):
+            continue
+
+        level_map: dict[str, int] = {}
+        for level_key in ("level1", "level2", "level3", "level4", "level5"):
+            value = per_level.get(level_key)
+            if isinstance(value, int):
+                level_map[level_key] = value
+
+        if level_map:
+            extracted[status_key] = level_map
+
+    return extracted
+
+
+def calculate_status_level_deltas_for_player(
+    current_state: dict[str, Any],
+    previous_state: dict[str, Any] | None,
+    player_index: int | None,
+) -> dict[str, dict[str, int]]:
+    if previous_state is None or player_index is None:
+        return {}
+
+    cur_players = current_state.get("players")
+    prev_players = previous_state.get("players")
+    if not isinstance(cur_players, list) or not isinstance(prev_players, list):
+        return {}
+    if player_index < 0 or player_index >= len(cur_players) or player_index >= len(prev_players):
+        return {}
+    if not isinstance(cur_players[player_index], dict) or not isinstance(prev_players[player_index], dict):
+        return {}
+
+    current_map = get_status_by_level_for_player(cur_players[player_index])
+    previous_map = get_status_by_level_for_player(prev_players[player_index])
+    if not current_map or not previous_map:
+        return {}
+
+    deltas: dict[str, dict[str, int]] = {}
+    for status_key in ("fit", "working", "exhausted"):
+        current_levels = current_map.get(status_key, {})
+        previous_levels = previous_map.get(status_key, {})
+        status_deltas: dict[str, int] = {}
+
+        for level_key in ("level1", "level2", "level3", "level4", "level5"):
+            cur_value = current_levels.get(level_key)
+            prev_value = previous_levels.get(level_key)
+            if isinstance(cur_value, int) and isinstance(prev_value, int):
+                delta = cur_value - prev_value
+                if delta != 0:
+                    status_deltas[level_key] = delta
+
+        if status_deltas:
+            deltas[status_key] = status_deltas
+
+    return deltas
+
+
+def distribute_delta_across_buckets(delta: int, bucket_count: int) -> list[int]:
+    if bucket_count <= 1:
+        return [delta]
+    if delta == 0:
+        return [0 for _ in range(bucket_count)]
+
+    sign = 1 if delta > 0 else -1
+    magnitude = abs(delta)
+    base = magnitude // bucket_count
+    remainder = magnitude % bucket_count
+    distributed = [sign * base for _ in range(bucket_count)]
+    for i in range(remainder):
+        distributed[i] += sign
+    return distributed
+
+
+def distribute_status_level_deltas(
+    deltas: dict[str, dict[str, int]],
+    bucket_count: int,
+) -> list[dict[str, dict[str, int]]]:
+    if bucket_count <= 0:
+        return []
+
+    buckets: list[dict[str, dict[str, int]]] = [
+        {"fit": {}, "working": {}, "exhausted": {}} for _ in range(bucket_count)
+    ]
+
+    for status_key, levels in deltas.items():
+        for level_key, delta in levels.items():
+            distributed = distribute_delta_across_buckets(delta, bucket_count)
+            for i, value in enumerate(distributed):
+                if value != 0:
+                    buckets[i][status_key][level_key] = value
+
+    return buckets
+
+
+def format_status_delta_lines(status_deltas: dict[str, dict[str, int]]) -> list[str]:
+    lines: list[str] = []
+
+    for status_key in ("fit", "working", "exhausted"):
+        level_deltas = status_deltas.get(status_key, {})
+        if not isinstance(level_deltas, dict) or not level_deltas:
+            continue
+
+        parts: list[str] = []
+        for level_key in ("level1", "level2", "level3", "level4", "level5"):
+            delta = level_deltas.get(level_key)
+            if isinstance(delta, int) and delta != 0:
+                sign = "+" if delta > 0 else ""
+                parts.append(f"{sign}{delta}x {WORKFORCE_ICON_NAMES[level_key]}")
+
+        if parts:
+            lines.append(f"Residents.{status_key}: {', '.join(parts)}")
+
+    return lines
+
+
+def workforce_label_for_level(level: int) -> str:
+    labels = {
+        1: "Farmer",
+        2: "Worker",
+        3: "Artisan",
+        4: "Engineer",
+        5: "Investor",
+    }
+    return labels.get(level, f"Level {level}")
+
+
+def extract_working_changes_from_raw_items(raw_items: list[str]) -> list[str]:
+    counts: dict[int, int] = {}
+    for item in raw_items:
+        match = re.search(r"Bewohnerstufe\s*(\d+)", item)
+        if not match:
+            continue
+        level = int(match.group(1))
+        if 1 <= level <= 5:
+            counts[level] = counts.get(level, 0) + 1
+
+    lines: list[str] = []
+    for level in (1, 2, 3, 4, 5):
+        count = counts.get(level, 0)
+        if count <= 0:
+            continue
+        label = workforce_label_for_level(level)
+        if count == 1:
+            lines.append(f"1x {label} is Working now")
+        else:
+            lines.append(f"{count}x {label} are Working now")
+
+    return lines
+
+
+def get_by_level_for_player(player: dict[str, Any]) -> dict[int, int]:
+    residents = player.get("residents") if isinstance(player, dict) else None
+    if not isinstance(residents, dict):
+        return {}
+
+    by_level = residents.get("byLevel")
+    if not isinstance(by_level, dict):
+        return {}
+
+    extracted: dict[int, int] = {}
+    for level in (1, 2, 3, 4, 5):
+        value = by_level.get(f"level{level}")
+        if isinstance(value, int):
+            extracted[level] = value
+    return extracted
+
+
+def calculate_by_level_deltas_for_player(
+    current_state: dict[str, Any],
+    previous_state: dict[str, Any] | None,
+    player_index: int | None,
+) -> dict[int, int]:
+    if previous_state is None or player_index is None:
+        return {}
+
+    cur_players = current_state.get("players")
+    prev_players = previous_state.get("players")
+    if not isinstance(cur_players, list) or not isinstance(prev_players, list):
+        return {}
+    if player_index < 0 or player_index >= len(cur_players) or player_index >= len(prev_players):
+        return {}
+    if not isinstance(cur_players[player_index], dict) or not isinstance(prev_players[player_index], dict):
+        return {}
+
+    cur_levels = get_by_level_for_player(cur_players[player_index])
+    prev_levels = get_by_level_for_player(prev_players[player_index])
+    if not cur_levels or not prev_levels:
+        return {}
+
+    deltas: dict[int, int] = {}
+    for level in (1, 2, 3, 4, 5):
+        delta = cur_levels.get(level, 0) - prev_levels.get(level, 0)
+        if delta != 0:
+            deltas[level] = delta
+    return deltas
+
+
+def build_action_result_change_blocks(
+    current_state: dict[str, Any],
+    previous_state: dict[str, Any] | None,
+    player_index: int | None,
+    block_count: int,
+) -> list[list[str]]:
+    if block_count <= 0:
+        return []
+
+    blocks: list[list[str]] = [[] for _ in range(block_count)]
+    deltas = calculate_by_level_deltas_for_player(current_state, previous_state, player_index)
+    if not deltas:
+        return blocks
+
+    remaining = {level: deltas.get(level, 0) for level in (1, 2, 3, 4, 5)}
+
+    # Convert paired level deltas to explicit upgrade transitions.
+    for from_level in (1, 2, 3, 4):
+        to_level = from_level + 1
+        moved = min(max(0, -remaining.get(from_level, 0)), max(0, remaining.get(to_level, 0)))
+        if moved <= 0:
+            continue
+
+        distribution = distribute_delta_across_buckets(moved, block_count)
+        for i, count in enumerate(distribution):
+            if count <= 0:
+                continue
+            from_label = workforce_label_for_level(from_level)
+            to_label = workforce_label_for_level(to_level)
+            blocks[i].append(f"{count}x {from_label} => {count}x {to_label}")
+
+        remaining[from_level] += moved
+        remaining[to_level] -= moved
+
+    # Positive remainder means newly settled residents.
+    for level in (1, 2, 3, 4, 5):
+        settled_count = remaining.get(level, 0)
+        if settled_count <= 0:
+            continue
+
+        distribution = distribute_delta_across_buckets(settled_count, block_count)
+        for i, count in enumerate(distribution):
+            if count <= 0:
+                continue
+            label = workforce_label_for_level(level)
+            if count == 1:
+                blocks[i].append(f"1 new {label} has settled")
+            else:
+                blocks[i].append(f"{count} new {label}s have settled")
+
+    return blocks
 
 
 def is_build_action(action_name: str) -> bool:
@@ -508,10 +1028,10 @@ def build_chip_line_for_items(items: list[str], action_name: str) -> str | None:
 
     segments: list[str] = []
     if trade_chips > 0:
-        segments.append(f"Tradechips={trade_chips}")
+        segments.append(summarize_resource_chips(trade_chips, RESOURCE_ICON_NAMES["tradechips"]))
 
     if is_build_action(action_name) and explorer_chips > 0:
-        segments.append(f"Explorerchips={explorer_chips}")
+        segments.append(summarize_resource_chips(explorer_chips, RESOURCE_ICON_NAMES["explorerchips"]))
 
     if not segments:
         return None
@@ -585,8 +1105,7 @@ def build_action_details_blocks(
     if cleaned_goods_entries:
         block_count = min(block_count, len(cleaned_goods_entries))
     grouped_entries = split_entries_evenly(cleaned_goods_entries, block_count)
-    fallback_chip_line = normalize_chip_line(chip_line, action_name)
-
+    grouped_raw_entries = split_entries_evenly(goods_entries, block_count)
     if action_name == "UpgradeResident":
         prefix = "ResidentUpdate"
     elif action_name == "BuildShips":
@@ -594,17 +1113,36 @@ def build_action_details_blocks(
     else:
         prefix = "Aktionsschritt"
 
+    player_index = player_index_from_name(current_state, current_state.get("executedByPlayer"))
+    action_result_change_blocks = build_action_result_change_blocks(
+        current_state=current_state,
+        previous_state=previous_state,
+        player_index=player_index,
+        block_count=block_count,
+    )
+
     blocks: list[dict[str, Any]] = []
+    action_label = action_with_amount(raw_action, current_state, previous_state)
     for i in range(block_count):
         items = grouped_entries[i] if i < len(grouped_entries) else []
-        calculated_chip_line = build_chip_line_for_items(items, action_name)
-        final_chip_line = calculated_chip_line
-        if final_chip_line is None and i == 0 and block_count == 1:
-            final_chip_line = fallback_chip_line
-        if final_chip_line:
-            items = items + [final_chip_line]
+        if action_label:
+            items = [f"Aktion: {action_label}", *items]
+        production_status_lines = extract_working_changes_from_raw_items(
+            grouped_raw_entries[i] if i < len(grouped_raw_entries) else []
+        )
+        action_result_lines = action_result_change_blocks[i] if i < len(action_result_change_blocks) else []
+
+        if production_status_lines:
+            items = [*items, "Statusaenderungen Rohstoffproduktion:", *production_status_lines]
+        if action_result_lines:
+            items = [*items, "Statusaenderungen Aktionsergebnis:", *action_result_lines]
         title = f"{prefix}{i + 1}" if block_count > 1 else "Details"
-        blocks.append({"title": title, "items": [with_umlauts(item) or item for item in items]})
+        rendered_items: list[str] = []
+        for item in items:
+            display_item = with_umlauts(item) or item
+            rendered_items.append(iconize_output_text(display_item) or display_item)
+
+        blocks.append({"title": title, "items": rendered_items})
 
     return blocks
 
@@ -626,6 +1164,7 @@ def build_action_details(
         if match:
             good = match.group(1)
             partner = int(match.group(2)) + 1
+            good_icon = icon_name_for_good(good)
             chips_text = "unbekannt"
             if player_index is not None:
                 cur_players = current_state.get("players")
@@ -637,8 +1176,8 @@ def build_action_details(
                     prev_chips = prev_res.get("tradeChips") if isinstance(prev_res, dict) else None
                     if isinstance(cur_chips, int) and isinstance(prev_chips, int):
                         used = max(0, prev_chips - cur_chips)
-                        chips_text = str(used)
-            return f"Handel: 1x {good} (Tradechips: {chips_text}, mit Spieler {partner})"
+                        chips_text = summarize_resource_chips(used, RESOURCE_ICON_NAMES["tradechips"])
+            return f"Handel: 1x {good_icon} (Tradechips: {chips_text}, mit Spieler {partner})"
 
     if player_index is None:
         return None
@@ -680,10 +1219,10 @@ def build_action_details(
 
     if traded_for_levels and chips_used and chips_used > 0:
         goods_text = summarize_goods(traded_for_levels)
-        return f"Verbrauch fuer Aktion: {goods_text} (ueber Handel, Tradechips: {chips_used}, Spieler: {format_player_reference(executed_by)})"
+        return f"Verbrauch fuer Aktion: {goods_text} (ueber Handel, Tradechips: {summarize_resource_chips(chips_used, RESOURCE_ICON_NAMES['tradechips'])}, Spieler: {format_player_reference(executed_by)})"
 
     if chips_used and chips_used > 0 and (action.startswith("Build") or action.startswith("UpgradeResident") or action.startswith("SettleResident")):
-        return f"Verbrauch fuer Aktion: Tradechips {chips_used}"
+        return f"Verbrauch fuer Aktion: {summarize_resource_chips(chips_used, RESOURCE_ICON_NAMES['tradechips'])}"
 
     return None
 
@@ -753,8 +1292,8 @@ def diff_values(
                 lines.append(f"{label}: '{prev_action}' -> '{cur_action}'")
                 return lines
             if label == "executedActionDetails":
-                prev_details = str(previous).replace("; ", ";\n")
-                cur_details = str(current).replace("; ", ";\n")
+                prev_details = iconize_output_text(str(previous).replace("; ", ";\n"))
+                cur_details = iconize_output_text(str(current).replace("; ", ";\n"))
                 lines.append(f"{label}: '{prev_details}' -> '{cur_details}'")
                 return lines
             if label == "currentPlayer":
@@ -775,7 +1314,12 @@ def diff_values(
     return lines
 
 
-def enrich_working_diffs(diffs: list[str], action_details: str | None) -> list[str]:
+def enrich_working_diffs(
+    diffs: list[str],
+    action_details: str | None,
+    current_state: dict[str, Any],
+    previous_state: dict[str, Any] | None,
+) -> list[str]:
     factory_summary = extract_production_factories(action_details)
     if not factory_summary:
         return diffs
@@ -788,6 +1332,7 @@ def enrich_working_diffs(diffs: list[str], action_details: str | None) -> list[s
         if working_pattern.search(line):
             enriched.append(f"  Zugewiesene Fabriken: {factory_summary}")
 
+    enriched.extend(build_resident_status_level_diffs(current_state, previous_state))
     return enriched
 
 
@@ -819,16 +1364,17 @@ def build_state_entries(files: list[Path]) -> list[dict[str, Any]]:
 
     for index, path in enumerate(files, start=1):
         state = load_state(path)
-        action_details = state.get("executedActionDetails") or build_action_details(
+        raw_action_details = state.get("executedActionDetails") or build_action_details(
             state.get("executedAction"),
             state,
             previous_state,
         )
-        action_details = with_umlauts(str(action_details)) if action_details else None
+        action_details = iconize_output_text(with_umlauts(str(raw_action_details)) if raw_action_details else None)
         diffs = [] if previous_state is None else [
-            with_umlauts(line) or line for line in diff_values(state, previous_state, action_details=action_details)
+            iconize_output_text(with_umlauts(line) or line) or line
+            for line in diff_values(state, previous_state, action_details=action_details)
         ]
-        diffs = enrich_working_diffs(diffs, action_details)
+        diffs = enrich_working_diffs(diffs, action_details, state, previous_state)
 
         entries.append(
             {
@@ -845,7 +1391,7 @@ def build_state_entries(files: list[Path]) -> list[dict[str, Any]]:
                     state.get("executedAction"),
                     state,
                     previous_state,
-                    action_details,
+                    raw_action_details if raw_action_details else action_details,
                 ),
                 "agentMainActionScores": state.get("agentMainActionScores")
                 if isinstance(state.get("agentMainActionScores"), list)
@@ -866,6 +1412,14 @@ def build_state_entries(files: list[Path]) -> list[dict[str, Any]]:
 
 def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
     payload = json.dumps(entries, ensure_ascii=False)
+    icon_base_uri = (PROJECT_ROOT / "src" / "pictures").resolve().as_uri()
+    icon_file_names = sorted(
+        {
+            *GOOD_ICON_NAMES.values(),
+            *RESOURCE_ICON_NAMES.values(),
+            *WORKFORCE_ICON_NAMES.values(),
+        }
+    )
     title = f"Anno 1800 Debuggame States - {state_dir}"
 
     return f"""<!doctype html>
@@ -877,8 +1431,8 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
     <style>
         :root {{
             --bg-0: #0f172a;
-            --bg-1: #111827;
-            --panel: #111827dd;
+            --bg-1: #1b2639;
+            --panel: #162136dd;
             --text: #f3f4f6;
             --muted: #9ca3af;
             --accent: #14b8a6;
@@ -893,8 +1447,8 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             min-height: 100vh;
             color: var(--text);
             background:
-                radial-gradient(1200px 700px at 10% -10%, #1e293b 0%, transparent 60%),
-                radial-gradient(900px 600px at 100% 0%, #164e63 0%, transparent 60%),
+                radial-gradient(1200px 700px at 10% -10%, #27344d 0%, transparent 60%),
+                radial-gradient(900px 600px at 100% 0%, #1d5f73 0%, transparent 60%),
                 linear-gradient(180deg, var(--bg-0), var(--bg-1));
             font-family: \"Segoe UI\", Tahoma, Geneva, Verdana, sans-serif;
             padding: 16px;
@@ -1011,6 +1565,47 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             line-height: 1.5;
         }}
 
+        .icon-inline {{
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            vertical-align: middle;
+            line-height: 1;
+            white-space: nowrap;
+        }}
+
+        .icon-inline img {{
+            width: 1.98em;
+            height: 1.98em;
+            object-fit: contain;
+            vertical-align: middle;
+            image-rendering: auto;
+        }}
+
+        .icon-inline img.resource-small {{
+            width: 1.58em;
+            height: 1.58em;
+        }}
+
+        .factory-color-square {{
+            display: inline-block;
+            width: 0.99em;
+            height: 0.99em;
+            border-radius: 0.25em;
+            vertical-align: middle;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+        }}
+
+        .factory-color-square.red {{ background: #d94848; }}
+        .factory-color-square.blue {{ background: #4a89dc; }}
+        .factory-color-square.green {{ background: #47b36b; }}
+        .factory-color-square.yellow {{ background: #d4b13a; }}
+        .factory-color-square.orange {{ background: #dd8a36; }}
+        .factory-color-square.purple {{ background: #9b63d6; }}
+        .factory-color-square.black {{ background: #4b5563; }}
+        .factory-color-square.white {{ background: #f3f4f6; }}
+
         details.collapsible {{
             margin-top: 8px;
             border: 1px solid #1f2937;
@@ -1084,23 +1679,23 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
         </div>
 
         <div class=\"panel\">
-            <div class=\"header\">
-                <strong id=\"stateIndicator\">Zustand</strong>
-                <span class=\"hint muted\">Tasten: &lt;- vorheriger, -&gt; nächster</span>
-            </div>
-            <div class=\"grid\" style=\"margin-top: 10px\">
-                <div class=\"kv\"><div class=\"k\">Datei</div><div class=\"v\" id=\"fileName\"></div></div>
-                <div class=\"kv\"><div class=\"k\">Aktion</div><div class=\"v\" id=\"action\"></div></div>
-                <div class=\"kv\"><div class=\"k\">Ausgeführte Aktion</div><div class=\"v\" id=\"executedAction\"></div></div>
-                <div class=\"kv\"><div class=\"k\">Ausgeführt von</div><div class=\"v\" id=\"executedBy\"></div></div>
-                <div class=\"kv\"><div class=\"k\">Runde</div><div class=\"v\" id=\"round\"></div></div>
-                <div class=\"kv\"><div class=\"k\">Aktueller Spieler</div><div class=\"v\" id=\"currentPlayer\"></div></div>
-            </div>
-        </div>
-
-        <div class=\"panel\">
             <strong>Aktionsdetails</strong>
             <div id=\"actionDetailsContainer\"></div>
+        </div>
+
+        <div class="panel">
+            <div class="header">
+                <strong id="stateIndicator">Zustand</strong>
+                <span class="hint muted">Tasten: &lt;- vorheriger, -&gt; nächster</span>
+            </div>
+            <div class="grid" style="margin-top: 10px">
+                <div class="kv"><div class="k">Datei</div><div class="v" id="fileName"></div></div>
+                <div class="kv"><div class="k">Aktion</div><div class="v" id="action"></div></div>
+                <div class="kv"><div class="k">Ausgeführte Aktion</div><div class="v" id="executedAction"></div></div>
+                <div class="kv"><div class="k">Ausgeführt von</div><div class="v" id="executedBy"></div></div>
+                <div class="kv"><div class="k">Runde</div><div class="v" id="round"></div></div>
+                <div class="kv"><div class="k">Aktueller Spieler</div><div class="v" id="currentPlayer"></div></div>
+            </div>
         </div>
 
         <div class=\"panel\">
@@ -1122,6 +1717,23 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
     <script>
         const stateDir = {json.dumps(str(state_dir), ensure_ascii=False)};
         const entries = {payload};
+        const iconBaseUri = {json.dumps(icon_base_uri, ensure_ascii=False)};
+        const iconFileNames = {json.dumps(icon_file_names, ensure_ascii=False)};
+        const orderedIconFileNames = [...iconFileNames].sort((left, right) => right.length - left.length);
+        const goodIconTokens = {json.dumps(GOOD_ICON_TOKENS, ensure_ascii=False)};
+        const orderedGoodIconTokens = Object.keys(goodIconTokens).sort((left, right) => right.length - left.length);
+        const smallResourceIconNames = new Set(["gold.png", "tradechip.png", "explorerchip.png"]);
+        const colorSquareTokens = {{
+            "red_square": "red",
+            "blue_square": "blue",
+            "green_square": "green",
+            "yellow_square": "yellow",
+            "orange_square": "orange",
+            "purple_square": "purple",
+            "black_square": "black",
+            "white_square": "white",
+        }};
+        const orderedColorSquareTokens = Object.keys(colorSquareTokens).sort((left, right) => right.length - left.length);
         let index = 0;
 
         const stateDirEl = document.getElementById("stateDir");
@@ -1143,6 +1755,111 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
         function text(value, fallback = "(nicht im JSON vorhanden)") {{
             if (value === null || value === undefined || value === "") return fallback;
             return String(value);
+        }}
+
+        function startsWithFactorySuffix(value, cursor, tokenLength) {{
+            const suffix = value.slice(cursor + tokenLength);
+            return /^(?:\\s+)(?:mine|factory|workshop|mill|yard|works|plant|plantation|refinery|foundry)\\b/i.test(suffix);
+        }}
+
+        function renderTextWithIcons(container, value) {{
+            const textValue = text(value, "");
+            if (!textValue) {{
+                return;
+            }}
+
+            let bufferStart = 0;
+            let cursor = 0;
+
+            while (cursor < textValue.length) {{
+                const goodToken = orderedGoodIconTokens.find((candidate) => textValue.startsWith(candidate, cursor));
+                if (goodToken) {{
+                    if (startsWithFactorySuffix(textValue, cursor, goodToken.length)) {{
+                        cursor += 1;
+                        continue;
+                    }}
+
+                    if (cursor > bufferStart) {{
+                        container.appendChild(document.createTextNode(textValue.slice(bufferStart, cursor)));
+                    }}
+
+                    const wrapper = document.createElement("span");
+                    wrapper.className = "icon-inline";
+                    const img = document.createElement("img");
+                    img.src = iconBaseUri + "/" + goodIconTokens[goodToken];
+                    img.alt = goodIconTokens[goodToken];
+                    img.title = goodIconTokens[goodToken];
+                    if (smallResourceIconNames.has(goodIconTokens[goodToken])) {{
+                        img.classList.add("resource-small");
+                    }}
+                    wrapper.appendChild(img);
+                    container.appendChild(wrapper);
+                    container.appendChild(document.createTextNode(" "));
+
+                    cursor += goodToken.length;
+                    if (textValue.startsWith(".png", cursor)) {{
+                        cursor += 4;
+                    }}
+                    bufferStart = cursor;
+                    continue;
+                }}
+
+                const squareToken = orderedColorSquareTokens.find((candidate) => textValue.startsWith(candidate, cursor));
+                if (squareToken) {{
+                    if (cursor > bufferStart) {{
+                        container.appendChild(document.createTextNode(textValue.slice(bufferStart, cursor)));
+                    }}
+
+                    const square = document.createElement("span");
+                    square.className = "factory-color-square " + colorSquareTokens[squareToken];
+                    square.title = "rotes Quadrat";
+                    square.setAttribute("aria-label", "rotes Quadrat");
+                    container.appendChild(square);
+                    container.appendChild(document.createTextNode(" "));
+
+                    cursor += squareToken.length;
+                    bufferStart = cursor;
+                    continue;
+                }}
+
+                const iconName = orderedIconFileNames.find((candidate) => textValue.startsWith(candidate, cursor));
+                if (!iconName) {{
+                    cursor += 1;
+                    continue;
+                }}
+
+                if (goodIconTokens["goodicon_" + iconName.replace(/\\.png$/i, "")] && startsWithFactorySuffix(textValue, cursor, iconName.length)) {{
+                    cursor += 1;
+                    continue;
+                }}
+
+                if (cursor > bufferStart) {{
+                    container.appendChild(document.createTextNode(textValue.slice(bufferStart, cursor)));
+                }}
+
+                const wrapper = document.createElement("span");
+                wrapper.className = "icon-inline";
+                const img = document.createElement("img");
+                img.src = iconBaseUri + "/" + iconName;
+                img.alt = iconName;
+                img.title = iconName;
+                if (smallResourceIconNames.has(iconName)) {{
+                    img.classList.add("resource-small");
+                }}
+                wrapper.appendChild(img);
+                container.appendChild(wrapper);
+                container.appendChild(document.createTextNode(" "));
+
+                cursor += iconName.length;
+                if (textValue.startsWith(".png", cursor)) {{
+                    cursor += 4;
+                }}
+                bufferStart = cursor;
+            }}
+
+            if (bufferStart < textValue.length) {{
+                container.appendChild(document.createTextNode(textValue.slice(bufferStart)));
+            }}
         }}
 
         function renderDiffs(entry) {{
@@ -1167,7 +1884,7 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             list.className = "diff-list";
             for (const diff of entry.diffs) {{
                 const item = document.createElement("li");
-                item.textContent = diff;
+                renderTextWithIcons(item, diff);
                 list.appendChild(item);
             }}
             diffContainerEl.appendChild(list);
@@ -1199,7 +1916,7 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
                 for (const itemText of (block.items || [])) {{
                     const paragraph = document.createElement("p");
                     paragraph.className = "action-paragraph";
-                    paragraph.textContent = itemText;
+                    renderTextWithIcons(paragraph, itemText);
                     list.appendChild(paragraph);
                 }}
                 wrapper.appendChild(list);
@@ -1237,7 +1954,7 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
 
                 const main = document.createElement("div");
                 main.className = "agent-score-main";
-                main.textContent = String(score.mainAction || "(unbekannt)");
+                renderTextWithIcons(main, String(score.mainAction || "(unbekannt)"));
                 row.appendChild(main);
 
                 const meta = document.createElement("div");
@@ -1246,7 +1963,7 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
                     : String(score.score ?? "-");
                 const selectedText = score.selected ? "Gewählt" : "Nicht gewählt";
                 meta.className = "agent-score-meta";
-                meta.textContent = `Score: ${{scoreValue}} | ${{selectedText}}`;
+                renderTextWithIcons(meta, `Score: ${{scoreValue}} | ${{selectedText}}`);
                 if (score.selected) {{
                     meta.classList.add("agent-score-selected");
                 }}
@@ -1255,7 +1972,7 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
                 if (score.bestActionVariant) {{
                     const variant = document.createElement("div");
                     variant.className = "agent-score-meta";
-                    variant.textContent = `Beste Variante: ${{score.bestActionVariant}}`;
+                    renderTextWithIcons(variant, `Beste Variante: ${{score.bestActionVariant}}`);
                     row.appendChild(variant);
                 }}
 
@@ -1412,17 +2129,17 @@ def main() -> int:
             action_with_amount(executed_action, state, previous_state)
         )
         executed_by_player = state.get("executedByPlayer")
-        action_details = state.get("executedActionDetails") or build_action_details(
+        raw_action_details = state.get("executedActionDetails") or build_action_details(
             executed_action,
             state,
             previous_state,
         )
-        action_details = with_umlauts(str(action_details)) if action_details else None
+        action_details = iconize_output_text(with_umlauts(str(raw_action_details)) if raw_action_details else None)
         action_detail_blocks = build_action_details_blocks(
             executed_action,
             state,
             previous_state,
-            action_details,
+            raw_action_details if raw_action_details else action_details,
         )
         if executed_action:
             print(f"Ausgeführte Aktion: {executed_action_readable}")
@@ -1457,8 +2174,8 @@ def main() -> int:
             print("Dies ist der Initial-State.")
         else:
             print("Änderungen seit dem vorherigen State:")
-            diffs = [with_umlauts(line) or line for line in diff_values(state, previous_state, action_details=action_details)]
-            diffs = enrich_working_diffs(diffs, action_details)
+            diffs = [iconize_output_text(with_umlauts(line) or line) or line for line in diff_values(state, previous_state, action_details=action_details)]
+            diffs = enrich_working_diffs(diffs, action_details, state, previous_state)
             if diffs:
                 for line in diffs:
                     for part in str(line).splitlines() or [""]:
