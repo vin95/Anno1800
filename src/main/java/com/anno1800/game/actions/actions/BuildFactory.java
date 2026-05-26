@@ -28,7 +28,7 @@ public class BuildFactory {
             }
             
             // EXECUTION PHASE: Actually obtain and consume goods
-            board.consumeGoods(costs);
+            board.consumeGoods(costs, game);
         }
 
         // Take factory from board

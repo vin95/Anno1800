@@ -162,29 +162,18 @@ public class WeightedScoringAgent extends ScoringAgent {
             }
 
             case Action.UpgradeResident upgradeResident -> {
-                boolean upgradesFarmers = false;
-                boolean upgradesWorkers = false;
-                for (Resident resident : upgradeResident.residents()) {
-                    if (resident == null) {
-                        continue;
-                    }
-                    if (resident.getPopulationLevel() == 1) {
-                        upgradesFarmers = true;
-                    }
-                    if (resident.getPopulationLevel() == 2) {
-                        upgradesWorkers = true;
-                    }
-                }
+                int farmersToUpgrade = countUpgradesAtLevel(upgradeResident, 1);
+                int workersToUpgrade = countUpgradesAtLevel(upgradeResident, 2);
 
-                if (upgradesFarmers && farmerCount <= 2) {
+                if (!hasBlueSawmill && farmersToUpgrade > 0 && farmerCount - farmersToUpgrade < 2) {
                     yield -1000.0;
                 }
 
-                if (upgradesWorkers && workerCount <= 2) {
+                if (workersToUpgrade > 0 && workerCount - workersToUpgrade < 2) {
                     yield -1000.0;
                 }
 
-                if (upgradesWorkers && !hasGreenSawmill && !hasBlueSawmill) {
+                if (workersToUpgrade > 0 && !hasGreenSawmill && !hasBlueSawmill) {
                     yield -1000.0;
                 }
 
@@ -217,6 +206,16 @@ public class WeightedScoringAgent extends ScoringAgent {
         return playerBoard.getResidents().stream()
             .filter(resident -> resident.getPopulationLevel() == populationLevel)
             .count();
+    }
+
+    private int countUpgradesAtLevel(Action.UpgradeResident upgradeResident, int populationLevel) {
+        int count = 0;
+        for (Resident resident : upgradeResident.residents()) {
+            if (resident != null && resident.getPopulationLevel() == populationLevel) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private boolean hasFactoryType(PlayerBoard playerBoard, Producers type) {

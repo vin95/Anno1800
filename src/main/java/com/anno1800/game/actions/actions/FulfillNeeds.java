@@ -39,7 +39,7 @@ public class FulfillNeeds {
             }
             
             // EXECUTION PHASE: Actually obtain and consume goods
-            playerBoard.consumeGoods(needs);
+            playerBoard.consumeGoods(needs, game);
         }
         
         // Add the reward to the player's pending rewards list

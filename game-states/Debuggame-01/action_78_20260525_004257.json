@@ -1,0 +1,694 @@
+{
+  "timestamp": "2026-05-24T22:42:57.393811900Z",
+  "round": 26,
+  "currentPlayer": 1,
+  "label": "action_78",
+  "executedAction": "UpgradeResident[residents=[Lcom.anno1800.game.residents.Resident;@396a51ab]",
+  "executedByPlayer": "Player 2",
+  "executedActionDetails": "Verbrauch fuer Aktion: 1x Bricks [gehandelt (Spieler 3, Kosten 1 Chip)]; 1x Bricks [gehandelt (Spieler 3, Kosten 1 Chip)]; 1x Goods [gehandelt (Spieler 3, Kosten 2 Chips)]; 1x Coal [gehandelt (Spieler 3, Kosten 2 Explorerchips via ExplorerTrader ~= 1 Tradechips)]; Chips verwendet: Tradechips=4, Explorerchips=2",
+  "agentStrategyName": "shipBuilding",
+  "agentMainActionScores": [
+    {
+      "mainAction": "UpgradeResident",
+      "score": 15.0010,
+      "selected": true,
+      "bestActionVariant": "UpgradeResident[residents=[Lcom.anno1800.game.residents.Resident;@396a51ab]"
+    },
+    {
+      "mainAction": "Expedition",
+      "score": 12.5000,
+      "selected": false,
+      "bestActionVariant": "Expedition[]"
+    },
+    {
+      "mainAction": "SettleResident",
+      "score": 11.0002,
+      "selected": false,
+      "bestActionVariant": "SettleResident[level=3]"
+    },
+    {
+      "mainAction": "BuildShipyard",
+      "score": 10.0002,
+      "selected": false,
+      "bestActionVariant": "BuildShipyard[level=2]"
+    },
+    {
+      "mainAction": "FulfillNeeds",
+      "score": 7.0009,
+      "selected": false,
+      "bestActionVariant": "FulfillNeeds[residentCard=ResidentCard[populationLevel=2, needs=[Lcom.anno1800.data.gamedata.Goods;@458ad742, reward=TradePoints[points=3]], goods=[Lcom.anno1800.data.gamedata.Goods;@458ad742]"
+    },
+    {
+      "mainAction": "DiscoverNewWorldIsland",
+      "score": 4.0000,
+      "selected": false,
+      "bestActionVariant": "DiscoverNewWorldIsland[]"
+    },
+    {
+      "mainAction": "DiscoverOldWorldIsland",
+      "score": 3.0000,
+      "selected": false,
+      "bestActionVariant": "DiscoverOldWorldIsland[]"
+    },
+    {
+      "mainAction": "BuildFactory",
+      "score": -0.4990,
+      "selected": false,
+      "bestActionVariant": "BuildFactory[factory=com.anno1800.game.tiles.Factory@7a0ac6e3]"
+    },
+    {
+      "mainAction": "BuildShips",
+      "score": -988.4992,
+      "selected": false,
+      "bestActionVariant": "BuildShips[shipType=TradeShip, level=1, amount=1]"
+    },
+    {
+      "mainAction": "ViewResidentCards",
+      "score": -1499.9997,
+      "selected": false,
+      "bestActionVariant": "ViewResidentCards[]"
+    }
+  ],
+  "objectiveCards": [
+    {
+      "title": "Engineer Master",
+      "description": "6 VP per Factory: Light Bulbs, Sewing Machines"
+    },
+    {
+      "title": "Expedition Master",
+      "description": "Most Expedition Cards: 1st place = 10 VP, 2nd place = 4 VP"
+    },
+    {
+      "title": "Investment Tycoon",
+      "description": "Most Investors (Level 5): 1st place = 10 VP, 2nd place = 4 VP"
+    },
+    {
+      "title": "Single Island Master",
+      "description": "18 VP if you have at most 1 Old World Island"
+    },
+    {
+      "title": "New World Importer",
+      "description": "6 VP per Factory: Chocolate, Coffee, Cigars, Rum"
+    }
+  ],
+  "boardState": {
+    "factories": {
+      "availableFactories": 63
+    },
+    "shipyards": {
+      "level1": 0,
+      "level2": 5,
+      "level3": 4
+    },
+    "ships": {
+      "tradeShips": {
+        "level1": 6,
+        "level2": 5,
+        "level3": 6
+      },
+      "explorerShips": {
+        "level1": 6,
+        "level2": 5,
+        "level3": 6
+      }
+    },
+    "cards": {
+      "residentStack1": 10,
+      "residentStack2": 24,
+      "residentStack3": 21,
+      "totalResidentCards": 55,
+      "expeditionCards": 16
+    },
+    "islands": {
+      "oldWorldIslands": 11,
+      "newWorldIslands": 7
+    },
+    "populationPool": {
+      "farmers": 0,
+      "workers": 15,
+      "artisans": 15,
+      "engineers": 20,
+      "investors": 15
+    },
+    "resources": {
+      "goldPool": 997,
+      "tradeChips": 992,
+      "explorerChips": 995
+    }
+  },
+  "players": [
+    {
+      "name": "Player 1",
+      "position": 2,
+      "tiles": {
+        "freeLand": 0,
+        "freeCoast": 2,
+        "freeSea": 2
+      },
+      "buildings": {
+        "factories": 12,
+        "shipyards": 1
+      },
+      "ships": {
+        "tradeShips": 2,
+        "explorerShips": 1
+      },
+      "resources": {
+        "gold": 20,
+        "tradeChips": 2,
+        "explorerChips": 1
+      },
+      "cards": {
+        "residentCards": 12,
+        "residentCardDetails": [
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Sausages",
+              "Goods"
+            ],
+            "reward": "3x Upgrade Stufe 1 -> 2"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Bread",
+              "Beer"
+            ],
+            "reward": "1x neuer Bewohner Stufe 4"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Soap",
+              "Cotton Fabric"
+            ],
+            "reward": "1x neuer Bewohner Stufe 4"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Beer",
+              "Sausages"
+            ],
+            "reward": "1x neuer Bewohner Stufe 3"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "3 Trade Points"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Steel Bars",
+              "Cigars",
+              "Highbikes"
+            ],
+            "reward": "2 Expedition Cards"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Snaps",
+              "Pocketwatches",
+              "Highbikes"
+            ],
+            "reward": "Discard 2 ResidentCard(s)"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Bricks",
+              "Gramophones",
+              "Coffee"
+            ],
+            "reward": "6 Trade Points"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Bricks",
+              "Sausages"
+            ],
+            "reward": "1x neuer Bewohner Stufe 4"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Steel Bars",
+              "Work Clothes"
+            ],
+            "reward": "4 Gold"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Soap",
+              "Work Clothes"
+            ],
+            "reward": "4 Gold"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Steel Bars",
+              "Canned Meat"
+            ],
+            "reward": "4 Gold"
+          }
+        ]
+      },
+      "residents": {
+        "total": 14,
+        "byLevel": {
+          "level1": 2,
+          "level2": 9,
+          "level3": 3,
+          "level4": 0,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 0,
+          "fit": 14,
+          "exhausted": 0
+        },
+        "byStatusByLevel": {
+          "fit": {
+            "level1": 2,
+            "level2": 9,
+            "level3": 3,
+            "level4": 0,
+            "level5": 0
+          },
+          "working": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          },
+          "exhausted": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "Player 2",
+      "position": 3,
+      "tiles": {
+        "freeLand": 0,
+        "freeCoast": 1,
+        "freeSea": 2
+      },
+      "buildings": {
+        "factories": 12,
+        "shipyards": 6
+      },
+      "ships": {
+        "tradeShips": 3,
+        "explorerShips": 2
+      },
+      "resources": {
+        "gold": 14,
+        "tradeChips": 0,
+        "explorerChips": 1
+      },
+      "cards": {
+        "residentCards": 19,
+        "residentCardDetails": [
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Beer",
+              "Work Clothes"
+            ],
+            "reward": "4 Gold"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Work Clothes",
+              "Snaps"
+            ],
+            "reward": "4 Gold"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Bread",
+              "Canned Meat"
+            ],
+            "reward": "3x Upgrade Stufe 1 -> 2"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Soap",
+              "Beer"
+            ],
+            "reward": "4 Gold"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Sausages",
+              "Canned Meat"
+            ],
+            "reward": "2x neuer Bewohner Stufe 2"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Sausages",
+              "Soap"
+            ],
+            "reward": "3x Upgrade Stufe 1 -> 2"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Bread",
+              "Soap"
+            ],
+            "reward": "3x Upgrade Stufe 1 -> 2"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Beer",
+              "Cigars",
+              "Cars"
+            ],
+            "reward": "3x Upgrade Stufe 2 -> 3"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Canned Meat",
+              "Pocketwatches",
+              "Glasses"
+            ],
+            "reward": "2 Expedition Cards"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Soap",
+              "Coffee",
+              "Cars"
+            ],
+            "reward": "3x Upgrade Stufe 2 -> 3"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Coats",
+              "Sausages",
+              "Trade Chip"
+            ],
+            "reward": "2 Expedition Cards"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Gramophones",
+              "Cotton Fabric",
+              "Trade Chip"
+            ],
+            "reward": "2 Expedition Cards"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Beer",
+              "Cotton Fabric",
+              "Trade Chip"
+            ],
+            "reward": "6 Trade Points"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Work Clothes",
+              "Canned Meat"
+            ],
+            "reward": "1x neuer Bewohner Stufe 3"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Beer",
+              "Bread"
+            ],
+            "reward": "3 Trade Points"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Snaps",
+              "Coal"
+            ],
+            "reward": "3 Trade Points"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "3 Trade Points"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Steel Bars",
+              "Snaps"
+            ],
+            "reward": "3 Trade Points"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Soap",
+              "Work Clothes"
+            ],
+            "reward": "2x neuer Bewohner Stufe 1"
+          }
+        ]
+      },
+      "residents": {
+        "total": 17,
+        "byLevel": {
+          "level1": 7,
+          "level2": 5,
+          "level3": 5,
+          "level4": 0,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 0,
+          "fit": 17,
+          "exhausted": 0
+        },
+        "byStatusByLevel": {
+          "fit": {
+            "level1": 7,
+            "level2": 5,
+            "level3": 5,
+            "level4": 0,
+            "level5": 0
+          },
+          "working": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          },
+          "exhausted": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "Player 3",
+      "position": 1,
+      "tiles": {
+        "freeLand": 0,
+        "freeCoast": 1,
+        "freeSea": 2
+      },
+      "buildings": {
+        "factories": 13,
+        "shipyards": 1
+      },
+      "ships": {
+        "tradeShips": 2,
+        "explorerShips": 1
+      },
+      "resources": {
+        "gold": 24,
+        "tradeChips": 2,
+        "explorerChips": 1
+      },
+      "cards": {
+        "residentCards": 12,
+        "residentCardDetails": [
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Bread",
+              "Beer"
+            ],
+            "reward": "1x neuer Bewohner Stufe 4"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Canned Meat",
+              "Cotton Fabric"
+            ],
+            "reward": "1x neuer Bewohner Stufe 4"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "3 Trade Points"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Canned Meat",
+              "Beer"
+            ],
+            "reward": "1x neuer Bewohner Stufe 3"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Work Clothes",
+              "Goods"
+            ],
+            "reward": "1x neuer Bewohner Stufe 3"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Rum",
+              "Light Bulbs",
+              "Gramophones"
+            ],
+            "reward": "Extra Action"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Beer",
+              "Light Bulbs",
+              "Sewing Machines"
+            ],
+            "reward": "Extra Action"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Snaps",
+              "Soap"
+            ],
+            "reward": "3x Upgrade Stufe 1 -> 2"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "3 Trade Points"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "3 Trade Points"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Bricks",
+              "Beer"
+            ],
+            "reward": "2x neuer Bewohner Stufe 1"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Beer",
+              "Cotton Fabric"
+            ],
+            "reward": "1x neuer Bewohner Stufe 4"
+          }
+        ]
+      },
+      "residents": {
+        "total": 14,
+        "byLevel": {
+          "level1": 2,
+          "level2": 10,
+          "level3": 2,
+          "level4": 0,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 1,
+          "fit": 13,
+          "exhausted": 0
+        },
+        "byStatusByLevel": {
+          "fit": {
+            "level1": 2,
+            "level2": 9,
+            "level3": 2,
+            "level4": 0,
+            "level5": 0
+          },
+          "working": {
+            "level1": 0,
+            "level2": 1,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          },
+          "exhausted": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          }
+        }
+      }
+    }
+  ]
+}

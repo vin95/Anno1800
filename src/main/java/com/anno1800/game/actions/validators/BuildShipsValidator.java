@@ -4,6 +4,7 @@ import com.anno1800.game.actions.Action;
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.player.PlayerBoard;
+import com.anno1800.game.tiles.Shipyard;
 import com.anno1800.game.tiles.ShipCosts;
 import com.anno1800.data.gamedata.Goods;
 import com.anno1800.game.board.Board;
@@ -37,6 +38,13 @@ public class BuildShipsValidator {
         }
 
         if (action.amount() < 1) {
+            return false;
+        }
+
+        // Ship level must not exceed the available shipyard level.
+        // A level 2 ship requires a level 2 or 3 shipyard, and level 3 ships require level 3 shipyards.
+        int eligibleShipyards = countShipyardsAtOrAboveLevel(playerBoard, action.level());
+        if (eligibleShipyards < action.amount()) {
             return false;
         }
 
@@ -85,5 +93,15 @@ public class BuildShipsValidator {
         playerBoard.clearStoredGoods();
 
         return true;
+    }
+
+    private static int countShipyardsAtOrAboveLevel(PlayerBoard playerBoard, int requiredLevel) {
+        int eligibleShipyards = 0;
+        for (Shipyard shipyard : playerBoard.getShipyards()) {
+            if (shipyard != null && shipyard.getLevel() >= requiredLevel) {
+                eligibleShipyards++;
+            }
+        }
+        return eligibleShipyards;
     }
 }

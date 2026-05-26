@@ -52,7 +52,7 @@ public class SettleResident {
             }
             
             // EXECUTION PHASE: Actually obtain and consume goods
-            playerBoard.consumeGoods(cost.goods());
+            playerBoard.consumeGoods(cost.goods(), game);
         }
         
         // Take a resident from the GameBoard

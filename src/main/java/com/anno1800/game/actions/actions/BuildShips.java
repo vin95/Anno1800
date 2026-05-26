@@ -3,9 +3,13 @@ package com.anno1800.game.actions.actions;
 import com.anno1800.data.gamedata.Goods;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.player.PlayerBoard;
+import com.anno1800.game.player.ProducedGood;
 import com.anno1800.game.engine.Game;
 import com.anno1800.data.gamedata.ShipType;
 import com.anno1800.game.tiles.ShipCosts;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Build ships using the player's shipyards.
@@ -19,6 +23,7 @@ import com.anno1800.game.tiles.ShipCosts;
 public class BuildShips {
     public static void buildShips(Player player, ShipType shipType, int level, int amount, Game game) {
         PlayerBoard board = player.getPlayerBoard();
+        List<ProducedGood> aggregatedConsumedGoods = new ArrayList<>();
         
         // Get required goods per ship
         Goods[] costPerShip = ShipCosts.getShipCost(level);
@@ -35,7 +40,8 @@ public class BuildShips {
                 if (!board.canObtainGoods(costPerShip, game)) {
                     throw new IllegalStateException("Cannot obtain required goods for ship " + (i + 1));
                 }
-                board.consumeGoods(costPerShip);
+                board.consumeGoods(costPerShip, game);
+                aggregatedConsumedGoods.addAll(board.getLastConsumedGoods());
             }
             
             // Take ship from board (also takes the required chips)
@@ -44,6 +50,8 @@ public class BuildShips {
             // Add ship to player's board (also adds the chips to player's available chips)
             board.buildShip(ship, shipType, level);
         }
+
+        board.replaceLastConsumedGoods(aggregatedConsumedGoods);
 
         System.out.println("Successfully built " + amount + " " + shipType + "(s) of level " + level);
     }

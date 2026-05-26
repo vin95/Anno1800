@@ -166,6 +166,14 @@ WORKFORCE_ICON_NAMES: dict[str, str] = {
     "level5": "workforce_level_5.png",
 }
 
+RESIDENT_CARD_ICON_NAMES: dict[int, str] = {
+    1: "residentcard_lv_1.png",
+    2: "residentcard_lv_2.png",
+    3: "residentcard_lv_3.png",
+    4: "residentcard_lv_4.png",
+    5: "residentcard_lv_5.png",
+}
+
 WORKFORCE_LABEL_ICON_NAMES: dict[str, str] = {
     "farmer": WORKFORCE_ICON_NAMES["level1"],
     "workers": WORKFORCE_ICON_NAMES["level2"],
@@ -203,6 +211,11 @@ GOOD_ICON_TOKENS: dict[str, str] = {
 def icon_name_for_good(value: str) -> str:
     key = value.strip().lower()
     return GOOD_ICON_NAMES.get(key, f"{key.replace(' ', '_')}.png")
+
+def resident_card_icon_name(level: Any) -> str:
+    if isinstance(level, int):
+        return RESIDENT_CARD_ICON_NAMES.get(level, "residentcard_lv_2.png")
+    return "residentcard_lv_2.png"
 
 
 def format_factory_name(value: str) -> str:
@@ -258,7 +271,7 @@ def iconize_output_text(text: str | None) -> str | None:
 
     for resource_name, icon_name in RESOURCE_ICON_NAMES.items():
         normalized = re.sub(
-            rf"(?<![A-Za-z]){resource_name}(?![A-Za-z])",
+            rf"(?<![A-Za-z0-9_]){resource_name}(?![A-Za-z0-9_]|\.png)",
             f"{resource_name} {icon_name}",
             normalized,
             flags=re.IGNORECASE,
@@ -633,7 +646,7 @@ def clean_goods_detail_entry(entry: str) -> str:
     def trade_replacer(match: re.Match[str]) -> str:
         player = match.group(1)
         cost = match.group(2)
-        return f"(gehandelt mit Spieler {player}, Kosten {cost} tradechip.png)"
+        return f"gehandelt mit Spieler {player}, Kosten {cost} tradechip.png, {cost}x Gold => Spieler {player}"
 
     cleaned = production_pattern.sub(production_replacer, cleaned)
     cleaned = trade_pattern.sub(trade_replacer, cleaned)
@@ -1083,15 +1096,12 @@ def build_action_details_blocks(
     previous_state: dict[str, Any] | None,
     action_details: str | None,
 ) -> list[dict[str, Any]]:
-    if not action_details:
-        return []
-
-    details_text = str(action_details)
-    goods_entries, chip_line = parse_action_details_entries(details_text)
-    if not goods_entries and not chip_line:
+    if raw_action is None and not action_details:
         return []
 
     action_name = str(raw_action).split("[", 1)[0] if raw_action is not None else ""
+    details_text = str(action_details) if action_details else ""
+    goods_entries, chip_line = parse_action_details_entries(details_text)
     amount = extract_action_amount(raw_action)
     if amount is None and action_name == "UpgradeResident":
         amount = infer_upgrade_resident_amount(
@@ -1418,6 +1428,7 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             *GOOD_ICON_NAMES.values(),
             *RESOURCE_ICON_NAMES.values(),
             *WORKFORCE_ICON_NAMES.values(),
+                    *RESIDENT_CARD_ICON_NAMES.values(),
         }
     )
     title = f"Anno 1800 Debuggame States - {state_dir}"
@@ -1560,6 +1571,11 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             gap: 8px;
         }}
 
+        .handcards-list .icon-inline img {{
+            width: 2.38em;
+            height: 2.38em;
+        }}
+
         .action-paragraph {{
             margin: 0;
             line-height: 1.5;
@@ -1585,6 +1601,11 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
         .icon-inline img.resource-small {{
             width: 1.58em;
             height: 1.58em;
+        }}
+
+        .icon-inline img.residentcard-large {{
+            width: 2.38em;
+            height: 2.38em;
         }}
 
         .factory-color-square {{
@@ -1684,6 +1705,11 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
         </div>
 
         <div class="panel">
+
+                    <div class="panel">
+                        <strong>Kartenübersicht</strong>
+                        <div id="cardOverviewContainer"></div>
+                    </div>
             <div class="header">
                 <strong id="stateIndicator">Zustand</strong>
                 <span class="hint muted">Tasten: &lt;- vorheriger, -&gt; nächster</span>
@@ -1722,6 +1748,7 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
         const orderedIconFileNames = [...iconFileNames].sort((left, right) => right.length - left.length);
         const goodIconTokens = {json.dumps(GOOD_ICON_TOKENS, ensure_ascii=False)};
         const orderedGoodIconTokens = Object.keys(goodIconTokens).sort((left, right) => right.length - left.length);
+        const goodIconsByName = {json.dumps(GOOD_ICON_NAMES, ensure_ascii=False)};
         const smallResourceIconNames = new Set(["gold.png", "tradechip.png", "explorerchip.png"]);
         const colorSquareTokens = {{
             "red_square": "red",
@@ -1748,6 +1775,7 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
         const roundEl = document.getElementById("round");
         const currentPlayerEl = document.getElementById("currentPlayer");
         const diffContainerEl = document.getElementById("diffContainer");
+        const cardOverviewContainerEl = document.getElementById("cardOverviewContainer");
         const rawJsonEl = document.getElementById("rawJson");
         const prevBtn = document.getElementById("prevBtn");
         const nextBtn = document.getElementById("nextBtn");
@@ -1755,6 +1783,87 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
         function text(value, fallback = "(nicht im JSON vorhanden)") {{
             if (value === null || value === undefined || value === "") return fallback;
             return String(value);
+        }}
+
+        function goodToIconName(value) {{
+            const normalized = String(value ?? "").trim().toLowerCase();
+            if (normalized === "exploration chip" || normalized === "explorer chip") {{
+                return "explorerchip.png";
+            }}
+            if (normalized === "trade chip") {{
+                return "tradechip.png";
+            }}
+            return goodIconsByName[normalized] || normalized;
+        }}
+
+        function rewardToIconText(rewardValue) {{
+            const reward = String(rewardValue ?? "-").trim();
+            if (!reward || reward === "-") return "-";
+
+            let match = reward.match(/^(\\d+)\\s+Gold$/i);
+            if (match) return `${{match[1]}}x gold.png`;
+
+            match = reward.match(/^(\\d+)\\s+Trade\\s+Points$/i);
+            if (match) return `${{match[1]}}x tradechip.png`;
+
+            match = reward.match(/^(\\d+)\\s+Exploration\\s+Points$/i);
+            if (match) return `${{match[1]}}x explorerchip.png`;
+
+            match = reward.match(/^(\\d+)\\s+Expedition\\s+Cards?$/i);
+            if (match) return `${{match[1]}}x Expeditioncards`;
+
+            match = reward.match(/^(\\d+)x\\s+neuer\\s+Bewohner\\s+Stufe\\s+(\\d)$/i);
+            if (match) return `${{match[1]}}x workforce_level_${{match[2]}}.png`;
+
+            match = reward.match(/^(\\d+)x\\s+Upgrade\\s+Stufe\\s+(\\d)\\s*->\\s*(\\d)$/i);
+            if (match) return `${{match[1]}}x workforce_level_${{match[2]}}.png -> workforce_level_${{match[3]}}.png`;
+
+            match = reward.match(/^Discard\\s+(\\d+)\\s+ResidentCard\\(s\\)$/i);
+            if (match) return `${{match[1]}}x residentcard_lv_2.png abwerfen`;
+
+            if (/^Extra\\s+Action$/i.test(reward)) return "Extra Action";
+
+            return reward;
+        }}
+
+        function cardLineText(card) {{
+            if (!card || typeof card !== "object") {{
+                return "residentcard_lv_2.png => -";
+            }}
+
+            const level = Number(card.populationLevel || 2);
+            const cardIcon = `residentcard_lv_${{Number.isFinite(level) ? level : 2}}.png`;
+            const needs = Array.isArray(card.needs) ? card.needs : [];
+            const needIcons = needs.map((good) => {{
+                const icon = goodToIconName(good);
+                return icon.endsWith(".png") ? icon : `${{icon}}.png`;
+            }});
+            const needsPart = needIcons.length ? needIcons.join(" , ") : "-";
+            const rewardPart = rewardToIconText(card.reward);
+            return `${{cardIcon}} ${{needsPart}} => ${{rewardPart}}`;
+        }}
+
+        function findPlayerByName(state, playerName) {{
+            if (!state || !Array.isArray(state.players)) return null;
+            const target = String(playerName || "").trim();
+            if (!target) return null;
+
+            for (const player of state.players) {{
+                if (player && String(player.name || "") === target) {{
+                    return player;
+                }}
+            }}
+
+            if (target.startsWith("Spieler ")) {{
+                const normalized = target.replace("Spieler ", "Player ");
+                for (const player of state.players) {{
+                    if (player && String(player.name || "") === normalized) {{
+                        return player;
+                    }}
+                }}
+            }}
+
+            return null;
         }}
 
         function startsWithFactorySuffix(value, cursor, tokenLength) {{
@@ -1845,6 +1954,8 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
                 img.title = iconName;
                 if (smallResourceIconNames.has(iconName)) {{
                     img.classList.add("resource-small");
+                }} else if (iconName.startsWith("residentcard_")) {{
+                    img.classList.add("residentcard-large");
                 }}
                 wrapper.appendChild(img);
                 container.appendChild(wrapper);
@@ -1924,6 +2035,110 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             }}
         }}
 
+        function renderCardOverview(entry) {{
+            cardOverviewContainerEl.innerHTML = "";
+
+            if (entry.isInitial) {{
+                const state = entry.state || {{}};
+                const objectives = Array.isArray(state.objectiveCards) ? state.objectiveCards : [];
+
+                const objectiveTitle = document.createElement("p");
+                objectiveTitle.className = "action-title";
+                objectiveTitle.textContent = "Objective Cards im Spiel";
+                cardOverviewContainerEl.appendChild(objectiveTitle);
+
+                if (!objectives.length) {{
+                    const none = document.createElement("p");
+                    none.className = "diff-empty";
+                    none.textContent = "Keine Objective Cards im JSON vorhanden.";
+                    cardOverviewContainerEl.appendChild(none);
+                }} else {{
+                    const list = document.createElement("div");
+                    list.className = "action-list";
+                    for (const objective of objectives) {{
+                        const paragraph = document.createElement("p");
+                        paragraph.className = "action-paragraph";
+                        const title = String(objective?.title || "Unbekannte Objective Card");
+                        const description = String(objective?.description || "");
+                        renderTextWithIcons(paragraph, description ? `${{title}}: ${{description}}` : title);
+                        list.appendChild(paragraph);
+                    }}
+                    cardOverviewContainerEl.appendChild(list);
+                }}
+
+                const players = Array.isArray(state.players) ? state.players : [];
+                const residentTitle = document.createElement("p");
+                residentTitle.className = "action-title";
+                residentTitle.style.marginTop = "12px";
+                residentTitle.textContent = "ResidentCards je Spieler";
+                cardOverviewContainerEl.appendChild(residentTitle);
+
+                for (const player of players) {{
+                    const playerName = String(player?.name || "Spieler");
+                    const header = document.createElement("p");
+                    header.className = "action-title";
+                    header.style.margin = "8px 0 4px";
+                    header.textContent = playerName.replace("Player ", "Spieler ");
+                    cardOverviewContainerEl.appendChild(header);
+
+                    const cards = Array.isArray(player?.cards?.residentCardDetails)
+                        ? player.cards.residentCardDetails
+                        : [];
+                    if (!cards.length) {{
+                        const none = document.createElement("p");
+                        none.className = "muted";
+                        none.textContent = "Keine ResidentCards im JSON vorhanden.";
+                        cardOverviewContainerEl.appendChild(none);
+                        continue;
+                    }}
+
+                    const cardList = document.createElement("div");
+                    cardList.className = "action-list handcards-list";
+                    for (const card of cards) {{
+                        const paragraph = document.createElement("p");
+                        paragraph.className = "action-paragraph";
+                        renderTextWithIcons(paragraph, cardLineText(card));
+                        cardList.appendChild(paragraph);
+                    }}
+                    cardOverviewContainerEl.appendChild(cardList);
+                }}
+            }}
+
+            const state = entry.state || {{}};
+            const executedBy = entry.executedByPlayer || state.currentPlayer;
+            const player = findPlayerByName(state, executedBy);
+            const playerName = (player?.name || String(executedBy || "Unbekannt")).replace("Player ", "Spieler ");
+            const cards = Array.isArray(player?.cards?.residentCardDetails)
+                ? player.cards.residentCardDetails
+                : [];
+
+            const details = document.createElement("details");
+            details.className = "collapsible";
+
+            const summary = document.createElement("summary");
+            summary.textContent = `Handkarten von ${{playerName}} (ein-/ausklappen)`;
+            details.appendChild(summary);
+
+            const list = document.createElement("div");
+            list.className = "action-list handcards-list";
+            if (!cards.length) {{
+                const none = document.createElement("p");
+                none.className = "muted";
+                none.textContent = "Keine Handkarten im JSON vorhanden.";
+                list.appendChild(none);
+            }} else {{
+                for (const card of cards) {{
+                    const paragraph = document.createElement("p");
+                    paragraph.className = "action-paragraph";
+                    renderTextWithIcons(paragraph, cardLineText(card));
+                    list.appendChild(paragraph);
+                }}
+            }}
+
+            details.appendChild(list);
+            cardOverviewContainerEl.appendChild(details);
+        }}
+
         function renderAgentScores(entry) {{
             agentScoresContainerEl.innerHTML = "";
             const strategyName = text(entry.agentStrategyName, "unbekannt");
@@ -1997,6 +2212,7 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             currentPlayerEl.textContent = text(entry.currentPlayer, "-");
             rawJsonEl.textContent = JSON.stringify(entry.state, null, 2);
             renderActionDetails(entry);
+                        renderCardOverview(entry);
             renderAgentScores(entry);
             renderDiffs(entry);
 

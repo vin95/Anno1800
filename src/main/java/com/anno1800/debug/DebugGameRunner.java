@@ -5,10 +5,13 @@ import com.anno1800.agents.Agent;
 import com.anno1800.agents.AgentImpl.ScoringAgent;
 import com.anno1800.data.gamedata.Goods;
 import com.anno1800.game.actions.Action;
+import com.anno1800.game.cards.ObjectiveCard;
+import com.anno1800.game.cards.ResidentCard;
 import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.player.PlayerBoard;
 import com.anno1800.game.player.ProducedGood;
+import com.anno1800.game.rewards.Reward;
 import com.anno1800.game.state.GameState;
 import com.anno1800.game.tiles.Factory;
 
@@ -23,10 +26,13 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 
 /**
@@ -126,6 +132,8 @@ public class DebugGameRunner {
         // After-Action-Callback: speichert nach jeder Aktion einen State
         // ---------------------------------------------------------------
         AtomicInteger actionCounter = new AtomicInteger(0);
+        AtomicReference<Map<Integer, List<String>>> previousResidentCardsRef =
+            new AtomicReference<>(snapshotResidentCardDetailsByPlayer(game));
         PrintStream actionLogOut = System.out;
 
         BiConsumer<Action, GameState> stateCallback = (action, state) -> {
@@ -138,7 +146,13 @@ public class DebugGameRunner {
             int playerIndex = state.currentPlayerIndex();
             if (playerIndex >= 0 && playerIndex < state.players().size()) {
                 executedByPlayer = state.players().get(playerIndex).name();
-                executedActionDetails = buildExecutedActionDetails(action, game, playerIndex, executedByPlayer);
+                executedActionDetails = buildExecutedActionDetails(
+                    action,
+                    game,
+                    playerIndex,
+                    executedByPlayer,
+                    previousResidentCardsRef.get()
+                );
                 agentStrategyName = chosenStrategies[playerIndex];
                 Agent actingAgent = game.getAgent(playerIndex);
                 if (actingAgent instanceof ScoringAgent scoringAgent) {
@@ -157,6 +171,7 @@ public class DebugGameRunner {
 
             saveGameState(
                 state,
+                game,
                 "action_" + n,
                 gameDir,
                 executedAction,
@@ -165,11 +180,13 @@ public class DebugGameRunner {
                 agentStrategyName,
                 mainActionScores
             );
+
+            previousResidentCardsRef.set(snapshotResidentCardDetailsByPlayer(game));
         };
         game.setAfterActionCallback(stateCallback);
 
         // Initialzustand speichern
-        saveGameState(game.getState(), "initial", gameDir, null, null, null, null, List.of());
+        saveGameState(game.getState(), game, "initial", gameDir, null, null, null, null, List.of());
 
         // ---------------------------------------------------------------
         // Spiel starten
@@ -245,7 +262,13 @@ public class DebugGameRunner {
         return String.join("; ", segments);
     }
 
-    private static String buildExecutedActionDetails(Action action, Game game, int playerIndex, String executedByPlayer) {
+    private static String buildExecutedActionDetails(
+        Action action,
+        Game game,
+        int playerIndex,
+        String executedByPlayer,
+        Map<Integer, List<String>> previousResidentCardsByPlayer
+    ) {
         if (action == null || playerIndex < 0 || playerIndex >= game.getPlayers().length) {
             return null;
         }
@@ -270,14 +293,35 @@ public class DebugGameRunner {
                 if (cheapestTradeCosts == Integer.MAX_VALUE) {
                     yield String.format("Handel: 1x %s (Tradechips: unbekannt, mit Spieler %d)", good, partnerPlayerIndex + 1);
                 }
-                yield String.format("Handel: 1x %s (Tradechips: %d, mit Spieler %d)", good, cheapestTradeCosts, partnerPlayerIndex + 1);
+                yield String.format(
+                    "Handel: 1x %s (Tradechips: %d, mit Spieler %d); Mitspieler erhaelt: %dx gold.png",
+                    good,
+                    cheapestTradeCosts,
+                    partnerPlayerIndex + 1,
+                    cheapestTradeCosts
+                );
             }
             case Action.BuildFactory ignored -> {
                 String summary = summarizeConsumedGoods(board.getLastConsumedGoods());
-                if (summary == null) {
-                    yield null;
+                String factoryLabel = formatFactoryForDetails(ignored.factory());
+                if (factoryLabel == null) {
+                    yield summary == null ? null : "Verbrauch fuer Aktion: " + summary;
                 }
-                yield "Verbrauch fuer Aktion: " + summary;
+                if (summary == null) {
+                    yield "Fabrik gebaut: " + factoryLabel;
+                }
+                yield "Fabrik gebaut: " + factoryLabel + "; Verbrauch fuer Aktion: " + summary;
+            }
+            case Action.OverbuildDefaultFactory overbuildDefaultFactory -> {
+                String summary = summarizeConsumedGoods(board.getLastConsumedGoods());
+                String factoryLabel = formatFactoryForDetails(overbuildDefaultFactory.newFactory());
+                if (factoryLabel == null) {
+                    yield summary == null ? null : "Verbrauch fuer Aktion: " + summary;
+                }
+                if (summary == null) {
+                    yield "Fabrik gebaut: " + factoryLabel;
+                }
+                yield "Fabrik gebaut: " + factoryLabel + "; Verbrauch fuer Aktion: " + summary;
             }
             case Action.BuildShipyard ignored -> {
                 String summary = summarizeConsumedGoods(board.getLastConsumedGoods());
@@ -302,10 +346,27 @@ public class DebugGameRunner {
             }
             case Action.SettleResident ignored -> {
                 String summary = summarizeConsumedGoods(board.getLastConsumedGoods());
-                if (summary == null) {
+                List<String> previousCards = previousResidentCardsByPlayer == null
+                    ? List.of()
+                    : previousResidentCardsByPlayer.getOrDefault(playerIndex, List.of());
+                List<String> currentCards = currentResidentCardDetailsForPlayer(game, playerIndex);
+                List<String> newlyDrawnCards = findNewEntries(previousCards, currentCards);
+
+                String cardDrawText = null;
+                if (!newlyDrawnCards.isEmpty()) {
+                    cardDrawText = "Gezogene Einwohnerkarte: " + String.join(" | ", newlyDrawnCards);
+                }
+
+                if (cardDrawText == null && summary == null) {
                     yield null;
                 }
-                yield "Verbrauch fuer Aktion: " + summary;
+                if (cardDrawText == null) {
+                    yield "Verbrauch fuer Aktion: " + summary;
+                }
+                if (summary == null) {
+                    yield cardDrawText;
+                }
+                yield cardDrawText + "; Verbrauch fuer Aktion: " + summary;
             }
             case Action.FulfillNeeds ignored -> {
                 String summary = summarizeConsumedGoods(board.getLastConsumedGoods());
@@ -316,6 +377,144 @@ public class DebugGameRunner {
             }
             default -> null;
         };
+    }
+
+    private static String formatFactoryForDetails(Factory factory) {
+        if (factory == null || factory.getType() == null) {
+            return null;
+        }
+
+        String displayName = factory.getType().getDisplayName();
+        if (displayName == null || displayName.isBlank()) {
+            return null;
+        }
+
+        String colorToken = inferFactoryColorSquare(factory);
+        if (colorToken == null) {
+            return displayName;
+        }
+
+        return displayName + " " + colorToken;
+    }
+
+    private static String inferFactoryColorSquare(Factory factory) {
+        String typeName = factory.getType().name();
+        if (typeName.endsWith("_BLUE")) {
+            return "blue_square";
+        }
+        if (typeName.endsWith("_RED")) {
+            return "red_square";
+        }
+        if (typeName.endsWith("_GREEN")) {
+            return "green_square";
+        }
+        if (typeName.endsWith("_YELLOW")) {
+            return "yellow_square";
+        }
+        if (typeName.endsWith("_ORANGE")) {
+            return "orange_square";
+        }
+        if (typeName.endsWith("_PURPLE")) {
+            return "purple_square";
+        }
+        if (typeName.endsWith("_BLACK")) {
+            return "black_square";
+        }
+        if (typeName.endsWith("_WHITE")) {
+            return "white_square";
+        }
+        return null;
+    }
+
+    private static Map<Integer, List<String>> snapshotResidentCardDetailsByPlayer(Game game) {
+        Map<Integer, List<String>> snapshot = new HashMap<>();
+        if (game == null || game.getPlayers() == null) {
+            return snapshot;
+        }
+
+        Player[] players = game.getPlayers();
+        for (int i = 0; i < players.length; i++) {
+            snapshot.put(i, currentResidentCardDetailsForPlayer(game, i));
+        }
+        return snapshot;
+    }
+
+    private static List<String> currentResidentCardDetailsForPlayer(Game game, int playerIndex) {
+        if (game == null || game.getPlayers() == null || playerIndex < 0 || playerIndex >= game.getPlayers().length) {
+            return List.of();
+        }
+
+        Player player = game.getPlayers()[playerIndex];
+        if (player == null) {
+            return List.of();
+        }
+
+        PlayerBoard playerBoard = player.getPlayerBoard();
+        if (playerBoard == null) {
+            return List.of();
+        }
+
+        List<ResidentCard> cards = playerBoard.getResidentCards();
+        List<String> details = new ArrayList<>(cards.size());
+        for (ResidentCard card : cards) {
+            details.add(formatResidentCardForDetails(card));
+        }
+        return details;
+    }
+
+    private static List<String> findNewEntries(List<String> previousValues, List<String> currentValues) {
+        if (currentValues == null || currentValues.isEmpty()) {
+            return List.of();
+        }
+
+        Map<String, Integer> previousCounts = new HashMap<>();
+        if (previousValues != null) {
+            for (String value : previousValues) {
+                if (value == null) {
+                    continue;
+                }
+                previousCounts.put(value, previousCounts.getOrDefault(value, 0) + 1);
+            }
+        }
+
+        List<String> added = new ArrayList<>();
+        for (String value : currentValues) {
+            if (value == null) {
+                continue;
+            }
+            int remaining = previousCounts.getOrDefault(value, 0);
+            if (remaining > 0) {
+                previousCounts.put(value, remaining - 1);
+            } else {
+                added.add(value);
+            }
+        }
+
+        return added;
+    }
+
+    private static String formatResidentCardForDetails(ResidentCard card) {
+        if (card == null) {
+            return "residentcard_lv_2.png => -";
+        }
+
+        String cardIcon = "residentcard_lv_" + card.populationLevel() + ".png";
+        Goods[] needs = card.needs();
+        String needsText;
+        if (needs == null || needs.length == 0) {
+            needsText = "-";
+        } else {
+            List<String> needIcons = new ArrayList<>(needs.length);
+            for (Goods need : needs) {
+                if (need == null) {
+                    continue;
+                }
+                needIcons.add(need.name().toLowerCase(Locale.ROOT) + ".png");
+            }
+            needsText = needIcons.isEmpty() ? "-" : String.join(" , ", needIcons);
+        }
+
+        return cardIcon + " " + needsText + " => " + formatRewardForExport(card.reward());
     }
 
     // ===================================================================
@@ -344,6 +543,7 @@ public class DebugGameRunner {
 
     private static void saveGameState(
         GameState state,
+        Game game,
         String label,
         String dir,
         String executedAction,
@@ -408,6 +608,19 @@ public class DebugGameRunner {
                     }
                     w.println("  ],");
                 }
+
+                // Active objective cards for this game.
+                w.println("  \"objectiveCards\": [");
+                List<ObjectiveCard> objectiveCards = game == null ? List.of() : game.getActiveObjectiveCards();
+                for (int i = 0; i < objectiveCards.size(); i++) {
+                    ObjectiveCard objectiveCard = objectiveCards.get(i);
+                    w.println("    {");
+                    w.printf("      \"title\": \"%s\",%n", escapeJson(objectiveCard.getTitle()));
+                    w.printf("      \"description\": \"%s\"%n", escapeJson(objectiveCard.getDescription()));
+                    w.print("    }");
+                    w.println(i < objectiveCards.size() - 1 ? "," : "");
+                }
+                w.println("  ],");
 
                 // Board State
                 w.println("  \"boardState\": {");
@@ -482,7 +695,32 @@ public class DebugGameRunner {
                     w.printf ("        \"explorerChips\": %d%n",   p.resources().availableExplorerChips());
                     w.println("      },");
                     w.println("      \"cards\": {");
-                    w.printf ("        \"residentCards\": %d%n",   p.cards().residentCardCount());
+                    w.printf ("        \"residentCards\": %d,%n",   p.cards().residentCardCount());
+                    Player livePlayer = (game != null && i < game.getPlayers().length) ? game.getPlayers()[i] : null;
+                    List<ResidentCard> residentCards = livePlayer == null
+                        ? List.of()
+                        : livePlayer.getPlayerBoard().getResidentCards();
+                    w.println("        \"residentCardDetails\": [");
+                    for (int cardIndex = 0; cardIndex < residentCards.size(); cardIndex++) {
+                        ResidentCard residentCard = residentCards.get(cardIndex);
+                        w.println("          {");
+                        w.printf ("            \"populationLevel\": %d,%n", residentCard.populationLevel());
+                        w.println("            \"needs\": [");
+                        Goods[] needs = residentCard.needs();
+                        for (int needIndex = 0; needIndex < needs.length; needIndex++) {
+                            Goods need = needs[needIndex];
+                            w.printf(
+                                "              \"%s\"%s%n",
+                                escapeJson(need.getDisplayName()),
+                                needIndex < needs.length - 1 ? "," : ""
+                            );
+                        }
+                        w.println("            ],");
+                        w.printf("            \"reward\": \"%s\"%n", escapeJson(formatRewardForExport(residentCard.reward())));
+                        w.print("          }");
+                        w.println(cardIndex < residentCards.size() - 1 ? "," : "");
+                    }
+                    w.println("        ]");
                     w.println("      },");
                     w.println("      \"residents\": {");
                     w.printf ("        \"total\": %d,%n",          p.residents().count());
@@ -562,5 +800,48 @@ public class DebugGameRunner {
         } catch (IOException e) {
             System.err.println("Warnung: Konnte State nicht speichern (" + label + "): " + e.getMessage());
         }
+    }
+
+    private static String escapeJson(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    private static String formatRewardForExport(Reward reward) {
+        if (reward == null) {
+            return "-";
+        }
+
+        return switch (reward) {
+            case Reward.NewResidents(int amount, int populationLevel) ->
+                String.format("%dx neuer Bewohner Stufe %d", amount, populationLevel);
+            case Reward.UpgradeResidents(int amount, int level1, int level2) ->
+                String.format("%dx Upgrade Stufe %d -> %d", amount, level1, level2);
+            case Reward.ExtraAction ignored -> "Extra Action";
+            case Reward.ExpeditionCards ignored -> "2 Expedition Cards";
+            case Reward.FreeGoodsChoice freeGoodsChoice -> {
+                Goods[] options = freeGoodsChoice.options();
+                String optionsText = java.util.Arrays.stream(options)
+                    .map(Goods::getDisplayName)
+                    .toList()
+                    .toString();
+                Goods chosenGood = freeGoodsChoice.chosenGood();
+                if (chosenGood == null) {
+                    yield "Free Goods Choice " + optionsText;
+                }
+                yield "Free Goods Choice " + optionsText + " (gewaehlt: " + chosenGood.getDisplayName() + ")";
+            }
+            case Reward.TradePoints(int points) -> points + " Trade Points";
+            case Reward.ExplorationPoints(int points) -> points + " Exploration Points";
+            case Reward.Gold(int amount) -> amount + " Gold";
+            case Reward.GoldAndTradePoints(int goldAmount, int tradePoints) ->
+                goldAmount + " Gold + " + tradePoints + " Trade Points";
+            case Reward.DiscardResidentCard(int amount) ->
+                "Discard " + amount + " ResidentCard(s)";
+            case Reward.BuildFactory(Factory factoryType) ->
+                factoryType == null ? "Build Factory" : "Build Factory: " + factoryType.getType().getDisplayName();
+        };
     }
 }

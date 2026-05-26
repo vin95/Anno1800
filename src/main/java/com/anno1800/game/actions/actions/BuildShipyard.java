@@ -28,7 +28,7 @@ public class BuildShipyard {
             }
             
             // EXECUTION PHASE: Actually obtain and consume goods
-            board.consumeGoods(costs);
+            board.consumeGoods(costs, game);
         }
         
         // Take shipyard from board

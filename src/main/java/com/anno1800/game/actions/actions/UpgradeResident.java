@@ -76,7 +76,7 @@ public class UpgradeResident {
 
         // PHASE 2: Single combined execution pass (consumes storedGoods once)
         if (combinedCosts.length > 0) {
-            playerBoard.consumeGoods(combinedCosts);
+            playerBoard.consumeGoods(combinedCosts, game);
         }
 
         // PHASE 3: Transform residents (no resource changes, just board manipulation)

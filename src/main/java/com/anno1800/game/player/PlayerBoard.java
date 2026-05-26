@@ -75,7 +75,6 @@ public class PlayerBoard {
     private boolean usedViewResidentCardsThisTurn = false;
 
     /**
-     * Tracks which goods have been traded this turn.
      * Rule: "Pro Spielzug kann dieselbe Ressource nur einmal erhandelt werden."
      * Must be cleared at the end of each turn using clearTradedGoodsThisTurn().
      */
@@ -991,6 +990,17 @@ public class PlayerBoard {
     }
 
     /**
+     * Replaces the tracked consumed goods snapshot for the last action.
+     * Useful for actions that execute multiple internal consume steps.
+     */
+    public void replaceLastConsumedGoods(List<ProducedGood> consumedGoods) {
+        lastConsumedGoods.clear();
+        if (consumedGoods != null && !consumedGoods.isEmpty()) {
+            lastConsumedGoods.addAll(consumedGoods);
+        }
+    }
+
+    /**
      * Helper method to determine if a producer is a StartFactory.
      * 
      * @param producer The producer to check
@@ -1276,6 +1286,10 @@ public class PlayerBoard {
      * @param required Array of goods to consume
      */
     public void consumeGoods(Goods[] required) {
+        consumeGoods(required, null);
+    }
+
+    public void consumeGoods(Goods[] required, Game game) {
         lastConsumedGoods.clear();
 
         if (required == null || required.length == 0) {
@@ -1298,7 +1312,7 @@ public class PlayerBoard {
             }
             
             // Execute the actual action based on source
-            executeGoodSource(producedGood);
+            executeGoodSource(producedGood, game);
 
             // Track for debug/export output
             lastConsumedGoods.add(producedGood);
@@ -1315,7 +1329,7 @@ public class PlayerBoard {
      * Executes the actual production/trade/import based on the good's source.
      * This performs the real game state changes (exhaust residents, use chips, etc.)
      */
-    private void executeGoodSource(ProducedGood producedGood) {
+    private void executeGoodSource(ProducedGood producedGood, Game game) {
         switch (producedGood.source()) {
             case GoodSource.Produced(Factory factory, Resident resident) -> {
                 // Actually assign resident to factory
@@ -1332,6 +1346,9 @@ public class PlayerBoard {
                     throw new IllegalStateException("Invalid chip cost for trading: " + chipCost);
                 }
                 availableTradeChips -= chipCost;
+                if (game != null && fromPlayer >= 0 && fromPlayer < game.getPlayers().length) {
+                    game.getPlayers()[fromPlayer].getPlayerBoard().earnGold(chipCost);
+                }
                 System.out.println("  -> Traded " + producedGood.good() + " from Player " + (fromPlayer + 1)
                         + " (cost " + chipCost + " TradeChip" + (chipCost == 1 ? "" : "s") + ")");
             }
@@ -1340,6 +1357,9 @@ public class PlayerBoard {
                     throw new IllegalStateException("Invalid explorer chip cost for trading: " + explorerChipCost);
                 }
                 availableExplorerChips -= explorerChipCost;
+                if (game != null && fromPlayer >= 0 && fromPlayer < game.getPlayers().length) {
+                    game.getPlayers()[fromPlayer].getPlayerBoard().earnGold(tradeChipCost);
+                }
                 System.out.println("  -> Traded " + producedGood.good() + " from Player " + (fromPlayer + 1)
                         + " (ExplorerTrader, cost " + explorerChipCost + " ExplorerChips ~= "
                         + tradeChipCost + " TradeChips)");
