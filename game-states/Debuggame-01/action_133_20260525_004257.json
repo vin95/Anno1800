@@ -5,7 +5,7 @@
   "label": "action_133",
   "executedAction": "SettleResident[level=2]",
   "executedByPlayer": "Player 3",
-  "executedActionDetails": "Gezogene Einwohnerkarte: residentcard_lv_2.png snaps.png , canned_meat.png => 2x neuer Bewohner Stufe 2; Verbrauch fuer Aktion: 1x Planks [gehandelt (Spieler 2, Kosten 1 Chip)]; 1x Bricks [produziert (Brick Factory Blue, Bewohnerstufe 2)]; Chips verwendet: Tradechips=1, Explorerchips=0",
+  "executedActionDetails": "Gezogene Einwohnerkarte: residents/residentcard_lv_2.png goods/snaps.png , goods/canned_meat.png => 2x neuer Bewohner Stufe 2; Verbrauch fuer Aktion: 1x Planks [gehandelt (Spieler 2, Kosten 1 Chip)]; 1x Bricks [produziert (Brick Factory Blue, Bewohnerstufe 2)]; Chips verwendet: Tradechips=1, Explorerchips=0",
   "agentStrategyName": "adaptiveResidentStrategy",
   "agentMainActionScores": [
     {

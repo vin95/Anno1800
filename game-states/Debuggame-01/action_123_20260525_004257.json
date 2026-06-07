@@ -5,7 +5,7 @@
   "label": "action_123",
   "executedAction": "SettleResident[level=3]",
   "executedByPlayer": "Player 2",
-  "executedActionDetails": "Gezogene Einwohnerkarte: residentcard_lv_5.png work_clothes.png , coffee.png , big_berta.png => 3 Exploration Points; Verbrauch fuer Aktion: 1x Bricks [gehandelt (Spieler 3, Kosten 1 Chip)]; 1x Coal [gehandelt (Spieler 3, Kosten 1 Chip)]; 1x Goods [gehandelt (Spieler 1, Kosten 2 Chips)]; Chips verwendet: Tradechips=4, Explorerchips=0",
+  "executedActionDetails": "Gezogene Einwohnerkarte: residents/residentcard_lv_5.png goods/work_clothes.png , goods/coffee.png , goods/big_berta.png => 3 Exploration Points; Verbrauch fuer Aktion: 1x Bricks [gehandelt (Spieler 3, Kosten 1 Chip)]; 1x Coal [gehandelt (Spieler 3, Kosten 1 Chip)]; 1x Goods [gehandelt (Spieler 1, Kosten 2 Chips)]; Chips verwendet: Tradechips=4, Explorerchips=0",
   "agentStrategyName": "shipBuilding",
   "agentMainActionScores": [
     {

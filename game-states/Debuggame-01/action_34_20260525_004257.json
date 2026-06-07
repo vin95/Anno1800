@@ -5,7 +5,7 @@
   "label": "action_34",
   "executedAction": "SettleResident[level=1]",
   "executedByPlayer": "Player 3",
-  "executedActionDetails": "Gezogene Einwohnerkarte: residentcard_lv_2.png beer.png , cotton_fabric.png => 1x neuer Bewohner Stufe 4; Verbrauch fuer Aktion: 1x Planks [gehandelt (Spieler 1, Kosten 1 Chip)]; Chips verwendet: Tradechips=1, Explorerchips=0",
+  "executedActionDetails": "Gezogene Einwohnerkarte: residents/residentcard_lv_2.png goods/beer.png , goods/cotton_fabric.png => 1x neuer Bewohner Stufe 4; Verbrauch fuer Aktion: 1x Planks [gehandelt (Spieler 1, Kosten 1 Chip)]; Chips verwendet: Tradechips=1, Explorerchips=0",
   "agentStrategyName": "adaptiveResidentStrategy",
   "agentMainActionScores": [
     {

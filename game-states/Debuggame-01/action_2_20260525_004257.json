@@ -5,7 +5,7 @@
   "label": "action_2",
   "executedAction": "SettleResident[level=3]",
   "executedByPlayer": "Player 1",
-  "executedActionDetails": "Gezogene Einwohnerkarte: residentcard_lv_5.png bricks.png , gramophones.png , coffee.png => 6 Trade Points; Verbrauch fuer Aktion: 1x Bricks [gehandelt (Spieler 3, Kosten 2 Chips)]; 1x Coal [produziert (Coal Mine Red, Bewohnerstufe 3)]; 1x Goods [produziert (Warehouse Red, Bewohnerstufe 3)]; Chips verwendet: Tradechips=2, Explorerchips=0",
+  "executedActionDetails": "Gezogene Einwohnerkarte: residents/residentcard_lv_5.png goods/bricks.png , goods/gramophones.png , goods/coffee.png => 6 Trade Points; Verbrauch fuer Aktion: 1x Bricks [gehandelt (Spieler 3, Kosten 2 Chips)]; 1x Coal [produziert (Coal Mine Red, Bewohnerstufe 3)]; 1x Goods [produziert (Warehouse Red, Bewohnerstufe 3)]; Chips verwendet: Tradechips=2, Explorerchips=0",
   "agentStrategyName": "adaptiveResidentStrategy",
   "agentMainActionScores": [
     {

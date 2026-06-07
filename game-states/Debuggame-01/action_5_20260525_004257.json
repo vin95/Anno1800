@@ -5,7 +5,7 @@
   "label": "action_5",
   "executedAction": "SettleResident[level=1]",
   "executedByPlayer": "Player 1",
-  "executedActionDetails": "Gezogene Einwohnerkarte: residentcard_lv_2.png bricks.png , sausage.png => 1x neuer Bewohner Stufe 4; Verbrauch fuer Aktion: 1x Planks [produziert (Sawmill Green, Bewohnerstufe 1)]",
+  "executedActionDetails": "Gezogene Einwohnerkarte: residents/residentcard_lv_2.png goods/bricks.png , goods/sausages.png => 1x neuer Bewohner Stufe 4; Verbrauch fuer Aktion: 1x Planks [produziert (Sawmill Green, Bewohnerstufe 1)]",
   "agentStrategyName": "adaptiveResidentStrategy",
   "agentMainActionScores": [
     {

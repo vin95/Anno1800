@@ -365,13 +365,6 @@ def infer_upgrade_resident_amount(
             return None
         deltas[level] = cur_val - prev_val
 
-    # Reconstruct the number of residents upgraded from each level i to i+1.
-    # For upgrade-only transitions:
-    #   delta(level1) = -x1
-    #   delta(level2) = x1 - x2
-    #   delta(level3) = x2 - x3
-    #   delta(level4) = x3 - x4
-    #   delta(level5) = x4
     x1 = -deltas["level1"]
     x2 = x1 - deltas["level2"]
     x3 = x2 - deltas["level3"]
@@ -379,7 +372,6 @@ def infer_upgrade_resident_amount(
 
     if min(x1, x2, x3, x4) < 0:
         return None
-
     if x4 != deltas["level5"]:
         return None
 
@@ -435,6 +427,16 @@ def parse_args() -> argparse.Namespace:
         "--out",
         default=None,
         help="Optional output HTML file path for --web mode",
+    )
+    parser.add_argument(
+        "--migrate-json",
+        action="store_true",
+        help="One-time migration: rewrite legacy image tokens in debug JSON files to folder-based paths",
+    )
+    parser.add_argument(
+        "--migrate-dir",
+        default=None,
+        help="Root directory for --migrate-json (default: game-states)",
     )
     return parser.parse_args()
 
@@ -1368,6 +1370,117 @@ def state_for_display(state: dict[str, Any]) -> dict[str, Any]:
     return filtered
 
 
+def build_picture_index() -> tuple[list[str], dict[str, str]]:
+    picture_dir = (PROJECT_ROOT / "src" / "pictures").resolve()
+    if not picture_dir.exists():
+        return [], {}
+
+    image_paths = sorted(
+        [
+            path
+            for path in picture_dir.rglob("*")
+            if path.is_file() and path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}
+        ]
+    )
+    relative_paths = [path.relative_to(picture_dir).as_posix() for path in image_paths]
+
+    preference_order = {"goods": 0, "residents": 1, "factories": 2, "ships": 3}
+    by_name: dict[str, list[str]] = {}
+    for rel_path in relative_paths:
+        name = Path(rel_path).name.lower()
+        by_name.setdefault(name, []).append(rel_path)
+
+    resolved_by_name: dict[str, str] = {}
+    for name, candidates in by_name.items():
+        resolved = min(
+            candidates,
+            key=lambda value: (preference_order.get(Path(value).parts[0], 99), len(value), value),
+        )
+        resolved_by_name[name] = resolved
+
+    alias_map = {
+        "explorationchip.png": "explorerchip.png",
+        "sausage.png": "sausages.png",
+        "steelbars.png": "steel_bars.png",
+        "gramophone.png": "gramophones.png",
+        "gramphone.png": "gramophones.png",
+        "highbike.png": "highbikes.png",
+        "lightbulb.png": "light_bulbs.png",
+        "lightbulbs.png": "light_bulbs.png",
+        "sewingmachine.png": "sewing_machines.png",
+        "pocketwatch.png": "pocketwatches.png",
+        "coffeebeans.png": "coffee_beans.png",
+        "workclothes.png": "work_clothes.png",
+        "cottonfabric.png": "cotton_fabric.png",
+        "bigberta.png": "big_berta.png",
+    }
+
+    icon_lookup: dict[str, str] = {}
+    for rel_path in relative_paths:
+        name = Path(rel_path).name.lower()
+        icon_lookup[name] = resolved_by_name.get(name, rel_path)
+        icon_lookup[rel_path.lower()] = rel_path
+
+    for alias, target_name in alias_map.items():
+        target_path = resolved_by_name.get(target_name)
+        if target_path:
+            icon_lookup[alias] = target_path
+
+    default_resident_card = resolved_by_name.get("residentcard_lv_2.png")
+    if default_resident_card:
+        for level in (1, 3, 4, 6):
+            icon_lookup[f"residentcard_lv_{level}.png"] = default_resident_card
+            icon_lookup[f"residentcard_lv{level}.png"] = default_resident_card
+
+    return relative_paths, icon_lookup
+
+
+def migrate_image_tokens_in_text(raw_text: str, icon_lookup: dict[str, str]) -> tuple[str, int]:
+    token_pattern = re.compile(r"(?<![A-Za-z0-9_])([A-Za-z0-9_\\/-]+\.(?:png|jpg|jpeg|webp))(?![A-Za-z0-9_])", flags=re.IGNORECASE)
+    replacement_count = 0
+
+    def replace_token(match: re.Match[str]) -> str:
+        nonlocal replacement_count
+        token = match.group(1)
+        normalized = token.replace("\\", "/").lower()
+        resolved = icon_lookup.get(normalized)
+        if resolved is None:
+            resolved = icon_lookup.get(Path(normalized).name)
+        if not resolved or token == resolved:
+            return token
+        replacement_count += 1
+        return resolved
+
+    return token_pattern.sub(replace_token, raw_text), replacement_count
+
+
+def migrate_debug_json_image_paths(state_root: Path) -> tuple[int, int]:
+    if not state_root.exists():
+        return 0, 0
+
+    _, icon_lookup = build_picture_index()
+    if not icon_lookup:
+        return 0, 0
+
+    changed_files = 0
+    changed_tokens = 0
+    for json_file in state_root.rglob("*.json"):
+        try:
+            original_text = json_file.read_text(encoding="utf-8")
+        except OSError:
+            continue
+
+        migrated_text, replacements = migrate_image_tokens_in_text(original_text, icon_lookup)
+        if replacements <= 0 or migrated_text == original_text:
+            continue
+
+        json_file.write_text(migrated_text, encoding="utf-8")
+        changed_files += 1
+        changed_tokens += replacements
+
+    return changed_files, changed_tokens
+
+
 def build_state_entries(files: list[Path]) -> list[dict[str, Any]]:
     previous_state: dict[str, Any] | None = None
     entries: list[dict[str, Any]] = []
@@ -1423,14 +1536,30 @@ def build_state_entries(files: list[Path]) -> list[dict[str, Any]]:
 def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
     payload = json.dumps(entries, ensure_ascii=False)
     icon_base_uri = (PROJECT_ROOT / "src" / "pictures").resolve().as_uri()
+    all_picture_paths, icon_lookup = build_picture_index()
     icon_file_names = sorted(
         {
             *GOOD_ICON_NAMES.values(),
             *RESOURCE_ICON_NAMES.values(),
             *WORKFORCE_ICON_NAMES.values(),
                     *RESIDENT_CARD_ICON_NAMES.values(),
+            *(Path(path).name for path in all_picture_paths),
         }
     )
+    action_image_candidates = {
+        "BuildShipyard": ["ships/shipyard_lv1.png", "ships/shipyard_lv2.png", "ships/shipyard_lv3.png"],
+        "BuildShips": ["ships/tradeship_lv1.png", "ships/explorership_lv1.png"],
+        "SettleResident": ["residents/farmer_house.png", "residents/worker_house.png"],
+        "UpgradeResident": ["residents/workforce_level_2.png", "residents/workforce_level_3.png"],
+        "FulfillNeeds": ["goods/goods.png", "goods/tradechip.png"],
+        "TradeGoods": ["goods/tradechip.png", "goods/gold.png"],
+        "ProduceGoods": ["factories/warehouse_red.png", "goods/goods.png"],
+        "DrawResidentCard": ["residents/residentcard_lv_2.png"],
+        "DiscoverOldWorldIsland": ["ships/explorership_lv1.png"],
+        "DiscoverNewWorldIsland": ["ships/explorership_lv1.png"],
+        "Expedition": ["ships/explorership_lv2.png", "ships/explorership_lv1.png"],
+        "Carneval": ["startplayer.png", "finishplayer.png"],
+    }
     title = f"Anno 1800 Debuggame States - {state_dir}"
 
     return f"""<!doctype html>
@@ -1461,15 +1590,16 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
                 radial-gradient(1200px 700px at 10% -10%, #27344d 0%, transparent 60%),
                 radial-gradient(900px 600px at 100% 0%, #1d5f73 0%, transparent 60%),
                 linear-gradient(180deg, var(--bg-0), var(--bg-1));
-            font-family: \"Segoe UI\", Tahoma, Geneva, Verdana, sans-serif;
-            padding: 16px;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            padding: 10px;
         }}
 
         .container {{
-            max-width: 1100px;
-            margin: 0 auto;
+            width: 100%;
+            max-width: none;
+            margin: 0;
             display: grid;
-            gap: 14px;
+            gap: 10px;
         }}
 
         .panel {{
@@ -1501,6 +1631,12 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             align-items: center;
             gap: 8px;
             flex-wrap: wrap;
+        }}
+
+        .controls .toggle-details {{
+            border-color: #6b7280;
+            background: linear-gradient(180deg, #e2e8f0, #cbd5e1);
+            color: #0f172a;
         }}
 
         button {{
@@ -1684,6 +1820,220 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
         }}
 
         .hint {{ font-size: 0.9rem; }}
+
+        .visual-layer {{
+            display: grid;
+            gap: 10px;
+        }}
+
+        .game-layout {{
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: minmax(380px, auto) minmax(560px, auto) minmax(380px, auto);
+            grid-template-areas:
+                "ul ur"
+                "center center"
+                "ll lr";
+        }}
+
+        .board-slot {{
+            border: 1px solid #334155;
+            border-radius: 12px;
+            background: rgba(7, 12, 24, 0.82);
+            padding: 12px;
+            display: grid;
+            gap: 8px;
+            align-content: start;
+        }}
+
+        .board-slot h3 {{
+            margin: 0;
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+            color: #cbd5e1;
+        }}
+
+        .slot-ul {{ grid-area: ul; }}
+        .slot-ur {{ grid-area: ur; }}
+        .slot-ll {{ grid-area: ll; }}
+        .slot-lr {{ grid-area: lr; }}
+        .slot-center {{ grid-area: center; }}
+
+        .slot-ul, .slot-ur, .slot-ll, .slot-lr {{
+            min-height: 360px;
+        }}
+
+        .main-board {{
+            width: 100%;
+            min-height: 560px;
+            aspect-ratio: 16 / 9;
+            border: 2px dashed #14b8a677;
+            border-radius: 14px;
+            background:
+                radial-gradient(700px 260px at 50% -20%, rgba(45, 212, 191, 0.15), transparent 70%),
+                linear-gradient(180deg, rgba(15, 23, 42, 0.8), rgba(2, 6, 23, 0.92));
+            padding: 12px;
+            display: grid;
+            grid-template-rows: auto auto 1fr auto;
+            gap: 10px;
+        }}
+
+        .main-board-title {{
+            font-weight: 700;
+            font-size: 1.05rem;
+        }}
+
+        .main-board-meta {{
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }}
+
+        .main-board-pools {{
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }}
+
+        .pool-chip {{
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 8px;
+            background: rgba(15, 23, 42, 0.7);
+            font-size: 0.88rem;
+        }}
+
+        .island-layout {{
+            border: 1px dashed #32465f;
+            border-radius: 10px;
+            padding: 8px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.52);
+        }}
+
+        .island-main-tile {{
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border: 1px solid #3b4f6a;
+            border-radius: 12px;
+            background: linear-gradient(160deg, rgba(30, 64, 83, 0.5), rgba(15, 23, 42, 0.8));
+            display: grid;
+            place-items: center;
+            color: #cbd5e1;
+            font-size: 0.85rem;
+        }}
+
+        .island-lower-row {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }}
+
+        .island-small-tile {{
+            aspect-ratio: 1 / 1;
+            border: 1px solid #3b4f6a;
+            border-radius: 10px;
+            background: linear-gradient(160deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.9));
+            display: grid;
+            place-items: center;
+            color: #94a3b8;
+            font-size: 0.75rem;
+        }}
+
+        .layer-section {{
+            border: 1px solid #243246;
+            border-radius: 10px;
+            padding: 8px;
+            background: rgba(15, 23, 42, 0.6);
+        }}
+
+        .resource-row, .workers-row, .ships-row, .residentcards-row {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }}
+
+        .token-pill {{
+            border: 1px solid #334155;
+            border-radius: 999px;
+            padding: 3px 8px;
+            background: rgba(30, 41, 59, 0.8);
+            font-size: 0.78rem;
+        }}
+
+        .worker-chip, .resident-chip {{
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid #334155;
+            border-radius: 999px;
+            padding: 2px 7px;
+            background: rgba(30, 41, 59, 0.7);
+            font-size: 0.76rem;
+        }}
+
+        .worker-chip img, .resident-chip img, .resource-row img {{
+            width: 1.1rem;
+            height: 1.1rem;
+            object-fit: contain;
+        }}
+
+        .objective-card {{
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 8px;
+            background: #ffffff;
+            color: #0f172a;
+            min-height: 110px;
+            font-size: 0.82rem;
+            line-height: 1.35;
+        }}
+
+        .objective-card strong {{
+            display: block;
+            margin-bottom: 4px;
+            color: #0f172a;
+        }}
+
+        .objective-inline-strip {{
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 8px;
+        }}
+
+        .objective-inline-title {{
+            grid-column: 1 / -1;
+            font-weight: 700;
+            color: #0f172a;
+        }}
+
+        .hidden {{
+            display: none !important;
+        }}
+
+        @media (max-width: 1200px) {{
+            .game-layout {{
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+                grid-template-areas:
+                    "center"
+                    "ul"
+                    "ur"
+                    "ll"
+                    "lr";
+                min-height: 0;
+            }}
+            .main-board-pools {{
+                grid-template-columns: 1fr;
+            }}
+        }}
     </style>
 </head>
 <body>
@@ -1699,6 +2049,34 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             </div>
         </div>
 
+        <div class=\"panel\">
+            <strong>Visuelle Spielansicht</strong>
+            <div id=\"visualLayer\" class=\"visual-layer\">
+                <div class=\"game-layout\">
+                    <section class="board-slot slot-ul">
+                        <h3>Layer Oben Links</h3>
+                        <div id="layerUpperLeft"></div>
+                    </section>
+                    <section class="board-slot slot-ur">
+                        <h3>Layer Oben Rechts</h3>
+                        <div id="layerUpperRight"></div>
+                    </section>
+                    <section class=\"board-slot slot-center\">
+                        <div id=\"mainBoard\" class=\"main-board\"></div>
+                    </section>
+                    <section class="board-slot slot-ll">
+                        <h3>Layer Unten Links</h3>
+                        <div id="layerLowerLeft"></div>
+                    </section>
+                    <section class="board-slot slot-lr">
+                        <h3>Layer Unten Rechts</h3>
+                        <div id="layerLowerRight"></div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <div id=\"detailsLayer\" class=\"hidden\">
         <div class=\"panel\">
             <strong>Aktionsdetails</strong>
             <div id=\"actionDetailsContainer\"></div>
@@ -1738,17 +2116,21 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             <strong>Roh-JSON</strong>
             <pre id=\"rawJson\"></pre>
         </div>
+        </div>
     </div>
 
     <script>
         const stateDir = {json.dumps(str(state_dir), ensure_ascii=False)};
         const entries = {payload};
         const iconBaseUri = {json.dumps(icon_base_uri, ensure_ascii=False)};
+        const iconPathByName = {json.dumps(icon_lookup, ensure_ascii=False)};
+        const allPicturePaths = {json.dumps(all_picture_paths, ensure_ascii=False)};
         const iconFileNames = {json.dumps(icon_file_names, ensure_ascii=False)};
         const orderedIconFileNames = [...iconFileNames].sort((left, right) => right.length - left.length);
         const goodIconTokens = {json.dumps(GOOD_ICON_TOKENS, ensure_ascii=False)};
         const orderedGoodIconTokens = Object.keys(goodIconTokens).sort((left, right) => right.length - left.length);
         const goodIconsByName = {json.dumps(GOOD_ICON_NAMES, ensure_ascii=False)};
+        const actionImageCandidates = {json.dumps(action_image_candidates, ensure_ascii=False)};
         const smallResourceIconNames = new Set(["gold.png", "tradechip.png", "explorerchip.png"]);
         const colorSquareTokens = {{
             "red_square": "red",
@@ -1779,6 +2161,11 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
         const rawJsonEl = document.getElementById("rawJson");
         const prevBtn = document.getElementById("prevBtn");
         const nextBtn = document.getElementById("nextBtn");
+        const mainBoardEl = document.getElementById("mainBoard");
+        const layerUpperLeftEl = document.getElementById("layerUpperLeft");
+        const layerUpperRightEl = document.getElementById("layerUpperRight");
+        const layerLowerLeftEl = document.getElementById("layerLowerLeft");
+        const layerLowerRightEl = document.getElementById("layerLowerRight");
 
         function text(value, fallback = "(nicht im JSON vorhanden)") {{
             if (value === null || value === undefined || value === "") return fallback;
@@ -1794,6 +2181,38 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
                 return "tradechip.png";
             }}
             return goodIconsByName[normalized] || normalized;
+        }}
+
+        function normalizeImageName(value) {{
+            return String(value || "")
+                .trim()
+                .toLowerCase()
+                .replace(/\\\\/g, "/");
+        }}
+
+        function resolveImagePath(value) {{
+            const normalized = normalizeImageName(value);
+            if (!normalized) return null;
+
+            if (iconPathByName[normalized]) {{
+                return iconPathByName[normalized];
+            }}
+
+            const fileName = normalized.split("/").pop();
+            if (fileName && iconPathByName[fileName]) {{
+                return iconPathByName[fileName];
+            }}
+
+            if (normalized.startsWith("residentcard_lv_")) {{
+                return iconPathByName["residentcard_lv_2.png"] || null;
+            }}
+
+            return null;
+        }}
+
+        function imageSrcFor(value) {{
+            const resolved = resolveImagePath(value);
+            return resolved ? `${{iconBaseUri}}/${{resolved}}` : null;
         }}
 
         function rewardToIconText(rewardValue) {{
@@ -1895,7 +2314,8 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
                     const wrapper = document.createElement("span");
                     wrapper.className = "icon-inline";
                     const img = document.createElement("img");
-                    img.src = iconBaseUri + "/" + goodIconTokens[goodToken];
+                    const resolvedGoodPath = resolveImagePath(goodIconTokens[goodToken]) || goodIconTokens[goodToken];
+                    img.src = iconBaseUri + "/" + resolvedGoodPath;
                     img.alt = goodIconTokens[goodToken];
                     img.title = goodIconTokens[goodToken];
                     if (smallResourceIconNames.has(goodIconTokens[goodToken])) {{
@@ -1949,7 +2369,8 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
                 const wrapper = document.createElement("span");
                 wrapper.className = "icon-inline";
                 const img = document.createElement("img");
-                img.src = iconBaseUri + "/" + iconName;
+                const resolvedIconPath = resolveImagePath(iconName) || iconName;
+                img.src = iconBaseUri + "/" + resolvedIconPath;
                 img.alt = iconName;
                 img.title = iconName;
                 if (smallResourceIconNames.has(iconName)) {{
@@ -2198,6 +2619,215 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             agentScoresContainerEl.appendChild(details);
         }}
 
+        function createTokenWithIcon(iconValue, labelText) {{
+            const item = document.createElement("span");
+            item.className = "token-pill";
+            const src = imageSrcFor(iconValue);
+            if (src) {{
+                const img = document.createElement("img");
+                img.src = src;
+                img.alt = iconValue;
+                img.title = iconValue;
+                item.appendChild(img);
+                item.appendChild(document.createTextNode(" "));
+            }}
+            item.appendChild(document.createTextNode(labelText));
+            return item;
+        }}
+
+        function workerStoneForLevel(levelKey) {{
+            const map = {{
+                level1: "residents/farmer_stone.png",
+                level2: "residents/worker_stone.png",
+                level3: "residents/artesian_stone.png",
+                level4: "residents/engineer_stone.png",
+                level5: "residents/investor_stone.png",
+            }};
+            return map[levelKey] || null;
+        }}
+
+        function renderPlayerLayer(container, player, fallbackLabel) {{
+            container.innerHTML = "";
+            if (!player || typeof player !== "object") {{
+                const empty = document.createElement("p");
+                empty.className = "muted";
+                empty.textContent = `${{fallbackLabel}}: kein Spieler zugewiesen`;
+                container.appendChild(empty);
+                return;
+            }}
+
+            const title = document.createElement("div");
+            title.className = "main-board-title";
+            title.textContent = String(player.name || fallbackLabel).replace("Player ", "Spieler ");
+            container.appendChild(title);
+
+            const resources = player.resources || {{}};
+            const resourceSection = document.createElement("div");
+            resourceSection.className = "layer-section resource-row";
+            resourceSection.appendChild(createTokenWithIcon("goods/gold.png", `Gold: ${{resources.gold ?? 0}}`));
+            resourceSection.appendChild(createTokenWithIcon("goods/tradechip.png", `Tradechips: ${{resources.tradeChips ?? 0}}`));
+            resourceSection.appendChild(createTokenWithIcon("goods/explorerchip.png", `Explorerchips: ${{resources.explorerChips ?? 0}}`));
+            container.appendChild(resourceSection);
+
+            const ships = player.ships || {{}};
+            const shipsSection = document.createElement("div");
+            shipsSection.className = "layer-section ships-row";
+            shipsSection.appendChild(createTokenWithIcon("ships/tradeship_lv1.png", `Trade-Schiffe: ${{ships.tradeShips ?? 0}}`));
+            shipsSection.appendChild(createTokenWithIcon("ships/explorership_lv1.png", `Explorer-Schiffe: ${{ships.explorerShips ?? 0}}`));
+            container.appendChild(shipsSection);
+
+            const tiles = player.tiles || {{}};
+            const islandSection = document.createElement("div");
+            islandSection.className = "layer-section";
+            islandSection.innerHTML = `
+                <strong>Inselbereich</strong>
+                <div class=\"island-layout\">
+                    <div class=\"island-main-tile\">Hauptinsel</div>
+                    <div class=\"island-lower-row\">
+                        <div class=\"island-small-tile\">Neue Insel (L)</div>
+                        <div class=\"island-small-tile\">Neue Insel (R)</div>
+                    </div>
+                </div>
+                <div class=\"resource-row\" style=\"margin-top: 7px;\"><span class=\"token-pill\">Land frei: ${{tiles.freeLand ?? 0}}</span><span class=\"token-pill\">Küste frei: ${{tiles.freeCoast ?? 0}}</span><span class=\"token-pill\">See frei: ${{tiles.freeSea ?? 0}}</span></div>
+            `;
+            container.appendChild(islandSection);
+
+            const workersSection = document.createElement("div");
+            workersSection.className = "layer-section";
+            const workersTitle = document.createElement("strong");
+            workersTitle.textContent = "Verfügbare Arbeiter (Steine)";
+            workersSection.appendChild(workersTitle);
+            const workersRow = document.createElement("div");
+            workersRow.className = "workers-row";
+            const fitByLevel = (((player.residents || {{}}).byStatusByLevel || {{}}).fit || {{}});
+            for (const levelKey of ["level1", "level2", "level3", "level4", "level5"]) {{
+                const count = Number(fitByLevel[levelKey] || 0);
+                const chip = document.createElement("span");
+                chip.className = "worker-chip";
+                const stone = workerStoneForLevel(levelKey);
+                const src = stone ? imageSrcFor(stone) : null;
+                if (src) {{
+                    const img = document.createElement("img");
+                    img.src = src;
+                    img.alt = levelKey;
+                    chip.appendChild(img);
+                }}
+                chip.appendChild(document.createTextNode(String(count)));
+                workersRow.appendChild(chip);
+            }}
+            workersSection.appendChild(workersRow);
+            container.appendChild(workersSection);
+
+            const cardsSection = document.createElement("div");
+            cardsSection.className = "layer-section";
+            const cardsTitle = document.createElement("strong");
+            cardsTitle.textContent = "Resident Cards";
+            cardsSection.appendChild(cardsTitle);
+            const cardsRow = document.createElement("div");
+            cardsRow.className = "residentcards-row";
+            const cards = Array.isArray(((player.cards || {{}}).residentCardDetails)) ? player.cards.residentCardDetails : [];
+            for (const card of cards.slice(0, 6)) {{
+                const chip = document.createElement("span");
+                chip.className = "resident-chip";
+                const level = Number(card?.populationLevel || 2);
+                const iconName = `residentcard_lv_${{Number.isFinite(level) ? level : 2}}.png`;
+                const src = imageSrcFor(iconName);
+                if (src) {{
+                    const img = document.createElement("img");
+                    img.src = src;
+                    img.alt = iconName;
+                    chip.appendChild(img);
+                }}
+                chip.appendChild(document.createTextNode(`Lv${{Number.isFinite(level) ? level : 2}}`));
+                cardsRow.appendChild(chip);
+            }}
+            if (!cards.length) {{
+                const none = document.createElement("span");
+                none.className = "muted";
+                none.textContent = "Keine Karten";
+                cardsRow.appendChild(none);
+            }}
+            cardsSection.appendChild(cardsRow);
+            container.appendChild(cardsSection);
+        }}
+
+        function renderObjectiveCards(state, containerEl) {{
+            containerEl.innerHTML = "";
+            const objectives = Array.isArray(state?.objectiveCards) ? state.objectiveCards : [];
+            if (!objectives.length) {{
+                const none = document.createElement("p");
+                none.className = "muted";
+                none.textContent = "Keine Objective Cards im State";
+                containerEl.appendChild(none);
+                return;
+            }}
+
+            const title = document.createElement("div");
+            title.className = "objective-inline-title";
+            title.textContent = "Objective Cards";
+            containerEl.appendChild(title);
+
+            for (const objective of objectives) {{
+                const card = document.createElement("div");
+                card.className = "objective-card";
+                const title = document.createElement("strong");
+                title.textContent = String(objective?.title || "Objective Card");
+                card.appendChild(title);
+                const textNode = document.createElement("div");
+                textNode.textContent = String(objective?.description || "");
+                card.appendChild(textNode);
+                containerEl.appendChild(card);
+            }}
+        }}
+
+        function renderMainBoard(entry) {{
+            const state = entry.state || {{}};
+            const board = state.boardState || {{}};
+            const resources = board.resources || {{}};
+            const islands = board.islands || {{}};
+            const ships = board.ships || {{}};
+
+            mainBoardEl.innerHTML = "";
+            const title = document.createElement("div");
+            title.className = "main-board-title";
+            title.textContent = `Main Board - ${{text(entry.actionLabel, "State")}}`;
+            mainBoardEl.appendChild(title);
+
+            const meta = document.createElement("div");
+            meta.className = "main-board-meta";
+            meta.textContent = `Runde ${{text(entry.round, "-")}} | Aktueller Spieler: ${{text(entry.currentPlayer, "-")}}`;
+            mainBoardEl.appendChild(meta);
+
+            const objectiveStrip = document.createElement("div");
+            objectiveStrip.className = "objective-inline-strip";
+            renderObjectiveCards(state, objectiveStrip);
+            mainBoardEl.appendChild(objectiveStrip);
+
+            const pools = document.createElement("div");
+            pools.className = "main-board-pools";
+            pools.innerHTML = `
+                <div class=\"pool-chip\">Old World Inseln frei: ${{islands.oldWorldIslands ?? 0}}<br>New World Inseln frei: ${{islands.newWorldIslands ?? 0}}</div>
+                <div class=\"pool-chip\">Gold-Pool: ${{resources.goldPool ?? 0}}<br>Tradechips-Pool: ${{resources.tradeChips ?? 0}}<br>Explorerchips-Pool: ${{resources.explorerChips ?? 0}}</div>
+                <div class=\"pool-chip\">Trade Ships Board: L1 ${{ships.tradeShips?.level1 ?? 0}} / L2 ${{ships.tradeShips?.level2 ?? 0}} / L3 ${{ships.tradeShips?.level3 ?? 0}}<br>Explorer Ships Board: L1 ${{ships.explorerShips?.level1 ?? 0}} / L2 ${{ships.explorerShips?.level2 ?? 0}} / L3 ${{ships.explorerShips?.level3 ?? 0}}</div>
+            `;
+            mainBoardEl.appendChild(pools);
+
+            const boardSpace = document.createElement("div");
+            boardSpace.className = "layer-section";
+            boardSpace.innerHTML = "<strong>Zentrale Spielfläche</strong><div class=\"muted\">Hier folgt als nächstes die genaue grafische Platzierung von Inseln, Fabriken, Schiffen und Markern.</div>";
+            mainBoardEl.appendChild(boardSpace);
+        }}
+
+        function renderGameBoard(entry) {{
+            const state = entry.state || {{}};
+            const players = Array.isArray(state.players) ? state.players : [];
+            renderMainBoard(entry);
+            renderPlayerLayer(layerUpperLeftEl, players[0], "Layer Oben Links");
+            renderPlayerLayer(layerUpperRightEl, players[1], "Layer Oben Rechts");
+            renderPlayerLayer(layerLowerLeftEl, players[2], "Layer Unten Links");
+            renderPlayerLayer(layerLowerRightEl, players[3], "Layer Unten Rechts");
+        }}
+
         function render() {{
             if (!entries.length) return;
 
@@ -2211,10 +2841,7 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             roundEl.textContent = text(entry.round, "-");
             currentPlayerEl.textContent = text(entry.currentPlayer, "-");
             rawJsonEl.textContent = JSON.stringify(entry.state, null, 2);
-            renderActionDetails(entry);
-                        renderCardOverview(entry);
-            renderAgentScores(entry);
-            renderDiffs(entry);
+            renderGameBoard(entry);
 
             prevBtn.disabled = index <= 0;
             nextBtn.disabled = index >= entries.length - 1;
@@ -2303,6 +2930,13 @@ def browse_in_web(state_dir: Path, files: list[Path], prefer_firefox: bool, outp
 
 def main() -> int:
     args = parse_args()
+
+    if args.migrate_json:
+        migration_root = Path(args.migrate_dir) if args.migrate_dir else DEFAULT_GAME_STATES_DIR
+        changed_files, changed_tokens = migrate_debug_json_image_paths(migration_root)
+        print(f"JSON-Migration abgeschlossen: {changed_files} Dateien, {changed_tokens} ersetzte Bildpfade")
+        return 0
+
     state_dir = Path(args.dir) if args.dir else find_latest_debuggame_dir()
 
     if state_dir is None:

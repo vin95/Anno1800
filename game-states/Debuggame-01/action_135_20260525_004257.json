@@ -5,7 +5,7 @@
   "label": "action_135",
   "executedAction": "SettleResident[level=2]",
   "executedByPlayer": "Player 2",
-  "executedActionDetails": "Gezogene Einwohnerkarte: residentcard_lv_2.png bricks.png , bread.png => 2x neuer Bewohner Stufe 2; Verbrauch fuer Aktion: 1x Planks [produziert (Sawmill Blue, Bewohnerstufe 2)]; 1x Bricks [gehandelt (Spieler 3, Kosten 1 Chip)]; Chips verwendet: Tradechips=1, Explorerchips=0",
+  "executedActionDetails": "Gezogene Einwohnerkarte: residents/residentcard_lv_2.png goods/bricks.png , goods/bread.png => 2x neuer Bewohner Stufe 2; Verbrauch fuer Aktion: 1x Planks [produziert (Sawmill Blue, Bewohnerstufe 2)]; 1x Bricks [gehandelt (Spieler 3, Kosten 1 Chip)]; Chips verwendet: Tradechips=1, Explorerchips=0",
   "agentStrategyName": "shipBuilding",
   "agentMainActionScores": [
     {

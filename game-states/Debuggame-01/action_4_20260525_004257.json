@@ -5,7 +5,7 @@
   "label": "action_4",
   "executedAction": "SettleResident[level=2]",
   "executedByPlayer": "Player 3",
-  "executedActionDetails": "Gezogene Einwohnerkarte: residentcard_lv_2.png snaps.png , soap.png => 3x Upgrade Stufe 1 -> 2; Verbrauch fuer Aktion: 1x Planks [produziert (Sawmill Green, Bewohnerstufe 1)]; 1x Bricks [gehandelt (Spieler 2, Kosten 2 Chips)]; Chips verwendet: Tradechips=2, Explorerchips=0",
+  "executedActionDetails": "Gezogene Einwohnerkarte: residents/residentcard_lv_2.png goods/snaps.png , goods/soap.png => 3x Upgrade Stufe 1 -> 2; Verbrauch fuer Aktion: 1x Planks [produziert (Sawmill Green, Bewohnerstufe 1)]; 1x Bricks [gehandelt (Spieler 2, Kosten 2 Chips)]; Chips verwendet: Tradechips=2, Explorerchips=0",
   "agentStrategyName": "adaptiveResidentStrategy",
   "agentMainActionScores": [
     {

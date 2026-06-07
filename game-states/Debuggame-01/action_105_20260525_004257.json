@@ -5,7 +5,7 @@
   "label": "action_105",
   "executedAction": "SettleResident[level=3]",
   "executedByPlayer": "Player 2",
-  "executedActionDetails": "Gezogene Einwohnerkarte: residentcard_lv_5.png cigars.png , champagne.png , glasses.png => Discard 2 ResidentCard(s); Verbrauch fuer Aktion: 1x Bricks [gehandelt (Spieler 3, Kosten 1 Chip)]; 1x Coal [gehandelt (Spieler 3, Kosten 1 Chip)]; 1x Goods [gehandelt (Spieler 1, Kosten 2 Chips)]; Chips verwendet: Tradechips=4, Explorerchips=0",
+  "executedActionDetails": "Gezogene Einwohnerkarte: residents/residentcard_lv_5.png goods/cigars.png , goods/champagne.png , goods/glasses.png => Discard 2 ResidentCard(s); Verbrauch fuer Aktion: 1x Bricks [gehandelt (Spieler 3, Kosten 1 Chip)]; 1x Coal [gehandelt (Spieler 3, Kosten 1 Chip)]; 1x Goods [gehandelt (Spieler 1, Kosten 2 Chips)]; Chips verwendet: Tradechips=4, Explorerchips=0",
   "agentStrategyName": "shipBuilding",
   "agentMainActionScores": [
     {

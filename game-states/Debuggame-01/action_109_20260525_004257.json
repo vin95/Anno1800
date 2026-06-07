@@ -5,7 +5,7 @@
   "label": "action_109",
   "executedAction": "SettleResident[level=3]",
   "executedByPlayer": "Player 3",
-  "executedActionDetails": "Gezogene Einwohnerkarte: residentcard_lv_5.png soap.png , pocketwatches.png , big_berta.png => 3 Exploration Points; Verbrauch fuer Aktion: 1x Bricks [produziert (Brick Factory Blue, Bewohnerstufe 2)]; 1x Coal [produziert (Coal Mine Blue, Bewohnerstufe 2)]; 1x Goods [gehandelt (Spieler 2, Kosten 2 Chips)]; Chips verwendet: Tradechips=2, Explorerchips=0",
+  "executedActionDetails": "Gezogene Einwohnerkarte: residents/residentcard_lv_5.png goods/soap.png , goods/pocketwatches.png , goods/big_berta.png => 3 Exploration Points; Verbrauch fuer Aktion: 1x Bricks [produziert (Brick Factory Blue, Bewohnerstufe 2)]; 1x Coal [produziert (Coal Mine Blue, Bewohnerstufe 2)]; 1x Goods [gehandelt (Spieler 2, Kosten 2 Chips)]; Chips verwendet: Tradechips=2, Explorerchips=0",
   "agentStrategyName": "adaptiveResidentStrategy",
   "agentMainActionScores": [
     {

@@ -5,7 +5,7 @@
   "label": "action_39",
   "executedAction": "SettleResident[level=1]",
   "executedByPlayer": "Player 2",
-  "executedActionDetails": "Gezogene Einwohnerkarte: residentcard_lv_2.png explorationchip.png , explorationchip.png => 3 Trade Points; Verbrauch fuer Aktion: 1x Planks [produziert (Sawmill Blue, Bewohnerstufe 2)]",
+  "executedActionDetails": "Gezogene Einwohnerkarte: residents/residentcard_lv_2.png goods/explorerchip.png , goods/explorerchip.png => 3 Trade Points; Verbrauch fuer Aktion: 1x Planks [produziert (Sawmill Blue, Bewohnerstufe 2)]",
   "agentStrategyName": "shipBuilding",
   "agentMainActionScores": [
     {

@@ -5,7 +5,7 @@
   "label": "action_50",
   "executedAction": "SettleResident[level=1]",
   "executedByPlayer": "Player 1",
-  "executedActionDetails": "Gezogene Einwohnerkarte: residentcard_lv_2.png steelbars.png , canned_meat.png => 4 Gold; Verbrauch fuer Aktion: 1x Planks [gehandelt (Spieler 2, Kosten 1 Chip)]; Chips verwendet: Tradechips=1, Explorerchips=0",
+  "executedActionDetails": "Gezogene Einwohnerkarte: residents/residentcard_lv_2.png goods/steel_bars.png , goods/canned_meat.png => 4 Gold; Verbrauch fuer Aktion: 1x Planks [gehandelt (Spieler 2, Kosten 1 Chip)]; Chips verwendet: Tradechips=1, Explorerchips=0",
   "agentStrategyName": "adaptiveResidentStrategy",
   "agentMainActionScores": [
     {

@@ -5,7 +5,7 @@
   "label": "action_103",
   "executedAction": "SettleResident[level=3]",
   "executedByPlayer": "Player 3",
-  "executedActionDetails": "Gezogene Einwohnerkarte: residentcard_lv_5.png explorationchip.png , explorationchip.png , explorationchip.png , explorationchip.png , explorationchip.png , explorationchip.png => Extra Action; Verbrauch fuer Aktion: 1x Bricks [produziert (Brick Factory Blue, Bewohnerstufe 2)]; 1x Coal [produziert (Coal Mine Blue, Bewohnerstufe 2)]; 1x Goods [gehandelt (Spieler 1, Kosten 2 Chips)]; Chips verwendet: Tradechips=2, Explorerchips=0",
+  "executedActionDetails": "Gezogene Einwohnerkarte: residents/residentcard_lv_5.png goods/explorerchip.png , goods/explorerchip.png , goods/explorerchip.png , goods/explorerchip.png , goods/explorerchip.png , goods/explorerchip.png => Extra Action; Verbrauch fuer Aktion: 1x Bricks [produziert (Brick Factory Blue, Bewohnerstufe 2)]; 1x Coal [produziert (Coal Mine Blue, Bewohnerstufe 2)]; 1x Goods [gehandelt (Spieler 1, Kosten 2 Chips)]; Chips verwendet: Tradechips=2, Explorerchips=0",
   "agentStrategyName": "adaptiveResidentStrategy",
   "agentMainActionScores": [
     {
