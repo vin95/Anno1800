@@ -1,0 +1,42 @@
+@startuml
+title Simulate Layer - Future Outcome Estimation
+
+start
+
+:Receive GameState + Action;
+
+:Create simulationState copy;
+
+:Apply action to simulationState;
+
+:depth = 0;
+
+while (depth < maxDepth?) is (yes)
+
+  :Generate next possible actions;
+
+  if (no actions?) then (yes)
+    break
+  endif
+
+  :Pick simulated action (policy/random);
+
+  :Apply action to simulationState;
+
+  :depth++;
+
+endwhile
+
+:Evaluate final simulationState;
+
+:Compute outcomeScore;
+note right
+  - points
+  - resources
+  - win condition proximity
+end note
+
+:Return expectedValue(action);
+
+stop
+@enduml

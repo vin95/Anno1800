@@ -1,0 +1,302 @@
+@startuml
+title Anno1800 - Vollstaendiges Klassendiagramm
+skinparam packageStyle rectangle
+hide empty members
+hide circle
+
+package "com.anno1800" {
+  class App
+}
+
+package "com.anno1800.agents" {
+  interface Agent
+  class GameContext <<record>>
+  class ObjectiveContext <<record>>
+  class StrategyWeights <<record>>
+}
+
+package "com.anno1800.agents.AgentImpl" {
+  class AgentRandom
+  class MainActionScore <<record>>
+  class ScoringAgent
+  class WeightedScoringAgent
+}
+
+package "com.anno1800.data.config" {
+  class CardConfig
+  class GameConfig
+}
+
+package "com.anno1800.data.gamedata" {
+  class ExpeditionCardData
+  class FactoryData
+  enum Goods
+  class NewWorldIslandsData
+  class OldWorldIslandData
+  enum Producers
+  class ResidentCardData
+  enum ShipType
+  enum StartFactories
+}
+
+package "com.anno1800.debug" {
+  class DebugGameRunner
+  class FactoryCounter
+  class PossibleActionsProbe
+}
+
+package "com.anno1800.game.actions" {
+  class ActionGenerator
+  class ActionHandler
+  class ActionValidator
+  class ActivateReward <<record>>
+  class AssignWorker <<record>>
+  class BuildFactory <<record>>
+  class BuildShips <<record>>
+  class BuildShipyard <<record>>
+  class CardResult <<record>>
+  class CardsResult <<record>>
+  class Carneval <<record>>
+  class ChooseGoods <<record>>
+  class DemolishFactory <<record>>
+  class DiscardResidentCardAction <<record>>
+  class DiscoverNewWorldIsland <<record>>
+  class DiscoverOldWorldIsland <<record>>
+  class DoOvertime <<record>>
+  class DrawResidentCard <<record>>
+  class ExhaustWorker <<record>>
+  class Expedition <<record>>
+  class FulfillNeeds <<record>>
+  class GoodsResult <<record>>
+  class ImportGood <<record>>
+  class InvestorGoldAction <<record>>
+  class NoResult <<record>>
+  class OverbuildDefaultFactory <<record>>
+  class ProduceGoods <<record>>
+  class RewardResult <<record>>
+  class SettleResident <<record>>
+  class SwapResidentCards <<record>>
+  class TradeGoods <<record>>
+  class UpgradeResident <<record>>
+  class UseExtraAction <<record>>
+  class ViewResidentCards <<record>>
+}
+
+package "com.anno1800.game.actions.actions" {
+  class ActivateReward
+  class AssignWorker
+  class BuildFactory
+  class BuildShips
+  class BuildShipyard
+  class Carneval
+  class ChooseGoods
+  class DemolishFactory
+  class DiscardResidentCardAction
+  class DiscoverNewWorldIsland
+  class DiscoverOldWorldIsland
+  class DoOvertime
+  class DrawResidentCard
+  class ExhaustWorker
+  class Expedition
+  class FulfillNeeds
+  class ImportGood
+  class InvestorGoldAction
+  class OverbuildDefaultFactory
+  class ProduceGoods
+  class SettleResident
+  class SwapResidentCards
+  class TradeGoods
+  class UpgradeResident
+  class UseExtraAction
+  class ViewResidentCards
+}
+
+package "com.anno1800.game.actions.validators" {
+  class ActivateRewardValidator
+  class AssignWorkerValidator
+  class BuildFactoryValidator
+  class BuildShipsValidator
+  class BuildShipyardValidator
+  class CarnevalValidator
+  class ChooseGoodsValidator
+  class DemolishFactoryValidator
+  class DiscardResidentCardActionValidator
+  class DiscoverNewWorldIslandValidator
+  class DiscoverOldWorldIslandValidator
+  class DoOvertimeValidator
+  class DrawResidentCardValidator
+  class ExhaustWorkerValidator
+  class ExpeditionValidator
+  class FulfillNeedsValidator
+  class ImportGoodValidator
+  class InvestorGoldActionValidator
+  class OverbuildDefaultFactoryValidator
+  class ProduceGoodsValidator
+  class SettleResidentValidator
+  class SwapResidentCardsValidator
+  class TradeGoodsValidator
+  class UpgradeResidentValidator
+  class UseExtraActionValidator
+}
+
+package "com.anno1800.game.board" {
+  class Board
+}
+
+package "com.anno1800.game.cards" {
+  class AnimalBonus <<record>>
+  class ArtifactBonus <<record>>
+  class ArtisanGoodsFactories <<record>>
+  class BasicGoodsProducer <<record>>
+  class DiscardResidentCard <<record>>
+  class EngineerGoodsFactories <<record>>
+  class ExpeditionCard
+  class ExplorerTrader <<record>>
+  class ExtraAction <<record>>
+  class InvestorExhaustForGold <<record>>
+  class LuxuryFactories <<record>>
+  class MostEngineers <<record>>
+  class MostExpeditionCards <<record>>
+  class MostInvestors <<record>>
+  class MostResidentsTotal <<record>>
+  class MostTradeChips <<record>>
+  class NewWorldExplorer <<record>>
+  class NewWorldProductFactories <<record>>
+  class PrestigeFactories <<record>>
+  class ResidentCard <<record>>
+  class ResidentCardsPenalty <<record>>
+  class SingleIslandBonus <<record>>
+}
+
+package "com.anno1800.game.engine" {
+  class Game
+  class GameResult
+  class Rules
+}
+
+package "com.anno1800.game.examples" {
+  class FreeGoodsChoiceExample
+  class ResidentRewardsExample
+}
+
+package "com.anno1800.game.factories" {
+  class createResidents
+  class ShipFactory
+  class ShipyardFactory
+}
+
+package "com.anno1800.game.player" {
+  class FromReward <<record>>
+  class Imported <<record>>
+  class Inventory
+  class Other <<record>>
+  class Player
+  class PlayerBoard
+  class Population
+  class Produced <<record>>
+  class ProducedGood <<record>>
+  class Traded <<record>>
+  class TradedWithExplorer <<record>>
+}
+
+package "com.anno1800.game.residents" {
+  class Artisan
+  class Cost <<record>>
+  class Engineer
+  class Farmer
+  class Investor
+  class Resident
+  class ResidentCosts
+  enum ResidentStatus
+  class Worker
+}
+
+package "com.anno1800.game.rewards" {
+  class BuildFactory <<record>>
+  class DiscardResidentCard <<record>>
+  class ExpeditionCards <<record>>
+  class ExplorationPoints <<record>>
+  class ExtraAction <<record>>
+  class FreeGoodsChoice <<record>>
+  class Gold <<record>>
+  class GoldAndTradePoints <<record>>
+  class NewResidents <<record>>
+  enum RewardType
+  class TradePoints <<record>>
+  class UpgradeResidents <<record>>
+}
+
+package "com.anno1800.game.state" {
+  class BoardState <<record>>
+  class BuildingState <<record>>
+  class CardState <<record>>
+  class EndPhaseState <<record>>
+  class ExpeditionState <<record>>
+  class FactoryState <<record>>
+  class GameState <<record>>
+  class IslandState <<record>>
+  class PlayerResourceState <<record>>
+  class PlayerShipState <<record>>
+  class PlayerState <<record>>
+  class ResidentCardState <<record>>
+  class ResidentState <<record>>
+  class ResidentSummary <<record>>
+  class ResourcePoolState <<record>>
+  class ShipCountWithLevels <<record>>
+  class ShipLevelCounts <<record>>
+  class ShipState <<record>>
+  class ShipyardState <<record>>
+  class TileState <<record>>
+}
+
+package "com.anno1800.game.tiles" {
+  class ExplorerShip
+  class Factory
+  interface Island
+  class NewWorldIsland
+  class OldWorldIsland
+  class Plantation
+  class Producer
+  class ShipCosts
+  interface shipType
+  class Shipyard
+  class StartFactory
+  class TradeShip
+}
+
+package "com.anno1800.simulation" {
+  class DatasetGenerator
+  class Match
+}
+
+package "com.anno1800.ui" {
+  class TerminalGameUI
+}
+
+package "com.anno1800.ui.output" {
+  class GameStatePrinter
+}
+
+package "com.anno1800.utils" {
+  class IdGenerator
+  class RandomProvider
+  class Validation
+}
+
+AgentRandom ..|> Agent
+Artisan --|> Resident
+Engineer --|> Resident
+ExplorerShip ..|> shipType
+Factory --|> Producer
+Farmer --|> Resident
+Investor --|> Resident
+NewWorldIsland ..|> Island
+OldWorldIsland ..|> Island
+Plantation --|> Producer
+ScoringAgent ..|> Agent
+StartFactory --|> Factory
+TradeShip ..|> shipType
+WeightedScoringAgent --|> ScoringAgent
+Worker --|> Resident
+
+@enduml

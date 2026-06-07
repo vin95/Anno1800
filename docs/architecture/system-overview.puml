@@ -1,0 +1,116 @@
+@startuml
+title Anno1800 - System Overview
+left to right direction
+skinparam packageStyle rectangle
+
+package "Entry Points" {
+    [App] as APP
+    [TerminalGameUI] as TUI
+    [DebugGameRunner] as DGR
+    [DatasetGenerator] as DSG
+}
+
+package "Simulation" {
+    [Game Loop] as GL
+    [Round/Turn Control] as RTC
+}
+
+package "Agents" {
+    [Agent Interface] as AGI
+    [AgentRandom] as AGR
+    [ScoringAgent] as AGS
+    [WeightedScoringAgent] as AGW
+    [GameContext] as GCTX
+    [ObjectiveContext] as OCTX
+    [StrategyWeights] as SW
+}
+
+package "Engine" {
+    [Game] as GAME
+    [ActionGenerator] as AGEN
+    [ActionValidator] as AVAL
+    [ActionHandler] as AHND
+    [Rules] as RULES
+}
+
+package "Domain Model" {
+    [Board] as BOARD
+    [Player] as PLAYER
+    [PlayerBoard] as PBOARD
+    [Actions (records)] as ACTIONS
+    [Cards] as CARDS
+    [Residents] as RES
+    [Factories/Tiles/Ships] as TILES
+    [Rewards] as REW
+}
+
+package "State and Output" {
+    [GameState Snapshot] as GSTATE
+    [GameStatePrinter] as GPRINT
+    [Debug Probes] as DPROBE
+}
+
+package "Static Data" {
+    [GameConfig/CardConfig] as CFG
+    [FactoryData] as FDATA
+    [Goods/Producers/ShipType] as ENUMS
+    [ResidentCardData] as RDATA
+    [IslandData] as IDATA
+}
+
+package "Artifacts" {
+    [CSV Datasets] as CSV
+    [Saved Game States JSON] as SAVE
+}
+
+APP --> GAME
+TUI --> GAME
+DGR --> GAME
+DSG --> GAME
+
+GAME --> GL
+GL --> RTC
+
+GAME --> AGEN
+AGEN --> AVAL
+GAME --> AHND
+GAME --> RULES
+
+GAME --> GSTATE
+GSTATE --> GPRINT
+DGR --> DPROBE
+DPROBE --> SAVE
+DSG --> CSV
+
+GAME --> BOARD
+GAME --> PLAYER
+PLAYER --> PBOARD
+PBOARD --> ACTIONS
+PBOARD --> CARDS
+PBOARD --> RES
+PBOARD --> TILES
+PBOARD --> REW
+
+AGI --> GAME : selectAction(...)
+AGR ..|> AGI
+AGS ..|> AGI
+AGW --|> AGS
+AGS --> GCTX
+AGS --> OCTX
+AGW --> SW
+
+AGEN --> ACTIONS
+AVAL --> ACTIONS
+AHND --> ACTIONS
+AHND --> REW
+
+RULES --> ACTIONS
+RULES --> CARDS
+
+TILES --> FDATA
+TILES --> ENUMS
+CARDS --> RDATA
+BOARD --> IDATA
+GAME --> CFG
+
+@enduml

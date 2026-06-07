@@ -1,0 +1,45 @@
+@startuml
+title Evaluate Layer - Action Scoring
+
+start
+
+:Receive GameState + Player;
+:Generate possibleActions;
+
+:Load ObjectiveContext (cached or fallback);
+
+:bestScore = -infinity;
+
+while (more actions?) is (yes)
+
+  :Take next action;
+
+  :Apply basic rules scoring;
+  note right
+    immediate constraints,
+    legality, penalties
+  end note
+
+  :Apply strategy scoring;
+  note right
+    heuristics:
+    - resources
+    - production
+    - cards
+    - progression
+  end note
+
+  :Combine scores;
+  :score = basic + strategy;
+
+  if (score > bestScore?) then (yes)
+    :bestScore = score;
+    :bestAction = action;
+  endif
+
+endwhile
+
+:Return scored actions + bestAction;
+
+stop
+@enduml

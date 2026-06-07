@@ -1,0 +1,45 @@
+@startuml
+title Select Layer - Final Decision
+
+start
+
+:Receive scoredActions;
+:Receive simulatedValues (optional);
+
+:bestAction = null;
+:bestValue = -infinity;
+
+while (more actions?) is (yes)
+
+  :Take next action;
+
+  :Get evaluationScore;
+
+  if (simulation enabled?) then (yes)
+    :Get simulatedValue;
+    :finalScore = evaluationScore + simulatedValue;
+  else (no)
+    :finalScore = evaluationScore;
+  endif
+
+  :Add exploration noise;
+
+  if (agent == RandomAgent?) then (yes)
+    :Pick random action;
+    stop
+  endif
+
+  if (finalScore > bestValue?) then (yes)
+    :bestValue = finalScore;
+    :bestAction = action;
+  endif
+
+endwhile
+
+:Return bestAction;
+
+:Engine validates action;
+:Engine applies action to GameState;
+
+stop
+@enduml
