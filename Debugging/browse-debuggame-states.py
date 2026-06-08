@@ -1533,62 +1533,6 @@ def build_state_entries(files: list[Path]) -> list[dict[str, Any]]:
     return entries
 
 
-def get_factory_layout(num_players: int) -> list[dict]:
-    """Returns factory/ship layout with initial stack counts from Board.java.
-    
-    Args:
-        num_players: Number of players (1-4). Factories: 1-2 players = 1 each, 3-4 players = 2 each.
-                     Ships and shipyards have fixed counts regardless of player count.
-    """
-    factories_per_stack = 1 if num_players <= 2 else 2
-    return [
-        {"name": "Sägewerk",             "initial": factories_per_stack},
-        {"name": "Kohlemine",            "initial": factories_per_stack},
-        {"name": "Ziegelei",             "initial": factories_per_stack},
-        {"name": "Brauerei",             "initial": factories_per_stack},
-        {"name": "Bäckerei",             "initial": factories_per_stack},
-        {"name": "Messinggießerei",      "initial": factories_per_stack},
-        {"name": "Fenstermacher",        "initial": factories_per_stack},
-        {"name": "Champagnerkeller",     "initial": factories_per_stack},
-        {"name": "Werft L1",             "initial": 4},
-        {"name": "Werft L2",             "initial": 6},
-        {"name": "Werft L3",             "initial": 4},
-        {"name": "Lagerhaus",            "initial": factories_per_stack},
-        {"name": "Stahlwerk",            "initial": factories_per_stack},
-        {"name": "Segelmacher",          "initial": factories_per_stack},
-        {"name": "Destillerie",          "initial": factories_per_stack},
-        {"name": "Glasmacher",           "initial": factories_per_stack},
-        {"name": "Brillenfabrik",        "initial": factories_per_stack},
-        {"name": "Uhrmacher",            "initial": factories_per_stack},
-        {"name": "Nähmaschine",          "initial": factories_per_stack},
-        {"name": "Handelsschiff L1",     "initial": 6},
-        {"name": "Handelsschiff L2",     "initial": 6},
-        {"name": "Handelsschiff L3",     "initial": 6},
-        {"name": "Baumwollmühle (rot)",  "initial": factories_per_stack},
-        {"name": "Baumwollmühle (blau)", "initial": factories_per_stack},
-        {"name": "Kaffeerösterei",       "initial": factories_per_stack},
-        {"name": "Schlachthaus",         "initial": factories_per_stack},
-        {"name": "Seifenfabrik",         "initial": factories_per_stack},
-        {"name": "Pelzhändler",          "initial": factories_per_stack},
-        {"name": "Dynamitfabrik",        "initial": factories_per_stack},
-        {"name": "Kanonenfabrik",        "initial": factories_per_stack},
-        {"name": "Expeditionsschiff L1", "initial": 6},
-        {"name": "Expeditionsschiff L2", "initial": 6},
-        {"name": "Expeditionsschiff L3", "initial": 6},
-        {"name": "Rum-Destillerie",      "initial": factories_per_stack},
-        {"name": "Zigarrenfabrik",       "initial": factories_per_stack},
-        {"name": "Schokoladenfabrik",    "initial": factories_per_stack},
-        {"name": "Konservenfabrik",      "initial": factories_per_stack},
-        {"name": "Strumpfwirker",        "initial": factories_per_stack},
-        {"name": "Motorenmontage",       "initial": factories_per_stack},
-        {"name": "Autofabrik",           "initial": factories_per_stack},
-        {"name": "Fahrradfabrik",        "initial": factories_per_stack},
-        {"name": "Glühbirnenfabrik",     "initial": factories_per_stack},
-        {"name": "Grammophonfabrik",     "initial": factories_per_stack},
-        {"name": "Schwerwaffenfabrik",   "initial": factories_per_stack},
-    ]
-
-
 def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_path: Path | None = None) -> str:
     entries_json = json.dumps(entries, indent=None)
 
@@ -1629,56 +1573,56 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
     }
     factory_layout = [
         {"label": "Reihe 1 — Basisfabriken + Werften", "factories": [
-            {"id": "sawmill_blue",             "path": "factories/sawmill_blue_blueprint.png",             "name": "Sägewerk"},
-            {"id": "coal_mine_blue",           "path": "factories/coal_mine_blue_blueprint.png",           "name": "Kohlemine"},
-            {"id": "brick_factory_blue",       "path": "factories/brick_factory_blue_blueprint.png",       "name": "Ziegelei"},
-            {"id": "brewery_blue",             "path": "factories/brewery_blue_blueprint.png",             "name": "Brauerei"},
-            {"id": "bakery_blue",              "path": "factories/bakery_blue_blueprint.png",              "name": "Bäckerei"},
-            {"id": "brass_foundry",            "path": "factories/brass_foundry_red_blueprint.png",        "name": "Messinggießerei"},
-            {"id": "window_maker_red",         "path": "factories/window_maker_red_blueprint.png",         "name": "Fenstermacher"},
-            {"id": "champagne_cellar_red",     "path": "factories/champagne_cellar_red_blueprint.png",     "name": "Champagnerkeller"},
-            {"id": "shipyard_lv1",             "path": "ships/shipyard_lv1_blueprint.png",                 "name": "Werft L1"},
-            {"id": "shipyard_lv2",             "path": "ships/shipyard_lv2_blueprint.png",                 "name": "Werft L2"},
-            {"id": "shipyard_lv3",             "path": "ships/shipyard_lv3_blueprint.png",                 "name": "Werft L3"}
+            {"id": "sawmill_blue",             "path": "factories/sawmill_blue_blueprint.png",             "name": "Sägewerk",              "initial": 0},
+            {"id": "coal_mine_blue",           "path": "factories/coal_mine_blue_blueprint.png",           "name": "Kohlemine",             "initial": 0},
+            {"id": "brick_factory_blue",       "path": "factories/brick_factory_blue_blueprint.png",       "name": "Ziegelei",              "initial": 0},
+            {"id": "brewery_blue",             "path": "factories/brewery_blue_blueprint.png",             "name": "Brauerei",              "initial": 0},
+            {"id": "bakery_blue",              "path": "factories/bakery_blue_blueprint.png",              "name": "Bäckerei",              "initial": 0},
+            {"id": "brass_foundry",            "path": "factories/brass_foundry_red_blueprint.png",        "name": "Messinggießerei",       "initial": 0},
+            {"id": "window_maker_red",         "path": "factories/window_maker_red_blueprint.png",         "name": "Fenstermacher",         "initial": 0},
+            {"id": "champagne_cellar_red",     "path": "factories/champagne_cellar_red_blueprint.png",     "name": "Champagnerkeller",      "initial": 0},
+            {"id": "shipyard_lv1",             "path": "ships/shipyard_lv1_blueprint.png",                 "name": "Werft L1",              "initial": 4},
+            {"id": "shipyard_lv2",             "path": "ships/shipyard_lv2_blueprint.png",                 "name": "Werft L2",              "initial": 6},
+            {"id": "shipyard_lv3",             "path": "ships/shipyard_lv3_blueprint.png",                 "name": "Werft L3",              "initial": 4}
         ]},
         {"label": "Reihe 2 — Verarbeitungsfabriken + Handelsschiffe", "factories": [
-            {"id": "warehouse_blue",           "path": "factories/warehouse_blue_blueprint.png",           "name": "Lagerhaus"},
-            {"id": "steel_works_blue",         "path": "factories/steel_works_blue_blueprint.png",         "name": "Stahlwerk"},
-            {"id": "sailmakers_blue",          "path": "factories/sailmakers_blue_blueprint.png",          "name": "Segelmacher"},
-            {"id": "distillery_blue",          "path": "factories/distillery_blue_blueprint.png",          "name": "Destillerie"},
-            {"id": "glass_maker_blue",         "path": "factories/glass_maker_blue_blueprint.png",         "name": "Glasmacher"},
-            {"id": "spectacle_factory_red",    "path": "factories/spectacle_factory_red_blueprint.png",    "name": "Brillenfabrik"},
-            {"id": "clockmakers",              "path": "factories/clockmakers_red_blueprint.png",          "name": "Uhrmacher"},
-            {"id": "sewing_machine_red",       "path": "factories/sewing_machine_red_blueprint.png",       "name": "Nähmaschine"},
-            {"id": "tradeship_lv1",            "path": "ships/tradeship_lv1_blueprint.png",               "name": "Handelsschiff L1"},
-            {"id": "tradeship_lv2",            "path": "ships/tradeship_lv2_blueprint.png",               "name": "Handelsschiff L2"},
-            {"id": "tradeship_lv3",            "path": "ships/tradeship_lv3_blueprint.png",               "name": "Handelsschiff L3"},
+            {"id": "warehouse_blue",           "path": "factories/warehouse_blue_blueprint.png",           "name": "Lagerhaus",             "initial": 0},
+            {"id": "steel_works_blue",         "path": "factories/steel_works_blue_blueprint.png",         "name": "Stahlwerk",             "initial": 0},
+            {"id": "sailmakers_blue",          "path": "factories/sailmakers_blue_blueprint.png",          "name": "Segelmacher",           "initial": 0},
+            {"id": "distillery_blue",          "path": "factories/distillery_blue_blueprint.png",          "name": "Destillerie",           "initial": 0},
+            {"id": "glass_maker_blue",         "path": "factories/glass_maker_blue_blueprint.png",         "name": "Glasmacher",            "initial": 0},
+            {"id": "spectacle_factory_red",    "path": "factories/spectacle_factory_red_blueprint.png",    "name": "Brillenfabrik",         "initial": 0},
+            {"id": "clockmakers",              "path": "factories/clockmakers_red_blueprint.png",          "name": "Uhrmacher",             "initial": 0},
+            {"id": "sewing_machine_red",       "path": "factories/sewing_machine_red_blueprint.png",       "name": "Nähmaschine",           "initial": 0},
+            {"id": "tradeship_lv1",            "path": "ships/tradeship_lv1_blueprint.png",               "name": "Handelsschiff L1",      "initial": 6},
+            {"id": "tradeship_lv2",            "path": "ships/tradeship_lv2_blueprint.png",               "name": "Handelsschiff L2",      "initial": 6},
+            {"id": "tradeship_lv3",            "path": "ships/tradeship_lv3_blueprint.png",               "name": "Handelsschiff L3",      "initial": 6},
         ]},
         {"label": "Reihe 3 — Fortgeschrittene Fabriken + Expeditionsschiffe", "factories": [
-            {"id": "cotton_mill_red",          "path": "factories/cotton_mill_red_blueprint.png",          "name": "Baumwollmühle (rot)"},
-            {"id": "cotton_mill_blue",         "path": "factories/cotton_mill_blue_blue_blueprint.png",    "name": "Baumwollmühle (blau)"},
-            {"id": "coffee_rosters_red",       "path": "factories/coffee_rosters_red_blueprint.png",       "name": "Kaffeerösterei"},
-            {"id": "slaughterhouse_blue",      "path": "factories/slaughterhouse_blue_blueprint.png",      "name": "Schlachthaus"},
-            {"id": "soap_factory_blue",        "path": "factories/soap_factory_blue_blueprint.png",        "name": "Seifenfabrik"},
-            {"id": "fur_dealer_red",           "path": "factories/fur_dealer_red_blueprint.png",           "name": "Pelzhändler"},
-            {"id": "dynamite_factory_red",     "path": "factories/dynamite_factory_red_blueprint.png",     "name": "Dynamitfabrik"},
-            {"id": "cannons_factory_red",      "path": "factories/cannons_factory_red_blueprint.png",      "name": "Kanonenfabrik"},
-            {"id": "explorership_lv1",         "path": "ships/explorership_lv1_blueprint.png",             "name": "Expeditionsschiff L1"},
-            {"id": "explorership_lv2",         "path": "ships/explorership_lv2_blueprint.png",             "name": "Expeditionsschiff L2"},
-            {"id": "explorership_lv3",         "path": "ships/explorership_lv3_blueprint.png",             "name": "Expeditionsschiff L3"},
+            {"id": "cotton_mill_red",          "path": "factories/cotton_mill_red_blueprint.png",          "name": "Baumwollmühle (rot)",   "initial": 0},
+            {"id": "cotton_mill_blue",         "path": "factories/cotton_mill_blue_blue_blueprint.png",    "name": "Baumwollmühle (blau)",  "initial": 0},
+            {"id": "coffee_rosters_red",       "path": "factories/coffee_rosters_red_blueprint.png",       "name": "Kaffeerösterei",        "initial": 0},
+            {"id": "slaughterhouse_blue",      "path": "factories/slaughterhouse_blue_blueprint.png",      "name": "Schlachthaus",          "initial": 0},
+            {"id": "soap_factory_blue",        "path": "factories/soap_factory_blue_blueprint.png",        "name": "Seifenfabrik",          "initial": 0},
+            {"id": "fur_dealer_red",           "path": "factories/fur_dealer_red_blueprint.png",           "name": "Pelzhändler",           "initial": 0},
+            {"id": "dynamite_factory_red",     "path": "factories/dynamite_factory_red_blueprint.png",     "name": "Dynamitfabrik",         "initial": 0},
+            {"id": "cannons_factory_red",      "path": "factories/cannons_factory_red_blueprint.png",      "name": "Kanonenfabrik",         "initial": 0},
+            {"id": "explorership_lv1",         "path": "ships/explorership_lv1_blueprint.png",             "name": "Expeditionsschiff L1",  "initial": 6},
+            {"id": "explorership_lv2",         "path": "ships/explorership_lv2_blueprint.png",             "name": "Expeditionsschiff L2",  "initial": 6},
+            {"id": "explorership_lv3",         "path": "ships/explorership_lv3_blueprint.png",             "name": "Expeditionsschiff L3",  "initial": 6},
         ]},
         {"label": "Reihe 4 — Luxusgüter & Neue Welt", "factories": [
-            {"id": "rum_distillery_red",       "path": "factories/rum_distillery_red_blueprint.png",       "name": "Rum-Destillerie"},
-            {"id": "cigar_factory_red",        "path": "factories/cigar_factory_red_blueprint.png",        "name": "Zigarrenfabrik"},
-            {"id": "chocolate_factory_red",    "path": "factories/chocolate_factory_red_blueprint.png",    "name": "Schokoladenfabrik"},
-            {"id": "cannery_blue",             "path": "factories/cannery_blue_blueprint.png",             "name": "Konservenfabrik"},
-            {"id": "framework_knitters_blue",  "path": "factories/framework_knitters_blue_blueprint.png",  "name": "Strumpfwirker"},
-            {"id": "motor_assembly_purple",    "path": "factories/motor_assembly_purple_blueprint.png",    "name": "Motorenmontage"},
-            {"id": "car_factory_purple",       "path": "factories/car_factory_purple_blueprint.png",       "name": "Autofabrik"},
-            {"id": "bicycle_purple",           "path": "factories/bicycle_purple_blueprint.png",           "name": "Fahrradfabrik"},
-            {"id": "lightbulb_purple",         "path": "factories/lightbulb_purple_blueprint.png",         "name": "Glühbirnenfabrik"},
-            {"id": "gramphone_purple",         "path": "factories/gramphone_purple_blueprint.png",         "name": "Grammophonfabrik"},
-            {"id": "heavy_weapons_purple",         "path": "factories/heavy_weapons_purple_blueprint.png",         "name": "Schwerwaffenfabrik"},
+            {"id": "rum_distillery_red",       "path": "factories/rum_distillery_red_blueprint.png",       "name": "Rum-Destillerie",       "initial": 0},
+            {"id": "cigar_factory_red",        "path": "factories/cigar_factory_red_blueprint.png",        "name": "Zigarrenfabrik",        "initial": 0},
+            {"id": "chocolate_factory_red",    "path": "factories/chocolate_factory_red_blueprint.png",    "name": "Schokoladenfabrik",     "initial": 0},
+            {"id": "cannery_blue",             "path": "factories/cannery_blue_blueprint.png",             "name": "Konservenfabrik",       "initial": 0},
+            {"id": "framework_knitters_blue",  "path": "factories/framework_knitters_blue_blueprint.png",  "name": "Strumpfwirker",         "initial": 0},
+            {"id": "motor_assembly_purple",    "path": "factories/motor_assembly_purple_blueprint.png",    "name": "Motorenmontage",        "initial": 0},
+            {"id": "car_factory_purple",       "path": "factories/car_factory_purple_blueprint.png",       "name": "Autofabrik",            "initial": 0},
+            {"id": "bicycle_purple",           "path": "factories/bicycle_purple_blueprint.png",           "name": "Fahrradfabrik",         "initial": 0},
+            {"id": "lightbulb_purple",         "path": "factories/lightbulb_purple_blueprint.png",         "name": "Glühbirnenfabrik",      "initial": 0},
+            {"id": "gramphone_purple",         "path": "factories/gramphone_purple_blueprint.png",         "name": "Grammophonfabrik",      "initial": 0},
+            {"id": "heavy_weapons_purple",         "path": "factories/heavy_weapons_purple_blueprint.png",         "name": "Schwerwaffenfabrik",    "initial": 0},
         ]},
     ]
     title = f"Anno 1800 Debuggame States - {state_dir}"
@@ -1986,7 +1930,7 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
         }}
 
         .main-board {{
-            width: 100%;
+            width: 70%;
             min-height: 560px;
             border: 2px dashed #14b8a677;
             border-radius: 14px;
@@ -2048,7 +1992,7 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
         }}
 
         .board-factory-slot img {{
-            width: 87%;
+            width: 84%;
             flex: 1;
             min-height: 0;
             object-fit: contain;
@@ -2068,7 +2012,7 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
 
         .resident-cards-overlay {{
             position: absolute;
-            bottom: 2.3%;
+            bottom: 1.7%;
             left: 3%;
             width: 49.2%;
             height: 22%;
@@ -2082,22 +2026,46 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
         }}
 
         .resident-card-stack img {{
-            width: 100%;
+            width: 105%;
             height: auto;
             object-fit: contain;
         }}
 
         .resident-card-count {{
-            font-size: 0.70em;
+            font-size: 1em;
             font-weight: 800;
-            color: #a78bfa;
+            color: #826b38;
         }}
 
         .resident-card-count.zero {{
             color: #ef4444;
+        }}
+
+        .resident-stones-container {{
+            width: 5%;
+            margin-top: 10%;
+        }}
+
+        .resident-stone-stack{{
+            margin-top: 20%;
+            height: auto;
+            object-fit: contain;
+        }}
+
+        .resident-stone-stack img{{
+            width: 20%;
+            height: auto;
+            object-fit: contain;
+        }}
+
+        .mainboard-wrapper {{
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
         }}
 
         .main-board-title {{
@@ -2336,6 +2304,7 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
             <div class=\"controls\">
                 <button id=\"prevBtn\" type=\"button\">Vorheriger</button>
                 <button id=\"nextBtn\" type=\"button\">Nächster</button>
+                <button id=\"toggleDetailsBtn\" type=\"button\" class=\"toggle-details\">Details ein-/ausblenden</button>
             </div>
         </div>
 
@@ -2352,7 +2321,10 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
                         <div id="layerUpperRight"></div>
                     </section>
                     <section class=\"board-slot slot-center\">
-                        <div id=\"mainBoard\" class=\"main-board\"><p style=\"color:#ff0;padding:8px;\">v3 - JS noch nicht ausgef\u00fchrt</p></div>
+                        <div class=\"mainboard-wrapper\">
+                            <div id=\"residentStones\" class=\"resident-stones-container\"></div>
+                            <div id=\"mainBoard\" class=\"main-board\"></div>
+                        </div>
                     </section>
                     <section class="board-slot slot-ll">
                         <h3>Layer Unten Links</h3>
@@ -2463,6 +2435,7 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
         }};
         const orderedColorSquareTokens = Object.keys(colorSquareTokens).sort((left, right) => right.length - left.length);
         let index = 0;
+        let numPlayers = 2;
 
         const stateDirEl = document.getElementById("stateDir");
         const stateIndicatorEl = document.getElementById("stateIndicator");
@@ -2480,6 +2453,8 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
         const rawJsonEl = document.getElementById("rawJson");
         const prevBtn = document.getElementById("prevBtn");
         const nextBtn = document.getElementById("nextBtn");
+        const toggleDetailsBtn = document.getElementById("toggleDetailsBtn");
+        const detailsLayer = document.getElementById("detailsLayer");
         const mainBoardEl = document.getElementById("mainBoard");
         const layerUpperLeftEl = document.getElementById("layerUpperLeft");
         const layerUpperRightEl = document.getElementById("layerUpperRight");
@@ -2489,6 +2464,48 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
         function text(value, fallback = "(nicht im JSON vorhanden)") {{
             if (value === null || value === undefined || value === "") return fallback;
             return String(value);
+        }}
+
+        function calculateAvailableFactories(state) {{
+            const factoriesPerStack = numPlayers <= 2 ? 1 : 2;
+            const initialCounts = {{}};
+            
+            for (const row of FACTORY_LAYOUT) {{
+                for (const f of row.factories) {{
+                    if (f.initial > 0) {{
+                        initialCounts[f.name] = f.initial;
+                    }} else {{
+                        initialCounts[f.name] = factoriesPerStack;
+                    }}
+                }}
+            }}
+
+            const built = {{}};
+            const players = Array.isArray(state?.players) ? state.players : [];
+            for (const player of players) {{
+                const tiles = player?.tiles?.islandTiles || [];
+                for (const tile of tiles) {{
+                    const name = tile?.name || "";
+                    if (name) {{
+                        built[name] = (built[name] || 0) + 1;
+                    }}
+                }}
+            }}
+
+            const available = {{}};
+            for (const [name, initial] of Object.entries(initialCounts)) {{
+                available[name] = Math.max(0, initial - (built[name] || 0));
+            }}
+
+            console.log("Factory calculation:", {{
+                numPlayers,
+                factoriesPerStack,
+                builtCount: Object.keys(built).length,
+                sampleBuilt: Object.entries(built).slice(0, 5),
+                sampleAvailable: Object.entries(available).slice(0, 5)
+            }});
+
+            return available;
         }}
 
         function goodToIconName(value) {{
@@ -3100,8 +3117,7 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
         }}
 
         function renderFactoryOverlay(state, boardCenterEl) {{
-            const bs = state?.boardState ?? {{}};
-            const availableByType = bs.factories?.availableByType ?? {{}};
+            const availableByType = calculateAvailableFactories(state);
             const overlay = document.createElement("div");
             overlay.className = "board-factory-overlay";
             for (const row of FACTORY_LAYOUT) {{
@@ -3139,9 +3155,9 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
             overlay.className = "resident-cards-overlay";
 
             const stacks = [
-                {{ level: 2, count: cards.residentStack1 ?? 0, img: "residents/residentcard_lv_2.png" }},
-                {{ level: 5, count: cards.residentStack2 ?? 0, img: "residents/residentcard_lv_5.png" }},
-                {{ level: 7, count: cards.residentStack3 ?? 0, img: "residents/residentcard_lv_7.png" }}
+                {{ level: 2, count: cards.residentStack1 ?? 0, img: "residents/residentcard_lv2.png" }},
+                {{ level: 5, count: cards.residentStack2 ?? 0, img: "residents/residentcard_lv5.png" }},
+                {{ level: 7, count: cards.residentStack3 ?? 0, img: "residents/residentcard_lv7.png" }}
             ];
 
             for (const stack of stacks) {{
@@ -3165,12 +3181,61 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
             boardCenterEl.appendChild(overlay);
         }}
 
+        function renderResidentStones(state) {{
+            const container = document.getElementById("residentStones");
+            if (!container) return;
+            
+            const bs = state?.boardState ?? {{}};
+            const pool = bs.populationPool ?? {{}};
+            
+            const residents = [
+                {{ type: "farmers", count: pool.farmers ?? 0, img: "residents/farmer_stone.png", label: "Farmers" }},
+                {{ type: "workers", count: pool.workers ?? 0, img: "residents/worker_stone.png", label: "Workers" }},
+                {{ type: "artisans", count: pool.artisans ?? 0, img: "residents/artesian_stone.png", label: "Artisans" }},
+                {{ type: "engineers", count: pool.engineers ?? 0, img: "residents/engineer_stone.png", label: "Engineers" }},
+                {{ type: "investors", count: pool.investors ?? 0, img: "residents/investor_stone.png", label: "Investors" }}
+            ];
+
+            container.innerHTML = "";
+
+            for (const resident of residents) {{
+                const group = document.createElement("div");
+                group.className = "resident-stone-group";
+
+                const stackContainer = document.createElement("div");
+                stackContainer.className = "resident-stone-stack";
+
+                const maxVisible = Math.min(resident.count, 50);
+                for (let i = 0; i < maxVisible; i++) {{
+                    const img = document.createElement("img");
+                    img.className = "resident-stone-img";
+                    const imgPath = resolveImagePath(resident.img) || resident.img;
+                    img.src = iconBaseUri + "/" + imgPath;
+                    img.title = resident.label;
+                    img.style.left = `${{i * 8}}px`;
+                    img.style.bottom = `${{i * 3}}px`;
+                    img.style.zIndex = i;
+                    stackContainer.appendChild(img);
+                }}
+
+                const countEl = document.createElement("div");
+                countEl.className = "resident-stone-count";
+                countEl.textContent = `${{resident.count}}`;
+                
+                group.appendChild(stackContainer);
+                group.appendChild(countEl);
+                container.appendChild(group);
+            }}
+        }}
+
         function renderMainBoard(entry) {{
             const state = entry.state || {{}};
             const board = state.boardState || {{}};
             const resources = board.resources || {{}};
             const islands = board.islands || {{}};
             const ships = board.ships || {{}};
+
+            renderResidentStones(state);
 
             mainBoardEl.innerHTML = "";
             const title = document.createElement("div");
@@ -3237,6 +3302,10 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
             if (!entries.length) return;
 
             const entry = entries[index];
+            renderDiffs(entry);
+            renderActionDetails(entry);
+            renderCardOverview(entry);
+            renderAgentScores(entry);
             stateDirEl.textContent = stateDir;
             stateIndicatorEl.textContent = `Zustand ${{entry.index}}/${{entries.length}}`;
             fileNameEl.textContent = text(entry.fileName, "-");
@@ -3266,6 +3335,14 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
             }}
         }}
 
+        toggleDetailsBtn.addEventListener("click", () => {{
+            if (detailsLayer.classList.contains("hidden")) {{
+                detailsLayer.classList.remove("hidden");
+            }} else {{
+                detailsLayer.classList.add("hidden");
+            }}
+        }});
+
         prevBtn.addEventListener("click", goPrevious);
         nextBtn.addEventListener("click", goNext);
         document.addEventListener("keydown", (event) => {{
@@ -3280,6 +3357,11 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
         }});
 
         try {{
+            if (entries.length > 0) {{
+                const firstState = entries[0]?.state || {{}};
+                const players = Array.isArray(firstState.players) ? firstState.players : [];
+                numPlayers = players.length || 2;
+            }}
             render();
         }} catch (e) {{
             const banner = document.createElement('div');
@@ -3362,20 +3444,8 @@ def main() -> int:
     if args.web:
         entries = build_state_entries(sorted_paths)
 
-        # Enrich each entry's boardState with available factory counts from engine
-        # Determine player count from first state
-        num_players = len(entries[0].get("state", {}).get("players", [])) if entries else 2
-        factory_defs = get_factory_layout(num_players)
-        for entry in entries:
-            state = entry.get("state", {})
-            built: dict[str, int] = {}
-            for player in state.get("players", []):
-                for tile in player.get("tiles", {}).get("islandTiles", []):
-                    name = tile.get("name", "")
-                    if name:
-                        built[name] = built.get(name, 0) + 1
-            available = {d["name"]: max(0, d["initial"] - built.get(d["name"], 0)) for d in factory_defs}
-            state.setdefault("boardState", {}).setdefault("factories", {})["availableByType"] = available
+        # Factory availability is calculated dynamically in JavaScript (calculateAvailableFactories)
+        # based on player count and built factories from state.players[].tiles.islandTiles
 
         html_output = PROJECT_ROOT / f"anno1800-debuggame-{state_dir.name}.html"
         html_output.parent.mkdir(parents=True, exist_ok=True)
