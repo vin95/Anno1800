@@ -1533,9 +1533,76 @@ def build_state_entries(files: list[Path]) -> list[dict[str, Any]]:
     return entries
 
 
-def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
-    payload = json.dumps(entries, ensure_ascii=False)
-    icon_base_uri = (PROJECT_ROOT / "src" / "pictures").resolve().as_uri()
+def get_factory_layout(num_players: int) -> list[dict]:
+    """Returns factory/ship layout with initial stack counts from Board.java.
+    
+    Args:
+        num_players: Number of players (1-4). Factories: 1-2 players = 1 each, 3-4 players = 2 each.
+                     Ships and shipyards have fixed counts regardless of player count.
+    """
+    factories_per_stack = 1 if num_players <= 2 else 2
+    return [
+        {"name": "Sägewerk",             "initial": factories_per_stack},
+        {"name": "Kohlemine",            "initial": factories_per_stack},
+        {"name": "Ziegelei",             "initial": factories_per_stack},
+        {"name": "Brauerei",             "initial": factories_per_stack},
+        {"name": "Bäckerei",             "initial": factories_per_stack},
+        {"name": "Messinggießerei",      "initial": factories_per_stack},
+        {"name": "Fenstermacher",        "initial": factories_per_stack},
+        {"name": "Champagnerkeller",     "initial": factories_per_stack},
+        {"name": "Werft L1",             "initial": 4},
+        {"name": "Werft L2",             "initial": 6},
+        {"name": "Werft L3",             "initial": 4},
+        {"name": "Lagerhaus",            "initial": factories_per_stack},
+        {"name": "Stahlwerk",            "initial": factories_per_stack},
+        {"name": "Segelmacher",          "initial": factories_per_stack},
+        {"name": "Destillerie",          "initial": factories_per_stack},
+        {"name": "Glasmacher",           "initial": factories_per_stack},
+        {"name": "Brillenfabrik",        "initial": factories_per_stack},
+        {"name": "Uhrmacher",            "initial": factories_per_stack},
+        {"name": "Nähmaschine",          "initial": factories_per_stack},
+        {"name": "Handelsschiff L1",     "initial": 6},
+        {"name": "Handelsschiff L2",     "initial": 6},
+        {"name": "Handelsschiff L3",     "initial": 6},
+        {"name": "Baumwollmühle (rot)",  "initial": factories_per_stack},
+        {"name": "Baumwollmühle (blau)", "initial": factories_per_stack},
+        {"name": "Kaffeerösterei",       "initial": factories_per_stack},
+        {"name": "Schlachthaus",         "initial": factories_per_stack},
+        {"name": "Seifenfabrik",         "initial": factories_per_stack},
+        {"name": "Pelzhändler",          "initial": factories_per_stack},
+        {"name": "Dynamitfabrik",        "initial": factories_per_stack},
+        {"name": "Kanonenfabrik",        "initial": factories_per_stack},
+        {"name": "Expeditionsschiff L1", "initial": 6},
+        {"name": "Expeditionsschiff L2", "initial": 6},
+        {"name": "Expeditionsschiff L3", "initial": 6},
+        {"name": "Rum-Destillerie",      "initial": factories_per_stack},
+        {"name": "Zigarrenfabrik",       "initial": factories_per_stack},
+        {"name": "Schokoladenfabrik",    "initial": factories_per_stack},
+        {"name": "Konservenfabrik",      "initial": factories_per_stack},
+        {"name": "Strumpfwirker",        "initial": factories_per_stack},
+        {"name": "Motorenmontage",       "initial": factories_per_stack},
+        {"name": "Autofabrik",           "initial": factories_per_stack},
+        {"name": "Fahrradfabrik",        "initial": factories_per_stack},
+        {"name": "Glühbirnenfabrik",     "initial": factories_per_stack},
+        {"name": "Grammophonfabrik",     "initial": factories_per_stack},
+        {"name": "Schwerwaffenfabrik",   "initial": factories_per_stack},
+    ]
+
+
+def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_path: Path | None = None) -> str:
+    entries_json = json.dumps(entries, indent=None)
+
+    payload = entries_json
+    pictures_dir = (PROJECT_ROOT / "src" / "pictures").resolve()
+    output_dir = (html_output_path.parent.resolve() if html_output_path else PROJECT_ROOT.resolve())
+    try:
+        icon_base_uri = pictures_dir.relative_to(output_dir).as_posix()
+    except ValueError:
+        icon_base_uri = pictures_dir.as_uri()
+    try:
+        main_board_image_uri = pictures_dir.relative_to(output_dir).as_posix() + "/mainboard.png"
+    except ValueError:
+        main_board_image_uri = (pictures_dir / "mainboard.png").as_uri()
     all_picture_paths, icon_lookup = build_picture_index()
     icon_file_names = sorted(
         {
@@ -1560,6 +1627,60 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
         "Expedition": ["ships/explorership_lv2.png", "ships/explorership_lv1.png"],
         "Carneval": ["startplayer.png", "finishplayer.png"],
     }
+    factory_layout = [
+        {"label": "Reihe 1 — Basisfabriken + Werften", "factories": [
+            {"id": "sawmill_blue",             "path": "factories/sawmill_blue_blueprint.png",             "name": "Sägewerk"},
+            {"id": "coal_mine_blue",           "path": "factories/coal_mine_blue_blueprint.png",           "name": "Kohlemine"},
+            {"id": "brick_factory_blue",       "path": "factories/brick_factory_blue_blueprint.png",       "name": "Ziegelei"},
+            {"id": "brewery_blue",             "path": "factories/brewery_blue_blueprint.png",             "name": "Brauerei"},
+            {"id": "bakery_blue",              "path": "factories/bakery_blue_blueprint.png",              "name": "Bäckerei"},
+            {"id": "brass_foundry",            "path": "factories/brass_foundry_red_blueprint.png",        "name": "Messinggießerei"},
+            {"id": "window_maker_red",         "path": "factories/window_maker_red_blueprint.png",         "name": "Fenstermacher"},
+            {"id": "champagne_cellar_red",     "path": "factories/champagne_cellar_red_blueprint.png",     "name": "Champagnerkeller"},
+            {"id": "shipyard_lv1",             "path": "ships/shipyard_lv1_blueprint.png",                 "name": "Werft L1"},
+            {"id": "shipyard_lv2",             "path": "ships/shipyard_lv2_blueprint.png",                 "name": "Werft L2"},
+            {"id": "shipyard_lv3",             "path": "ships/shipyard_lv3_blueprint.png",                 "name": "Werft L3"}
+        ]},
+        {"label": "Reihe 2 — Verarbeitungsfabriken + Handelsschiffe", "factories": [
+            {"id": "warehouse_blue",           "path": "factories/warehouse_blue_blueprint.png",           "name": "Lagerhaus"},
+            {"id": "steel_works_blue",         "path": "factories/steel_works_blue_blueprint.png",         "name": "Stahlwerk"},
+            {"id": "sailmakers_blue",          "path": "factories/sailmakers_blue_blueprint.png",          "name": "Segelmacher"},
+            {"id": "distillery_blue",          "path": "factories/distillery_blue_blueprint.png",          "name": "Destillerie"},
+            {"id": "glass_maker_blue",         "path": "factories/glass_maker_blue_blueprint.png",         "name": "Glasmacher"},
+            {"id": "spectacle_factory_red",    "path": "factories/spectacle_factory_red_blueprint.png",    "name": "Brillenfabrik"},
+            {"id": "clockmakers",              "path": "factories/clockmakers_red_blueprint.png",          "name": "Uhrmacher"},
+            {"id": "sewing_machine_red",       "path": "factories/sewing_machine_red_blueprint.png",       "name": "Nähmaschine"},
+            {"id": "tradeship_lv1",            "path": "ships/tradeship_lv1_blueprint.png",               "name": "Handelsschiff L1"},
+            {"id": "tradeship_lv2",            "path": "ships/tradeship_lv2_blueprint.png",               "name": "Handelsschiff L2"},
+            {"id": "tradeship_lv3",            "path": "ships/tradeship_lv3_blueprint.png",               "name": "Handelsschiff L3"},
+        ]},
+        {"label": "Reihe 3 — Fortgeschrittene Fabriken + Expeditionsschiffe", "factories": [
+            {"id": "cotton_mill_red",          "path": "factories/cotton_mill_red_blueprint.png",          "name": "Baumwollmühle (rot)"},
+            {"id": "cotton_mill_blue",         "path": "factories/cotton_mill_blue_blue_blueprint.png",    "name": "Baumwollmühle (blau)"},
+            {"id": "coffee_rosters_red",       "path": "factories/coffee_rosters_red_blueprint.png",       "name": "Kaffeerösterei"},
+            {"id": "slaughterhouse_blue",      "path": "factories/slaughterhouse_blue_blueprint.png",      "name": "Schlachthaus"},
+            {"id": "soap_factory_blue",        "path": "factories/soap_factory_blue_blueprint.png",        "name": "Seifenfabrik"},
+            {"id": "fur_dealer_red",           "path": "factories/fur_dealer_red_blueprint.png",           "name": "Pelzhändler"},
+            {"id": "dynamite_factory_red",     "path": "factories/dynamite_factory_red_blueprint.png",     "name": "Dynamitfabrik"},
+            {"id": "cannons_factory_red",      "path": "factories/cannons_factory_red_blueprint.png",      "name": "Kanonenfabrik"},
+            {"id": "explorership_lv1",         "path": "ships/explorership_lv1_blueprint.png",             "name": "Expeditionsschiff L1"},
+            {"id": "explorership_lv2",         "path": "ships/explorership_lv2_blueprint.png",             "name": "Expeditionsschiff L2"},
+            {"id": "explorership_lv3",         "path": "ships/explorership_lv3_blueprint.png",             "name": "Expeditionsschiff L3"},
+        ]},
+        {"label": "Reihe 4 — Luxusgüter & Neue Welt", "factories": [
+            {"id": "rum_distillery_red",       "path": "factories/rum_distillery_red_blueprint.png",       "name": "Rum-Destillerie"},
+            {"id": "cigar_factory_red",        "path": "factories/cigar_factory_red_blueprint.png",        "name": "Zigarrenfabrik"},
+            {"id": "chocolate_factory_red",    "path": "factories/chocolate_factory_red_blueprint.png",    "name": "Schokoladenfabrik"},
+            {"id": "cannery_blue",             "path": "factories/cannery_blue_blueprint.png",             "name": "Konservenfabrik"},
+            {"id": "framework_knitters_blue",  "path": "factories/framework_knitters_blue_blueprint.png",  "name": "Strumpfwirker"},
+            {"id": "motor_assembly_purple",    "path": "factories/motor_assembly_purple_blueprint.png",    "name": "Motorenmontage"},
+            {"id": "car_factory_purple",       "path": "factories/car_factory_purple_blueprint.png",       "name": "Autofabrik"},
+            {"id": "bicycle_purple",           "path": "factories/bicycle_purple_blueprint.png",           "name": "Fahrradfabrik"},
+            {"id": "lightbulb_purple",         "path": "factories/lightbulb_purple_blueprint.png",         "name": "Glühbirnenfabrik"},
+            {"id": "gramphone_purple",         "path": "factories/gramphone_purple_blueprint.png",         "name": "Grammophonfabrik"},
+            {"id": "heavy_weapons_purple",         "path": "factories/heavy_weapons_purple_blueprint.png",         "name": "Schwerwaffenfabrik"},
+        ]},
+    ]
     title = f"Anno 1800 Debuggame States - {state_dir}"
 
     return f"""<!doctype html>
@@ -1867,7 +1988,6 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
         .main-board {{
             width: 100%;
             min-height: 560px;
-            aspect-ratio: 16 / 9;
             border: 2px dashed #14b8a677;
             border-radius: 14px;
             background:
@@ -1875,8 +1995,109 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
                 linear-gradient(180deg, rgba(15, 23, 42, 0.8), rgba(2, 6, 23, 0.92));
             padding: 12px;
             display: grid;
-            grid-template-rows: auto auto 1fr auto;
+            grid-template-rows: auto auto auto 1fr auto auto;
             gap: 10px;
+        }}
+
+        .main-board-center {{
+            position: relative;
+            border: 1px solid #2c3f56;
+            border-radius: 12px;
+            overflow: hidden;
+        }}
+
+        .main-board-image {{
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 10px;
+        }}
+
+        .main-board-image-fallback {{
+            color: #93a4bb;
+            font-size: 0.9rem;
+            padding: 20px;
+        }}
+
+        .board-factory-overlay {{
+            position: absolute;
+            top: 3.6%;
+            left: 2.4%;
+            right: 2.4%;
+            bottom: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.7%;
+            pointer-events: none;
+        }}
+
+        .board-factory-row {{
+            flex: 1;
+            display: flex;
+            align-items: stretch;
+        }}
+
+        .board-factory-slot {{
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            min-width: 0;
+            overflow: hidden;
+        }}
+
+        .board-factory-slot img {{
+            width: 87%;
+            flex: 1;
+            min-height: 0;
+            object-fit: contain;
+        }}
+
+        .board-slot-count {{
+            font-size: 1.0em;
+            font-weight: 800;
+            color: #826b38;
+            line-height: 1.1;
+            padding-bottom: 1px;
+        }}
+
+        .board-slot-count.zero {{
+            color: #ef4444;
+        }}
+
+        .resident-cards-overlay {{
+            position: absolute;
+            bottom: 2.3%;
+            left: 3%;
+            width: 49.2%;
+            height: 22%;
+            display: flex;
+            pointer-events: none;
+            gap: 20px;
+        }}
+
+        .resident-card-stack {{
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }}
+
+        .resident-card-stack img {{
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }}
+
+        .resident-card-count {{
+            font-size: 0.70em;
+            font-weight: 800;
+            color: #a78bfa;
+        }}
+
+        .resident-card-count.zero {{
+            color: #ef4444;
         }}
 
         .main-board-title {{
@@ -1901,6 +2122,75 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             padding: 8px;
             background: rgba(15, 23, 42, 0.7);
             font-size: 0.88rem;
+        }}
+
+        .ships-row .token-pill img {{
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+        }}
+
+        .factory-board {{
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }}
+
+        .factory-row-header {{
+            font-size: 0.68rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding-bottom: 2px;
+            border-bottom: 1px solid #1e293b;
+        }}
+
+        .factory-row {{
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 4px;
+            align-items: flex-start;
+            overflow-x: auto;
+            padding-bottom: 2px;
+        }}
+
+        .factory-tile {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+            width: 68px;
+            flex-shrink: 0;
+        }}
+
+        .factory-tile img {{
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background: rgba(15, 23, 42, 0.7);
+            padding: 2px;
+        }}
+
+        .factory-tile-name {{
+            font-size: 0.5rem;
+            color: #94a3b8;
+            text-align: center;
+            line-height: 1.2;
+            width: 68px;
+            word-break: break-word;
+            hyphens: auto;
+        }}
+
+        .factory-tile-count {{
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #22d3ee;
+        }}
+
+        .factory-tile-count.zero {{
+            color: #ef4444;
         }}
 
         .island-layout {{
@@ -2062,7 +2352,7 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
                         <div id="layerUpperRight"></div>
                     </section>
                     <section class=\"board-slot slot-center\">
-                        <div id=\"mainBoard\" class=\"main-board\"></div>
+                        <div id=\"mainBoard\" class=\"main-board\"><p style=\"color:#ff0;padding:8px;\">v3 - JS noch nicht ausgef\u00fchrt</p></div>
                     </section>
                     <section class="board-slot slot-ll">
                         <h3>Layer Unten Links</h3>
@@ -2119,10 +2409,39 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
         </div>
     </div>
 
+    <script type="application/json" id="gameStateData">{payload}</script>
+    <script type="application/json" id="factoryLayoutData">{json.dumps(factory_layout, ensure_ascii=False)}</script>
     <script>
+        (function() {{
+            var bar = document.createElement('div');
+            bar.id = 'diagBar';
+            bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#0f3460;color:#0ff;padding:6px 12px;font-size:12px;font-family:monospace;z-index:9999;';
+            try {{
+                var el = document.getElementById('gameStateData');
+                if (!el) {{ bar.textContent = 'DIAG: gameStateData element NOT FOUND'; }}
+                else {{
+                    var parsed = JSON.parse(el.textContent);
+                    bar.textContent = 'DIAG: gameStateData OK, ' + parsed.length + ' entries, ' + el.textContent.length + ' chars';
+                }}
+            }} catch(e) {{
+                bar.textContent = 'DIAG ERROR: ' + e.message;
+            }}
+            document.body.appendChild(bar);
+        }})();
+    </script>
+    <script>
+        window.onerror = function(msg, src, line, col, err) {{
+            const banner = document.createElement('div');
+            banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#b91c1c;color:#fff;padding:16px 20px;font-size:14px;font-family:monospace;white-space:pre-wrap;';
+            banner.textContent = 'JS ERROR: ' + msg + ' | at ' + src + ':' + line + ':' + col + (err && err.stack ? ' | ' + err.stack : '');
+            document.body.appendChild(banner);
+            return false;
+        }};
         const stateDir = {json.dumps(str(state_dir), ensure_ascii=False)};
-        const entries = {payload};
+        const entries = JSON.parse(document.getElementById('gameStateData').textContent);
+        const FACTORY_LAYOUT = JSON.parse(document.getElementById('factoryLayoutData').textContent);
         const iconBaseUri = {json.dumps(icon_base_uri, ensure_ascii=False)};
+        const mainBoardImageUri = {json.dumps(main_board_image_uri, ensure_ascii=False)};
         const iconPathByName = {json.dumps(icon_lookup, ensure_ascii=False)};
         const allPicturePaths = {json.dumps(all_picture_paths, ensure_ascii=False)};
         const iconFileNames = {json.dumps(icon_file_names, ensure_ascii=False)};
@@ -2461,7 +2780,7 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
 
             if (entry.isInitial) {{
                 const state = entry.state || {{}};
-                const objectives = Array.isArray(state.objectiveCards) ? state.objectiveCards : [];
+                const objectives = Array.isArray(state.objectiveCards) ? state.objectiveCards : []
 
                 const objectiveTitle = document.createElement("p");
                 objectiveTitle.className = "action-title";
@@ -2780,6 +3099,72 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             }}
         }}
 
+        function renderFactoryOverlay(state, boardCenterEl) {{
+            const bs = state?.boardState ?? {{}};
+            const availableByType = bs.factories?.availableByType ?? {{}};
+            const overlay = document.createElement("div");
+            overlay.className = "board-factory-overlay";
+            for (const row of FACTORY_LAYOUT) {{
+                const rowEl = document.createElement("div");
+                rowEl.className = "board-factory-row";
+                for (const f of row.factories) {{
+                    const slot = document.createElement("div");
+                    slot.className = "board-factory-slot";
+
+                    const img = document.createElement("img");
+                    img.className = "board-factory-img";
+                    img.src = iconBaseUri + "/" + (f.path || "");
+                    img.title = f.name;
+                    slot.appendChild(img);
+
+                    const count = availableByType[f.name];
+                    if (count !== undefined) {{
+                        const badge = document.createElement("div");
+                        badge.className = "board-slot-count" + (count === 0 ? " zero" : "");
+                        badge.textContent = count;
+                        slot.appendChild(badge);
+                    }}
+
+                    rowEl.appendChild(slot);
+                }}
+                overlay.appendChild(rowEl);
+            }}
+            boardCenterEl.appendChild(overlay);
+        }}
+
+        function renderResidentCardsOverlay(state, boardCenterEl) {{
+            const bs = state?.boardState ?? {{}};
+            const cards = bs.cards ?? {{}};
+            const overlay = document.createElement("div");
+            overlay.className = "resident-cards-overlay";
+
+            const stacks = [
+                {{ level: 2, count: cards.residentStack1 ?? 0, img: "residents/residentcard_lv_2.png" }},
+                {{ level: 5, count: cards.residentStack2 ?? 0, img: "residents/residentcard_lv_5.png" }},
+                {{ level: 7, count: cards.residentStack3 ?? 0, img: "residents/residentcard_lv_7.png" }}
+            ];
+
+            for (const stack of stacks) {{
+                const stackEl = document.createElement("div");
+                stackEl.className = "resident-card-stack";
+
+                const img = document.createElement("img");
+                const imgPath = resolveImagePath(stack.img) || stack.img;
+                img.src = iconBaseUri + "/" + imgPath;
+                img.title = `Resident Cards Level ${{stack.level}}`;
+                stackEl.appendChild(img);
+
+                const countEl = document.createElement("div");
+                countEl.className = "resident-card-count" + (stack.count === 0 ? " zero" : "");
+                countEl.textContent = stack.count;
+                stackEl.appendChild(countEl);
+
+                overlay.appendChild(stackEl);
+            }}
+
+            boardCenterEl.appendChild(overlay);
+        }}
+
         function renderMainBoard(entry) {{
             const state = entry.state || {{}};
             const board = state.boardState || {{}};
@@ -2803,6 +3188,31 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             renderObjectiveCards(state, objectiveStrip);
             mainBoardEl.appendChild(objectiveStrip);
 
+            const boardCenter = document.createElement("div");
+            boardCenter.className = "main-board-center";
+            if (mainBoardImageUri) {{
+                const boardImage = document.createElement("img");
+                boardImage.className = "main-board-image";
+                boardImage.src = mainBoardImageUri;
+                boardImage.alt = "Main Board";
+                boardImage.addEventListener("error", () => {{
+                    boardImage.remove();
+                    const errorNote = document.createElement("div");
+                    errorNote.className = "main-board-image-fallback";
+                    errorNote.textContent = `Mainboard konnte nicht geladen werden: ${{mainBoardImageUri}}`;
+                    boardCenter.appendChild(errorNote);
+                }});
+                boardCenter.appendChild(boardImage);
+            }} else {{
+                const fallback = document.createElement("div");
+                fallback.className = "main-board-image-fallback";
+                fallback.textContent = "mainboard.png nicht gefunden";
+                boardCenter.appendChild(fallback);
+            }}
+            renderFactoryOverlay(state, boardCenter);
+            renderResidentCardsOverlay(state, boardCenter);
+            mainBoardEl.appendChild(boardCenter);
+
             const pools = document.createElement("div");
             pools.className = "main-board-pools";
             pools.innerHTML = `
@@ -2811,11 +3221,6 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
                 <div class=\"pool-chip\">Trade Ships Board: L1 ${{ships.tradeShips?.level1 ?? 0}} / L2 ${{ships.tradeShips?.level2 ?? 0}} / L3 ${{ships.tradeShips?.level3 ?? 0}}<br>Explorer Ships Board: L1 ${{ships.explorerShips?.level1 ?? 0}} / L2 ${{ships.explorerShips?.level2 ?? 0}} / L3 ${{ships.explorerShips?.level3 ?? 0}}</div>
             `;
             mainBoardEl.appendChild(pools);
-
-            const boardSpace = document.createElement("div");
-            boardSpace.className = "layer-section";
-            boardSpace.innerHTML = "<strong>Zentrale Spielfläche</strong><div class=\"muted\">Hier folgt als nächstes die genaue grafische Platzierung von Inseln, Fabriken, Schiffen und Markern.</div>";
-            mainBoardEl.appendChild(boardSpace);
         }}
 
         function renderGameBoard(entry) {{
@@ -2874,7 +3279,14 @@ def render_web_view(state_dir: Path, entries: list[dict[str, Any]]) -> str:
             }}
         }});
 
-        render();
+        try {{
+            render();
+        }} catch (e) {{
+            const banner = document.createElement('div');
+            banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#b91c1c;color:#fff;padding:16px 20px;font-size:14px;font-family:monospace;white-space:pre-wrap;';
+            banner.textContent = 'render() ERROR: ' + e.message + ' | ' + (e.stack || '');
+            document.body.appendChild(banner);
+        }}
     </script>
 </body>
 </html>
@@ -2908,11 +3320,11 @@ def browse_in_web(state_dir: Path, files: list[Path], prefer_firefox: bool, outp
     html_output = (
         Path(output_path)
         if output_path
-        else Path(tempfile.gettempdir()) / f"anno1800-debuggame-{state_dir.name}.html"
+        else PROJECT_ROOT / f"anno1800-debuggame-{state_dir.name}.html"
     )
 
     html_output.parent.mkdir(parents=True, exist_ok=True)
-    html_output.write_text(render_web_view(state_dir, entries), encoding="utf-8")
+    html_output.write_text(render_web_view(state_dir, entries, html_output_path=html_output), encoding="utf-8")
 
     opened = False
     if prefer_firefox:
@@ -2932,121 +3344,53 @@ def main() -> int:
     args = parse_args()
 
     if args.migrate_json:
-        migration_root = Path(args.migrate_dir) if args.migrate_dir else DEFAULT_GAME_STATES_DIR
-        changed_files, changed_tokens = migrate_debug_json_image_paths(migration_root)
-        print(f"JSON-Migration abgeschlossen: {changed_files} Dateien, {changed_tokens} ersetzte Bildpfade")
-        return 0
+        migrate_legacy_json_files(args.migrate_dir)
+        return
 
-    state_dir = Path(args.dir) if args.dir else find_latest_debuggame_dir()
+    directory = args.dir
+    if directory is None:
+        latest_dir = find_latest_debuggame_dir()
+        if latest_dir:
+            directory = str(latest_dir)
+        else:
+            print("No game state directory found.", file=sys.stderr)
+            sys.exit(1)
 
-    if state_dir is None:
-        print("Kein Debuggame-Ordner gefunden. Starte zuerst .\\Debugging\\debug-game.ps1", file=sys.stderr)
-        return 1
-
-    if not state_dir.exists():
-        print(f"Verzeichnis nicht gefunden: {state_dir}", file=sys.stderr)
-        return 1
-
-    files = sorted(state_dir.glob("*.json"), key=sort_key)
-    if not files:
-        print(f"Keine JSON-Dateien in {state_dir} gefunden.", file=sys.stderr)
-        return 1
+    state_dir = Path(directory)
+    sorted_paths = sorted([p for p in state_dir.iterdir() if p.suffix == ".json"], key=sort_key)
 
     if args.web:
-        return browse_in_web(
-            state_dir=state_dir,
-            files=files,
-            prefer_firefox=args.firefox,
-            output_path=args.out,
-        )
+        entries = build_state_entries(sorted_paths)
 
-    previous_state: dict[str, Any] | None = None
+        # Enrich each entry's boardState with available factory counts from engine
+        # Determine player count from first state
+        num_players = len(entries[0].get("state", {}).get("players", [])) if entries else 2
+        factory_defs = get_factory_layout(num_players)
+        for entry in entries:
+            state = entry.get("state", {})
+            built: dict[str, int] = {}
+            for player in state.get("players", []):
+                for tile in player.get("tiles", {}).get("islandTiles", []):
+                    name = tile.get("name", "")
+                    if name:
+                        built[name] = built.get(name, 0) + 1
+            available = {d["name"]: max(0, d["initial"] - built.get(d["name"], 0)) for d in factory_defs}
+            state.setdefault("boardState", {}).setdefault("factories", {})["availableByType"] = available
 
-    print()
-    print(f"Debuggame-States: {state_dir}")
-    print("Taste drücken: beliebige Taste = nächster State, Q = Ende")
-    print()
+        html_output = PROJECT_ROOT / f"anno1800-debuggame-{state_dir.name}.html"
+        html_output.parent.mkdir(parents=True, exist_ok=True)
+        html_output.write_text(render_web_view(state_dir, entries, html_output_path=html_output), encoding="utf-8")
+        print(f"Web-Ansicht erstellt: {html_output}")
 
-    for index, path in enumerate(files, start=1):
-        state = load_state(path)
-
-        clear_screen()
-        print(f"Zustand {index}/{len(files)}")
-        print(f"Datei: {path.name}")
-        print(f"Aktion: {with_umlauts(action_label(path))}")
-        executed_action = state.get("executedAction")
-        executed_action_readable = with_umlauts(
-            action_with_amount(executed_action, state, previous_state)
-        )
-        executed_by_player = state.get("executedByPlayer")
-        raw_action_details = state.get("executedActionDetails") or build_action_details(
-            executed_action,
-            state,
-            previous_state,
-        )
-        action_details = iconize_output_text(with_umlauts(str(raw_action_details)) if raw_action_details else None)
-        action_detail_blocks = build_action_details_blocks(
-            executed_action,
-            state,
-            previous_state,
-            raw_action_details if raw_action_details else action_details,
-        )
-        if executed_action:
-            print(f"Ausgeführte Aktion: {executed_action_readable}")
-        else:
-            print("Ausgeführte Aktion: (nicht im JSON vorhanden)")
-
-        print("Aktionsdetails:")
-        if action_detail_blocks:
-            for block in action_detail_blocks:
-                print(f"  {block.get('title', 'Details')}")
-                items = block.get("items", [])
-                if items:
-                    for item in items:
-                        print(f"    {item}")
-                    print()
-                else:
-                    print("    (keine Details)")
-        elif action_details:
-            print(f"  {action_details}")
-        else:
-            print("  (nicht im JSON vorhanden)")
-
-        if executed_by_player:
-            print(f"Ausgeführt von: {format_player_reference(executed_by_player)}")
-        else:
-            print("Ausgeführt von: (nicht im JSON vorhanden)")
-        print(f"Runde: {state.get('round')}")
-        print(f"Aktueller Spieler: {format_player_reference(state.get('currentPlayer'))}")
-        print()
-
-        if previous_state is None:
-            print("Dies ist der Initial-State.")
-        else:
-            print("Änderungen seit dem vorherigen State:")
-            diffs = [iconize_output_text(with_umlauts(line) or line) or line for line in diff_values(state, previous_state, action_details=action_details)]
-            diffs = enrich_working_diffs(diffs, action_details, state, previous_state)
-            if diffs:
-                for line in diffs:
-                    for part in str(line).splitlines() or [""]:
-                        print(f"  {part}")
-            else:
-                print("  Keine Änderungen erkannt.")
-
-        print()
-        print("Beliebige Taste = weiter | Q = beenden")
-
-        key = read_key()
-        if key.lower() == "q":
-            break
-
-        previous_state = state
-
-    print()
-    print("Fertig.")
-    return 0
+        opened = False
+        if args.firefox:
+            opened = open_in_firefox(html_output)
+        if not opened:
+            webbrowser.open(html_output.resolve().as_uri())
+    else:
+        run_terminal_interactively(sorted_paths)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
 
