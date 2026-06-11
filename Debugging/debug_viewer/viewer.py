@@ -1,4 +1,19 @@
-﻿from __future__ import annotations
+# """
+# Anno 1800 Debug Game State Viewer
+# ==================================
+# Dieses Script generiert eine HTML-basierte Visualisierung von Debug-Game-States
+# für das Anno 1800 Brettspiel. Es liest JSON-Dateien aus einem game-states Verzeichnis
+# und erstellt eine interaktive Webseite zum Durchblättern der verschiedenen Spielzustände.
+
+# Hauptfunktionen:
+# - Laden und Parsen von JSON Game-States
+# - Visualisierung von Spielerinformationen, Ressourcen, Fabriken
+# - Berechnung und Anzeige von Unterschieden zwischen aufeinanderfolgenden States
+# - Icon-basierte Darstellung von Gütern, Arbeitern und Karten
+# - Interaktive Navigation durch die States
+# """
+
+from __future__ import annotations
 
 import argparse
 import json
@@ -13,15 +28,31 @@ from pathlib import Path
 from typing import Any
 
 
+# Regex-Pattern zum Erkennen von Aktionsdateien (z.B. "action_42_timestamp.json")
 ACTION_RE = re.compile(r"^action_(\d+)_")
+# Regex-Pattern zum Erkennen des initialen States
 INITIAL_RE = re.compile(r"^initial_")
+# Verzeichnis des aktuellen Scripts
 SCRIPT_DIR = Path(__file__).resolve().parent
+# Projekt-Root-Verzeichnis (ein Level über dem Debugging-Ordner)
 PROJECT_ROOT = SCRIPT_DIR.parent if SCRIPT_DIR.name.lower() == "debugging" else SCRIPT_DIR
+# Standard-Verzeichnis für Game-States
 DEFAULT_GAME_STATES_DIR = PROJECT_ROOT / "game-states"
+# Pfad zur Action-Mapping-Konfigurationsdatei
 ACTION_MAPPING_FILE = SCRIPT_DIR / "action-mapping.json"
 
 
 def default_action_mappings() -> dict[str, Any]:
+    # """
+    # Liefert die Standard-Mappings zur Umwandlung von maschinenlesbaren
+    # Action-Namen in menschenlesbare deutsche Beschreibungen.
+    
+    # Returns:
+    #     Dictionary mit drei Arten von Mappings:
+    #     - exact: Exakte String-Matches
+    #     - prefix: Präfix-basierte Matches
+    #     - regex: Regex-basierte Matches mit Template-Substitution
+    # """
     return {
         "exact": {
             "Carneval[]": "Karneval",
@@ -64,6 +95,19 @@ def default_action_mappings() -> dict[str, Any]:
 
 
 def load_action_mappings(path: Path = ACTION_MAPPING_FILE) -> dict[str, Any]:
+    # """
+    # Lädt Action-Mappings aus einer JSON-Datei und merged sie mit den Defaults.
+    
+    # Die Funktion liest benutzerdefinierte Mappings aus einer Datei und kombiniert
+    # sie mit den Standard-Mappings. Falls die Datei nicht existiert oder fehlerhaft
+    # ist, werden nur die Defaults zurückgegeben.
+    
+    # Args:
+    #     path: Pfad zur action-mapping.json Datei
+        
+    # Returns:
+    #     Dictionary mit kombinierten Mappings (Defaults + Custom)
+    # """
     defaults = default_action_mappings()
     if not path.exists():
         return defaults
@@ -77,18 +121,22 @@ def load_action_mappings(path: Path = ACTION_MAPPING_FILE) -> dict[str, Any]:
     if not isinstance(loaded, dict):
         return defaults
 
+    # Beginne mit Defaults und ergänze/überschreibe mit geladenen Werten
     result: dict[str, Any] = {
         "exact": dict(defaults.get("exact", {})),
         "prefix": dict(defaults.get("prefix", {})),
         "regex": list(defaults.get("regex", [])),
     }
 
+    # Merge exact mappings
     if isinstance(loaded.get("exact"), dict):
         result["exact"].update({str(k): str(v) for k, v in loaded["exact"].items()})
 
+    # Merge prefix mappings
     if isinstance(loaded.get("prefix"), dict):
         result["prefix"].update({str(k): str(v) for k, v in loaded["prefix"].items()})
 
+    # Append regex mappings
     if isinstance(loaded.get("regex"), list):
         for item in loaded["regex"]:
             if not isinstance(item, dict):
@@ -101,8 +149,17 @@ def load_action_mappings(path: Path = ACTION_MAPPING_FILE) -> dict[str, Any]:
     return result
 
 
+# Lade die Action-Mappings beim Start
 ACTION_MAPPINGS = load_action_mappings()
 
+# ============================================================================
+# ICON-MAPPINGS
+# ============================================================================
+# Diese Dictionaries mappen Güter-, Ressourcen- und Arbeiter-Namen auf
+# ihre entsprechenden Icon-Dateinamen für die visuelle Darstellung.
+# ============================================================================
+
+# Mapping von Güternamen (in Kleinbuchstaben) auf Icon-Dateinamen
 GOOD_ICON_NAMES: dict[str, str] = {
     "beer": "beer.png",
     "big berta": "big_berta.png",
@@ -151,12 +208,14 @@ GOOD_ICON_NAMES: dict[str, str] = {
     "work clothes": "work_clothes.png",
 }
 
+# Mapping von Ressourcen-Namen (Gold, Tradechips, etc.) auf Icon-Dateinamen
 RESOURCE_ICON_NAMES: dict[str, str] = {
     "gold": "gold.png",
     "tradechips": "tradechip.png",
     "explorerchips": "explorerchip.png",
     "residentcards": "residentcard_lv_2.png",
 }
+# Mapping von Bewohner-Levels auf Workforce-Icon-Dateinamen
 
 WORKFORCE_ICON_NAMES: dict[str, str] = {
     "level1": "workforce_level_1.png",
@@ -165,6 +224,7 @@ WORKFORCE_ICON_NAMES: dict[str, str] = {
     "level4": "workforce_level_4.png",
     "level5": "workforce_level_5.png",
 }
+# Mapping von Bewohner-Level (als Zahl) auf ResidentCard-Icon-Dateinamen
 
 RESIDENT_CARD_ICON_NAMES: dict[int, str] = {
     1: "residentcard_lv_1.png",
@@ -172,6 +232,7 @@ RESIDENT_CARD_ICON_NAMES: dict[int, str] = {
     3: "residentcard_lv_3.png",
     4: "residentcard_lv_4.png",
     5: "residentcard_lv_5.png",
+# Alternative Workforce-Labels (z.B. "farmer", "workers") gemappt auf Icons
 }
 
 WORKFORCE_LABEL_ICON_NAMES: dict[str, str] = {
@@ -184,6 +245,7 @@ WORKFORCE_LABEL_ICON_NAMES: dict[str, str] = {
     "engineer": WORKFORCE_ICON_NAMES["level4"],
     "investors": WORKFORCE_ICON_NAMES["level5"],
     "investor": WORKFORCE_ICON_NAMES["level5"],
+# Mapping von Farbnamen auf farbige Quadrat-Token (für Fabriken)
 }
 
 FACTORY_COLOR_SQUARE_NAMES: dict[str, str] = {
@@ -209,16 +271,44 @@ GOOD_ICON_TOKENS: dict[str, str] = {
 
 
 def icon_name_for_good(value: str) -> str:
+    # """
+    # Gibt den Icon-Dateinamen für ein Gut zurück.
+    
+    # Args:
+    #     value: Name des Gutes (z.B. "Beer", "Coal")
+        
+    # Returns:
+    #     Icon-Dateiname (z.B. "beer.png") oder generierter Name falls nicht in der Map
+    # """
     key = value.strip().lower()
     return GOOD_ICON_NAMES.get(key, f"{key.replace(' ', '_')}.png")
 
 def resident_card_icon_name(level: Any) -> str:
+    # """
+    # Gibt den Icon-Dateinamen für eine ResidentCard basierend auf dem Level zurück.
+    
+    # Args:
+    #     level: Bewohner-Level (1-5)
+        
+    # Returns:
+    #     Icon-Dateiname (z.B. "residentcard_lv_3.png"), Default ist Level 2
+    # """
     if isinstance(level, int):
         return RESIDENT_CARD_ICON_NAMES.get(level, "residentcard_lv_2.png")
     return "residentcard_lv_2.png"
 
 
 def format_factory_name(value: str) -> str:
+    # # """
+    # Formatiert Fabriknamen, um Farbnamen in Farb-Quadrat-Token zu konvertieren.
+    # Beispiel: "Brickworks red" -> "Brickworks red_square"
+    
+    # Args:
+    #     value: Fabrikname mit optionaler Farbe am Ende
+        
+    # Returns:
+    #     Formatierter Fabrikname mit Farb-Token
+    # """
     text_value = value.strip()
     if not text_value:
         return text_value
@@ -262,13 +352,29 @@ def replace_counted_goods_with_icons(text: str) -> str:
 
 
 def iconize_output_text(text: str | None) -> str | None:
+    # """
+    # Konvertiert Text-Ausgaben durch Einfügen von Icon-Token für bessere Visualisierung.
+    
+    # Diese Funktion ersetzt:
+    # - Gezählte Güter (z.B. "5x beer") durch Icon-Token
+    # - Ressourcennamen durch Ressource + Icon-Token
+    # - Workforce-Labels durch entsprechende Icon-Token
+    
+    # Args:
+    #     text: Zu konvertierender Text
+        
+    # Returns:
+    #     Text mit eingefügten Icon-Token oder None falls Input None war
+    # """
     if text is None:
         return None
 
     normalized = str(text)
 
+    # Ersetze gezählte Güter (z.B. "3x beer" -> "3x goodicon_beer")
     normalized = replace_counted_goods_with_icons(normalized)
 
+    # Füge Icon-Token für Ressourcen hinzu
     for resource_name, icon_name in RESOURCE_ICON_NAMES.items():
         normalized = re.sub(
             rf"(?<![A-Za-z0-9_]){resource_name}(?![A-Za-z0-9_]|\.png)",
@@ -277,12 +383,28 @@ def iconize_output_text(text: str | None) -> str | None:
             flags=re.IGNORECASE,
         )
 
+    # Ersetze Workforce-Labels durch Icon-Token
     normalized = replace_text_tokens_with_icons(normalized, WORKFORCE_LABEL_ICON_NAMES)
 
     return normalized
 
 
 def humanize_action(raw_action: Any) -> str | None:
+    # """
+    # Konvertiert maschinenlesbare Action-Namen in menschenlesbare deutsche Beschreibungen.
+    
+    # Diese Funktion verwendet die ACTION_MAPPINGS um Actions zu übersetzen:
+    # 1. Versucht exakte Matches
+    # 2. Versucht Regex-Matches mit Template-Substitution
+    # 3. Versucht Präfix-Matches
+    # 4. Falls alles fehlschlägt: Formatiert den Action-Namen leserlich
+    
+    # Args:
+    #     raw_action: Roher Action-String (z.B. "BuildShips[shipType=Explorer, level=1, amount=2]")
+        
+    # Returns:
+    #     Menschenlesbare Action-Beschreibung oder None
+    # """
     if raw_action is None:
         return None
 
@@ -373,6 +495,20 @@ def infer_upgrade_resident_amount(
     if min(x1, x2, x3, x4) < 0:
         return None
     if x4 != deltas["level5"]:
+    # """
+    # Parst Kommandozeilen-Argumente für den Debug Viewer.
+    
+    # Unterstützte Argumente:
+    # --dir: Pfad zum Game-State-Verzeichnis
+    # --web: Generiert HTML-Ansicht für Browser
+    # --firefox: Öffnet die HTML-Ansicht in Firefox
+    # --out: Output-Pfad für HTML-Datei
+    # --migrate-json: Migriert Legacy-Image-Token in JSON-Files
+    # --migrate-dir: Root-Verzeichnis für Migration
+    
+    # Returns:
+    #     Parsed argparse.Namespace mit allen Argumenten
+    # """
         return None
 
     upgraded = x1 + x2 + x3 + x4
@@ -428,20 +564,18 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional output HTML file path for --web mode",
     )
-    parser.add_argument(
-        "--migrate-json",
-        action="store_true",
-        help="One-time migration: rewrite legacy image tokens in debug JSON files to folder-based paths",
-    )
-    parser.add_argument(
-        "--migrate-dir",
-        default=None,
-        help="Root directory for --migrate-json (default: game-states)",
-    )
-    return parser.parse_args()
-
-
-def find_latest_debuggame_dir(base_dir: Path = DEFAULT_GAME_STATES_DIR) -> Path | None:
+    # """
+    # Findet das neueste Debuggame-Verzeichnis im game-states Ordner.
+    
+    # Sucht nach Verzeichnissen mit dem Muster "Debuggame-XX" und gibt das
+    # mit der höchsten Nummer zurück.
+    
+    # Args:
+    #     base_dir: Basis-Verzeichnis für die Suche
+        
+    # Returns:
+    #     Path zum neuesten Debuggame-Verzeichnis oder None falls keins gefunden
+    # """
     if not base_dir.exists():
         return None
 
@@ -454,9 +588,25 @@ def find_latest_debuggame_dir(base_dir: Path = DEFAULT_GAME_STATES_DIR) -> Path 
         return None
 
     def debuggame_number(path: Path) -> int:
+        """Extrahiert die Nummer aus dem Debuggame-Verzeichnisnamen."""
         return int(path.name.split("-")[-1])
 
     return max(candidates, key=debuggame_number)
+
+# """
+    # Generiert einen Sortier-Schlüssel für Game-State-Dateien.
+    
+    # Sortierreihenfolge:
+    # 1. Initial-States (priority 0)
+    # 2. Action-States (priority 1, sortiert nach Action-Nummer)
+    # 3. Andere Dateien (priority 2, sortiert alphabetisch)
+    
+    # Args:
+    #     path: Pfad zur Game-State-Datei
+        
+    # Returns:
+    #     Tuple (priority, identifier) für Sortierung
+    # """
 
 
 def sort_key(path: Path) -> tuple[int, int | str]:

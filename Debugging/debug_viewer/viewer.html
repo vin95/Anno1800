@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Anno 1800 Debuggame States - {state_dir}</title>
+    <link rel="stylesheet" href="viewer.css">
+</head>
+<body>
+    <!-- 
+    ============================================================================
+    Anno 1800 Debug Game State Viewer - HTML Template
+    ============================================================================
+    Diese HTML-Seite wird von viewer.py generiert und zeigt Debug-Game-States
+    für das Anno 1800 Brettspiel in einer interaktiven Browser-Ansicht.
+    
+    Hauptbereiche:
+    - Header mit Navigation (vorheriger/nächster State, Details-Toggle)
+    - Visuelle Spielansicht (Mainboard, Player Layers, Fabrik-Overlay)
+    - Detail-Layer (Aktionsdetails, Kartenübersicht, Änderungen, Roh-JSON)
+    ============================================================================
+    -->
+    
+    <div class="container">
+        <!-- Header-Bereich mit Titel und Navigation -->
+        <div class="panel header">
+            <div>
+                <h1>Debuggame-Zustände</h1>
+                <div class="muted" id="stateDir"></div>
+            </div>
+            <div class="controls">
+                <button id="prevBtn" type="button">Vorheriger</button>
+                <button id="nextBtn" type="button">Nächster</button>
+                <button id="toggleDetailsBtn" type="button" class="toggle-details">Details ein-/ausblenden</button>
+            </div>
+        </div>
+
+        <!-- Visuelle Spielansicht: Mainboard mit umgebenden Layers -->
+        <div class="panel">
+            <strong>Visuelle Spielansicht</strong>
+            <div id="visualLayer" class="visual-layer">
+                <div class="game-layout">
+                    <!-- Layer Oben Links: Spieler 1 Informationen -->
+                    <section class="board-slot slot-ul">
+                        <h3>Layer Oben Links</h3>
+                        <div id="layerUpperLeft"></div>
+                    </section>
+                    <!-- Layer Oben Rechts: Spieler 2 Informationen -->
+                    <section class="board-slot slot-ur">
+                        <h3>Layer Oben Rechts</h3>
+                        <div id="layerUpperRight"></div>
+                    </section>
+                    <!-- Zentrales Mainboard mit Resident Stones und Fabrik-Overlay -->
+                    <section class="board-slot slot-center">
+                        <div class="mainboard-wrapper">
+                            <!-- Bewohner-Steine Container (Farmers, Workers, etc.) -->
+                            <div id="residentStones" class="resident-stones-container"></div>
+                            <!-- Hauptspielfeld mit Fabrik-Grid -->
+                            <div id="mainBoard" class="main-board"></div>
+                        </div>
+                    </section>
+                    <!-- Layer Unten Links: Spieler 3 Informationen (falls vorhanden) -->
+                    <section class="board-slot slot-ll">
+                        <h3>Layer Unten Links</h3>
+                        <div id="layerLowerLeft"></div>
+                    </section>
+                    <!-- Layer Unten Rechts: Spieler 4 Informationen (falls vorhanden) -->
+                    <section class="board-slot slot-lr">
+                        <h3>Layer Unten Rechts</h3>
+                        <div id="layerLowerRight"></div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail-Layer (standardmäßig versteckt, togglebar via Button) -->
+        <div id="detailsLayer" class="hidden">
+        <!-- Aktionsdetails Panel -->
+        <div class="panel">
+            <strong>Aktionsdetails</strong>
+            <div id="actionDetailsContainer"></div>
+        </div>
+
+        <!-- Kartenübersicht Panel -->
+        <div class="panel">
+
+                    <div class="panel">
+                        <strong>Kartenübersicht</strong>
+                        <div id="cardOverviewContainer"></div>
+                    </div>
+            <!-- State-Metadaten: Dateiname, Aktion, Runde, etc. -->
+            <div class="header">
+                <strong id="stateIndicator">Zustand</strong>
+                <span class="hint muted">Tasten: &lt;- vorheriger, -&gt; nächster</span>
+            </div>
+            <div class="grid" style="margin-top: 10px">
+                <div class="kv"><div class="k">Datei</div><div class="v" id="fileName"></div></div>
+                <div class="kv"><div class="k">Aktion</div><div class="v" id="action"></div></div>
+                <div class="kv"><div class="k">Ausgeführte Aktion</div><div class="v" id="executedAction"></div></div>
+                <div class="kv"><div class="k">Ausgeführt von</div><div class="v" id="executedBy"></div></div>
+                <div class="kv"><div class="k">Runde</div><div class="v" id="round"></div></div>
+                <div class="kv"><div class="k">Aktueller Spieler</div><div class="v" id="currentPlayer"></div></div>
+            </div>
+        </div>
+
+        <!-- Agent-Scores Panel (zeigt KI-Entscheidungen) -->
+        <div class="panel">
+            <strong id="agentScoresTitle">Agent-Auswahl</strong>
+            <div id="agentScoresContainer"></div>
+        </div>
+
+        <!-- Diff-Container (zeigt Änderungen zum vorherigen State) -->
+        <div class="panel">
+            <strong>Änderungen seit dem vorherigen State</strong>
+            <div id="diffContainer"></div>
+        </div>
+
+        <!-- Roh-JSON Anzeige für Debugging -->
+        <div class="panel">
+            <strong>Roh-JSON</strong>
+            <pre id="rawJson"></pre>
+        </div>
+        </div>
+    </div>
+
+    <!-- Embedded JSON Data: Alle Game States als JSON -->
+    <script type="application/json" id="gameStateData">{payload}</script>
+    <!-- Fabrik-Layout-Konfiguration als JSON -->
+    <script type="application/json" id="factoryLayoutData">{json.dumps(factory_layout, ensure_ascii=False)}</script>
+    
+    <!-- Diagnose-Banner (zeigt ob JSON korrekt geladen wurde) -->
+    <script>
+        (function() {{
+            var bar = document.createElement('div');
+            bar.id = 'diagBar';
+            bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#0f3460;color:#0ff;padding:6px 12px;font-size:12px;font-family:monospace;z-index:9999;';
+            try {{
+                var el = document.getElementById('gameStateData');
+                if (!el) {{ bar.textContent = 'DIAG: gameStateData element NOT FOUND'; }}
+                else {{
+                    var parsed = JSON.parse(el.textContent);
+                    bar.textContent = 'DIAG: gameStateData OK, ' + parsed.length + ' entries, ' + el.textContent.length + ' chars';
+                }}
+            }} catch(e) {{
+                bar.textContent = 'DIAG ERROR: ' + e.message;
+            }}
+            document.body.appendChild(bar);
+        }})();
+    </script>
+    
+    <!-- JavaScript Initialisierung: Lädt globale Konfigurationen -->
+    <!-- HINWEIS: Dies ist ein Python-Template-String. Die doppelten geschweiften Klammern
+         werden beim Generieren durch tatsächliche Werte ersetzt. -->
+    <script type="text/x-python-template">
+        // State-Verzeichnis-Name
+        const stateDir = {{json.dumps(str(state_dir), ensure_ascii=False)}};
+        // Alle Game State Einträge
+        const entries = JSON.parse(document.getElementById('gameStateData').textContent);
+        // Fabrik-Layout für das Mainboard
+        const FACTORY_LAYOUT = JSON.parse(document.getElementById('factoryLayoutData').textContent);
+        // Basis-URI für Icon-Pfade
+        const iconBaseUri = {{json.dumps(icon_base_uri, ensure_ascii=False)}};
+        // URI für das Mainboard-Hintergrundbild
+        const mainBoardImageUri = {{json.dumps(main_board_image_uri, ensure_ascii=False)}};
+        // Lookup-Map: Icon-Name -> Icon-Pfad
+        const iconPathByName = {{json.dumps(icon_lookup, ensure_ascii=False)}};
+        // Alle verfügbaren Bild-Pfade
+        const allPicturePaths = {{json.dumps(all_picture_paths, ensure_ascii=False)}};
+        // Liste aller Icon-Dateinamen
+        const iconFileNames = {{json.dumps(icon_file_names, ensure_ascii=False)}};
+        // Sortierte Icon-Namen (längste zuerst für Matching)
+        const orderedIconFileNames = [...iconFileNames].sort((left, right) => right.length - left.length);
+        // Güter-Icon-Token für Text-Rendering
+        const goodIconTokens = {{json.dumps(GOOD_ICON_TOKENS, ensure_ascii=False)}};
+        // Sortierte Güter-Icon-Token (längste zuerst)
+        const orderedGoodIconTokens = Object.keys(goodIconTokens).sort((left, right) => right.length - left.length);
+        // Güter-Icon-Map
+        const goodIconsByName = {{json.dumps(GOOD_ICON_NAMES, ensure_ascii=False)}};
+        // Bild-Kandidaten für Action-Visualisierung
+        const actionImageCandidates = {{json.dumps(action_image_candidates, ensure_ascii=False)}};
+        // Kleine Ressourcen-Icons (für spezielle Darstellung)
+        const smallResourceIconNames = new Set(["gold.png", "tradechip.png", "explorerchip.png"]);
+        // Farb-Quadrat-Token für Fabriken
+        const colorSquareTokens = {
+            "red_square": "red",
+            "blue_square": "blue",
+            "green_square": "green",
+            "yellow_square": "yellow",
+            "orange_square": "orange",
+            "purple_square": "purple",
+            "black_square": "black",
+            "white_square": "white",
+        };
+        const orderedColorSquareTokens = Object.keys(colorSquareTokens).sort((left, right) => right.length - left.length);
+        
+        // State-Tracking-Variablen
+        let index = 0;  // Aktueller State-Index
+        let numPlayers = 2;  // Anzahl der Spieler im Spiel
+
+        // DOM-Element-Referenzen für schnellen Zugriff
+        const stateDirEl = document.getElementById("stateDir");
+        const stateIndicatorEl = document.getElementById("stateIndicator");
+        const fileNameEl = document.getElementById("fileName");
+        const actionEl = document.getElementById("action");
+        const executedActionEl = document.getElementById("executedAction");
+        const actionDetailsContainerEl = document.getElementById("actionDetailsContainer");
+        const agentScoresContainerEl = document.getElementById("agentScoresContainer");
+        const agentScoresTitleEl = document.getElementById("agentScoresTitle");
+        const executedByEl = document.getElementById("executedBy");
+        const roundEl = document.getElementById("round");
+        const currentPlayerEl = document.getElementById("currentPlayer");
+        const diffContainerEl = document.getElementById("diffContainer");
+        const cardOverviewContainerEl = document.getElementById("cardOverviewContainer");
+        const rawJsonEl = document.getElementById("rawJson");
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        const toggleDetailsBtn = document.getElementById("toggleDetailsBtn");
+        const detailsLayer = document.getElementById("detailsLayer");
+        const mainBoardEl = document.getElementById("mainBoard");
+        const layerUpperLeftEl = document.getElementById("layerUpperLeft");
+        const layerUpperRightEl = document.getElementById("layerUpperRight");
+        const layerLowerLeftEl = document.getElementById("layerLowerLeft");
+        const layerLowerRightEl = document.getElementById("layerLowerRight");
+    </script>
+    
+    <!-- Hauptlogik: viewer.js enthält alle Rendering- und Interaktionsfunktionen -->
+    <script src="viewer.js"></script>
+</body>
+</html>

@@ -1,0 +1,820 @@
+/*
+============================================================================
+Anno 1800 Debug Game State Viewer - CSS Stylesheet
+============================================================================
+Styling für die interaktive Browser-Ansicht der Debug-Game-States.
+
+Design-System:
+- Dunkles Theme mit Blau-Grün-Akzenten
+- Radiale Gradienten für visuellen Tiefeneffekt
+- Glasmorphismus (backdrop-filter blur) für Panels
+- Responsive Grid-Layouts für flexible Anordnung
+
+Hauptbereiche:
+- CSS Custom Properties (Design-Tokens)
+- Layout (Body, Container, Grid)
+- Panel-System (Cards mit Blur-Effekt)
+- Icon-System (Inline-Icons, Farb-Quadrate)
+- Mainboard und Layer-Slots
+- Fabrik-Overlays und Bewohner-Steine
+============================================================================
+*/
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES (Design-Tokens)
+   ============================================================================ */
+:root {
+    --bg-0: #0f172a;           /* Dunkelster Hintergrund */
+    --bg-1: #1b2639;           /* Leicht hellerer Hintergrund */
+    --panel: #162136dd;        /* Panel-Hintergrund (semi-transparent) */
+    --text: #f3f4f6;           /* Primäre Textfarbe (hell) */
+    --muted: #9ca3af;          /* Gedämpfte/sekundäre Textfarbe */
+    --accent: #14b8a6;         /* Akzentfarbe (Türkis) für Buttons/Links */
+    --accent-strong: #0f766e;  /* Dunklere Akzentfarbe */
+    --border: #334155;         /* Border-Farbe für Trennlinien */
+    --ok: #10b981;             /* Erfolgsfarbe (Grün) */
+}
+
+/* ============================================================================
+   GRUNDLEGENDES LAYOUT
+   ============================================================================ */
+
+/* Box-Sizing auf allen Elementen für einfacheres Layout */
+* { box-sizing: border-box; }
+
+/* Body: Dunkler Hintergrund mit radialen Gradienten für Tiefe */
+body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--text);
+    /* Mehrere radiale Gradienten für visuellen Tiefeneffekt */
+    background:
+        radial-gradient(1200px 700px at 10% -10%, #27344d 0%, transparent 60%),
+        radial-gradient(900px 600px at 100% 0%, #1d5f73 0%, transparent 60%),
+        linear-gradient(180deg, var(--bg-0), var(--bg-1));
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    padding: 10px;
+}
+
+/* Haupt-Container: Grid-Layout mit Abständen */
+.container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    display: grid;
+    gap: 10px;
+}
+
+/* ============================================================================
+   PANEL-SYSTEM
+   ============================================================================ */
+
+/* Panel: Glasmorphismus-Effekt mit Blur und semi-transparentem Hintergrund */
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    backdrop-filter: blur(4px);  /* Glasmorphismus-Effekt */
+}
+
+/* Header-Panel: Flexbox für Titel und Controls nebeneinander */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Hauptüberschrift: Responsive Font-Größe mit clamp() */
+h1 {
+    margin: 0;
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    letter-spacing: 0.01em;
+}
+
+/* Gedämpfter Text für sekundäre Informationen */
+.muted { color: var(--muted); }
+
+/* ============================================================================
+   BUTTONS UND CONTROLS
+   ============================================================================ */
+
+/* Controls-Container: Flexbox für Button-Gruppe */
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Toggle-Details-Button: Andere Farbe als normale Buttons */
+.controls .toggle-details {
+    border-color: #6b7280;
+    background: linear-gradient(180deg, #e2e8f0, #cbd5e1);
+    color: #0f172a;
+}
+
+/* Standard-Button: Gradient-Hintergrund mit Akzentfarben */
+button {
+    border: 1px solid var(--accent-strong);
+    background: linear-gradient(180deg, var(--accent), #0d9488);
+    color: #042f2e;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    min-width: 90px;
+}
+
+/* Deaktivierter Button: Reduzierte Opacity */
+button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* ============================================================================
+   GRID-LAYOUTS FÜR DATEN-ANZEIGE
+   ============================================================================ */
+
+/* Responsive Grid: Automatische Spalten mit minmax() */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 8px 14px;
+}
+
+/* Key-Value-Pair Container */
+.kv {
+    background: #0b1220a6;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+/* Key: Gedämpfte Farbe, kleinere Schrift */
+.kv .k {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 3px;
+}
+
+/* Value: Fettgedruckt, kann umbrochen werden */
+.kv .v {
+    font-weight: 600;
+    word-break: break-word;
+}
+
+/* ============================================================================
+   DIFF-ANZEIGE UND ACTION-DETAILS
+   ============================================================================ */
+
+/* Liste für Diff-Einträge */
+.diff-list {
+    margin: 8px 0 0;
+    padding-left: 20px;
+    line-height: 1.35;
+}
+
+.diff-list li {
+    white-space: pre-wrap;
+}
+
+/* Action-Block: Container für Aktionsdetails */
+.action-block {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    background: #0b1220a6;
+}
+
+.action-title {
+    font-weight: 700;
+    margin: 0 0 6px;
+}
+
+.action-list {
+    display: grid;
+    gap: 8px;
+}
+
+/* Spezielle Größe für Handkarten-Icons */
+.handcards-list .icon-inline img {
+    width: 2.38em;
+    height: 2.38em;
+}
+
+.action-paragraph {
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ============================================================================
+   ICON-SYSTEM
+   ============================================================================ */
+
+/* Inline-Icon-Container: Flexbox für Icon + Text */
+.icon-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    vertical-align: middle;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* Standard-Icon-Größe */
+.icon-inline img {
+    width: 1.98em;
+    height: 1.98em;
+    object-fit: contain;
+    vertical-align: middle;
+    image-rendering: auto;
+}
+
+/* Kleine Ressourcen-Icons (Gold, Chips) */
+.icon-inline img.resource-small {
+    width: 1.58em;
+    height: 1.58em;
+}
+
+/* Große ResidentCard-Icons */
+.icon-inline img.residentcard-large {
+    width: 2.38em;
+    height: 2.38em;
+}
+
+/* Farb-Quadrate für Fabriken */
+.factory-color-square {
+    display: inline-block;
+    width: 0.99em;
+    height: 0.99em;
+    border-radius: 0.25em;
+    vertical-align: middle;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+
+/* Farbvarianten für Fabrik-Quadrate */
+.factory-color-square.red { background: #d94848; }
+.factory-color-square.blue { background: #4a89dc; }
+.factory-color-square.green { background: #47b36b; }
+.factory-color-square.yellow { background: #d4b13a; }
+.factory-color-square.orange { background: #dd8a36; }
+.factory-color-square.purple { background: #9b63d6; }
+.factory-color-square.black { background: #4b5563; }
+.factory-color-square.white { background: #f3f4f6; }
+
+/* ============================================================================
+   COLLAPSIBLE DETAILS (Ausklappbare Bereiche)
+   ============================================================================ */
+
+/* Ausklappbarer Details-Container */
+details.collapsible {
+    margin-top: 8px;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    background: #0b1220a6;
+    padding: 8px 10px;
+}
+
+/* Klickbare Summary (Kopfzeile) */
+details.collapsible > summary {
+    cursor: pointer;
+    font-weight: 700;
+    outline: none;
+}
+
+/* ============================================================================
+   AGENT-SCORES (KI-Entscheidungs-Anzeige)
+   ============================================================================ */
+
+/* Container für Agent-Score-Liste */
+.agent-scores {
+    margin: 10px 0 0;
+    display: grid;
+    gap: 8px;
+}
+
+/* Einzelne Score-Zeile */
+.agent-score-row {
+    border: 1px solid #1f2937;
+    border-radius: 8px;
+    padding: 8px;
+    background: #0b1220d8;
+}
+
+/* Hauptaktion (fettgedruckt) */
+.agent-score-main {
+    font-weight: 700;
+}
+
+/* Meta-Informationen (Score, Status) */
+.agent-score-meta {
+    color: var(--muted);
+    margin-top: 2px;
+    font-size: 0.92rem;
+    word-break: break-word;
+}
+
+/* Hervorhebung für gewählte Aktion */
+.agent-score-selected {
+    color: var(--ok);
+}
+
+/* ============================================================================
+   VERSCHIEDENE UTILITY-KLASSEN
+   ============================================================================ */
+
+/* Leerer Diff-Text (grün, da nichts schief ging) */
+.diff-empty { color: var(--ok); font-weight: 600; }
+
+/* Pre-Element für JSON-Anzeige mit Scroll */
+pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 48vh;
+    overflow: auto;
+    background: #0b1220d8;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+/* Hinweis-Text (kleinere Schrift) */
+.hint { font-size: 0.9rem; }
+
+/* ============================================================================
+   MAINBOARD UND SPIELFELD-LAYOUT
+   ============================================================================ */
+
+/* Visual Layer: Container für das gesamte Spielfeld */
+.visual-layer {
+    display: grid;
+    gap: 10px;
+}
+
+/* Game Layout: 3x2 Grid für Mainboard und Player-Layers */
+.game-layout {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: minmax(380px, auto) minmax(560px, auto) minmax(380px, auto);
+    grid-template-areas:
+        "ul ur"        /* Oben: Spieler 1 (links) und Spieler 2 (rechts) */
+        "center center"  /* Mitte: Mainboard (volle Breite) */
+        "ll lr";       /* Unten: Spieler 3 (links) und Spieler 4 (rechts) */
+}
+
+/* Board Slot: Container für Player-Layers oder Mainboard */
+.board-slot {
+    border: 1px solid #334155;
+    border-radius: 12px;
+    background: rgba(7, 12, 24, 0.82);
+    padding: 12px;
+    display: grid;
+    gap: 8px;
+    align-content: start;
+}
+
+.board-slot h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    color: #cbd5e1;
+}
+
+/* Grid-Area-Zuweisungen für die Layer-Slots */
+.slot-ul { grid-area: ul; }   /* Upper Left */
+.slot-ur { grid-area: ur; }   /* Upper Right */
+.slot-ll { grid-area: ll; }   /* Lower Left */
+.slot-lr { grid-area: lr; }   /* Lower Right */
+
+/* Center-Slot für Mainboard (volle Breite) */
+.slot-center { grid-area: center; }
+
+/* Minimale Höhe für Player-Layer-Slots */
+.slot-ul, .slot-ur, .slot-ll, .slot-lr {
+    min-height: 360px;
+}
+
+/* ============================================================================
+   MAINBOARD
+   ============================================================================ */
+
+/* Hauptspielfeld mit Fabrik-Grid */
+.main-board {
+    width: 70%;
+    min-height: 560px;
+    border: 2px dashed #14b8a677;
+    border-radius: 14px;
+    /* Mehrschichtiger Hintergrund mit radialen Gradienten */
+    background:
+        radial-gradient(700px 260px at 50% -20%, rgba(45, 212, 191, 0.15), transparent 70%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.8), rgba(2, 6, 23, 0.92));
+    padding: 12px;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr auto auto;
+    gap: 10px;
+}
+
+/* Zentraler Bereich mit Hintergrundbild (relative Positionierung für Overlays) */
+.main-board-center {
+    position: relative;
+    border: 1px solid #2c3f56;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Mainboard-Hintergrundbild */
+.main-board-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 10px;
+}
+
+/* Fallback-Text wenn kein Bild vorhanden */
+.main-board-image-fallback {
+    color: #93a4bb;
+    font-size: 0.9rem;
+    padding: 20px;
+}
+
+/* ============================================================================
+   FABRIK-OVERLAY
+   ============================================================================ */
+
+/* Overlay für Fabriken - absolut positioniert über dem Mainboard-Bild */
+.board-factory-overlay {
+    position: absolute;
+    top: 3.6%;
+    left: 2.4%;
+    right: 2.4%;
+    bottom: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7%;
+    pointer-events: none;  /* Klicks durchlassen */
+}
+
+/* Fabrik-Reihe (horizontal) */
+.board-factory-row {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+}
+
+/* Einzelner Fabrik-Slot */
+.board-factory-slot {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* Fabrik-Icon im Slot */
+.board-factory-slot img {
+    width: 84%;
+    flex: 1;
+    min-height: 0;
+    object-fit: contain;
+}
+
+/* Badge mit Anzahl verfügbarer Fabriken */
+.board-slot-count {
+    font-size: 1.0em;
+    font-weight: 800;
+    color: #826b38;  /* Gold-Farbe */
+    line-height: 1.1;
+    padding-bottom: 1px;
+}
+
+/* Rote Farbe wenn keine Fabriken mehr verfügbar */
+.board-slot-count.zero {
+    color: #ef4444;
+}
+
+/* ============================================================================
+   RESIDENT-CARDS-OVERLAY
+   ============================================================================ */
+
+/* Overlay für ResidentCard-Stapel */
+.resident-cards-overlay {
+    position: absolute;
+    bottom: 1.7%;
+    left: 3%;
+    width: 49.2%;
+    height: 22%;
+    display: flex;
+    pointer-events: none;
+    gap: 20px;
+}
+
+/* Einzelner Karten-Stapel */
+.resident-card-stack {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Karten-Icon */
+.resident-card-stack img {
+    width: 105%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Badge mit Anzahl Karten im Stapel */
+.resident-card-count {
+    font-size: 1em;
+    font-weight: 800;
+    color: #826b38;
+}
+
+/* Rote Farbe wenn Stapel leer */
+.resident-card-count.zero {
+    color: #ef4444;
+}
+
+/* ============================================================================
+   RESIDENT STONES (Bewohner-Steine)
+   ============================================================================ */
+
+/* Container für Bewohner-Steine links vom Mainboard */
+.resident-stones-container {
+    width: 5%;
+    margin-top: 10%;
+}
+
+/* Gestapelte Steine eines Typs */
+.resident-stone-stack{
+    margin-top: 20%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Einzelne Stein-Bilder */
+.resident-stone-stack img{
+    width: 20%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* ============================================================================
+   MAINBOARD-WRAPPER UND ZUSÄTZLICHE ELEMENTE
+   ============================================================================ */
+
+/* Wrapper für Resident Stones + Mainboard (Flexbox horizontal) */
+.mainboard-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+/* Titel auf dem Mainboard */
+.main-board-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+/* Meta-Informationen (Runde, Spieler) */
+.main-board-meta {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* Grid für Pool-Anzeige (Ressourcen-Pools) */
+.main-board-pools {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+/* Einzelner Pool-Chip */
+.pool-chip {
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 8px;
+    background: rgba(15, 23, 42, 0.7);
+    font-size: 0.88rem;
+}
+
+/* Spezielle Größe für Schiff-Icons in Token-Pills */
+.ships-row .token-pill img {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+}
+
+/* ============================================================================
+   FABRIK-BOARD (Alternative Darstellung)
+   ============================================================================ */
+
+/* Fabrik-Board mit Reihen */
+.factory-board {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Header für Fabrik-Reihe */
+.factory-row-header {
+    font-size: 0.68rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding-bottom: 2px;
+    border-bottom: 1px solid #1e293b;
+}
+
+/* Fabrik-Reihe mit horizontalem Scroll */
+.factory-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 4px;
+    align-items: flex-start;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+/* Einzelne Fabrik-Kachel */
+.factory-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    width: 68px;
+    flex-shrink: 0;
+}
+
+.factory-tile img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    background: rgba(15, 23, 42, 0.7);
+    padding: 2px;
+}
+
+.factory-tile-name {
+    font-size: 0.5rem;
+    color: #94a3b8;
+    text-align: center;
+    line-height: 1.2;
+    width: 68px;
+    word-break: break-word;
+    hyphens: auto;
+}
+
+.factory-tile-count {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #22d3ee;
+}
+
+.factory-tile-count.zero {
+    color: #ef4444;
+}
+
+.island-layout {
+    border: 1px dashed #32465f;
+    border-radius: 10px;
+    padding: 8px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.52);
+}
+
+.island-main-tile {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border: 1px solid #3b4f6a;
+    border-radius: 12px;
+    background: linear-gradient(160deg, rgba(30, 64, 83, 0.5), rgba(15, 23, 42, 0.8));
+    display: grid;
+    place-items: center;
+    color: #cbd5e1;
+    font-size: 0.85rem;
+}
+
+.island-lower-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.island-small-tile {
+    aspect-ratio: 1 / 1;
+    border: 1px solid #3b4f6a;
+    border-radius: 10px;
+    background: linear-gradient(160deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.9));
+    display: grid;
+    place-items: center;
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+.layer-section {
+    border: 1px solid #243246;
+    border-radius: 10px;
+    padding: 8px;
+    background: rgba(15, 23, 42, 0.6);
+}
+
+.resource-row, .workers-row, .ships-row, .residentcards-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.token-pill {
+    border: 1px solid #334155;
+    border-radius: 999px;
+    padding: 3px 8px;
+    background: rgba(30, 41, 59, 0.8);
+    font-size: 0.78rem;
+}
+
+.worker-chip, .resident-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid #334155;
+    border-radius: 999px;
+    padding: 2px 7px;
+    background: rgba(30, 41, 59, 0.7);
+    font-size: 0.76rem;
+}
+
+.worker-chip img, .resident-chip img, .resource-row img {
+    width: 1.1rem;
+    height: 1.1rem;
+    object-fit: contain;
+}
+
+.objective-card {
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 8px;
+    background: #ffffff;
+    color: #0f172a;
+    min-height: 110px;
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
+.objective-card strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #0f172a;
+}
+
+.objective-inline-strip {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 8px;
+}
+
+.objective-inline-title {
+    grid-column: 1 / -1;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@media (max-width: 1200px) {
+    .game-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        grid-template-areas:
+            "center"
+            "ul"
+            "ur"
+            "ll"
+            "lr";
+        min-height: 0;
+    }
+
+    .main-board-pools {
+        grid-template-columns: 1fr;
+    }
+}
