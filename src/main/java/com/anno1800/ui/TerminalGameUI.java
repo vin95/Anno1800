@@ -1639,7 +1639,15 @@ public class TerminalGameUI {
                 // Complete Board State
                 writer.println("  \"boardState\": {");
                 writer.println("    \"factories\": {");
-                writer.printf("      \"availableFactories\": %d%n", state.boardState().factories().availableFactories());
+                {
+                    java.util.Map<com.anno1800.data.gamedata.Producers, Integer> blueprints = state.boardState().factories().blueprints();
+                    java.util.List<com.anno1800.data.gamedata.Producers> keys = new java.util.ArrayList<>(blueprints.keySet());
+                    for (int fi = 0; fi < keys.size(); fi++) {
+                        com.anno1800.data.gamedata.Producers p = keys.get(fi);
+                        String key = p.name().toLowerCase();
+                        writer.printf("      \"%s\": %d%s%n", key, blueprints.get(p), fi < keys.size() - 1 ? "," : "");
+                    }
+                }
                 writer.println("    },");
                 writer.println("    \"shipyards\": {");
                 writer.printf("      \"level1\": %d,%n", state.boardState().shipyards().level1());

@@ -625,7 +625,15 @@ public class DebugGameRunner {
                 // Board State
                 w.println("  \"boardState\": {");
                 w.println("    \"factories\": {");
-                w.printf ("      \"availableFactories\": %d%n", state.boardState().factories().availableFactories());
+                {
+                    java.util.Map<com.anno1800.data.gamedata.Producers, Integer> blueprints = state.boardState().factories().blueprints();
+                    java.util.List<com.anno1800.data.gamedata.Producers> keys = new java.util.ArrayList<>(blueprints.keySet());
+                    for (int fi = 0; fi < keys.size(); fi++) {
+                        com.anno1800.data.gamedata.Producers p = keys.get(fi);
+                        String key = p.name().toLowerCase();
+                        w.printf("      \"%s\": %d%s%n", key, blueprints.get(p), fi < keys.size() - 1 ? "," : "");
+                    }
+                }
                 w.println("    },");
                 w.println("    \"shipyards\": {");
                 w.printf ("      \"level1\": %d,%n", state.boardState().shipyards().level1());

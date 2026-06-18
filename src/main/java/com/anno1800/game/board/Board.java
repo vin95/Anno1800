@@ -882,6 +882,23 @@ public class Board {
     }
 
     /**
+     * Returns a map of each factory type to its available blueprint count on the board.
+     * Only non-StartFactory types that have a stack are included.
+     *
+     * @return Ordered map of Producers -> blueprint count
+     */
+    public java.util.Map<com.anno1800.data.gamedata.Producers, Integer> getFactoryBlueprintCounts() {
+        java.util.LinkedHashMap<com.anno1800.data.gamedata.Producers, Integer> result = new java.util.LinkedHashMap<>();
+        for (java.util.Map.Entry<com.anno1800.data.gamedata.Producers, Integer> entry : factoryStackIndex.entrySet()) {
+            int stackIdx = entry.getValue();
+            if (stackIdx >= 0 && stackIdx < factoryStacks.size()) {
+                result.put(entry.getKey(), factoryStacks.get(stackIdx).size());
+            }
+        }
+        return result;
+    }
+
+    /**
      * Helper method to determine if a producer is a StartFactory.
      * StartFactories are the GREEN and RED factories that come as default on PlayerBoard.
      * 

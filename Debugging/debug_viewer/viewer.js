@@ -42,6 +42,35 @@ Wichtige Render-Funktionen:
             return String(value);
         }
 
+                /**
+                 * Normalizes a key for matching factory IDs/JSON keys.
+                 * Removes non-alphanumeric characters and lowercases.
+                 * @param {string} s
+                 */
+                function normalizeKey(s) {
+                    return String(s || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
+                }
+
+                // simple Levenshtein distance for short tokens (used for tolerant matching)
+                function levenshtein(a, b) {
+                    if (a === b) return 0;
+                    const al = a.length, bl = b.length;
+                    if (al === 0) return bl;
+                    if (bl === 0) return al;
+                    const v0 = new Array(bl + 1);
+                    const v1 = new Array(bl + 1);
+                    for (let i = 0; i <= bl; i++) v0[i] = i;
+                    for (let i = 0; i < al; i++) {
+                        v1[0] = i + 1;
+                        for (let j = 0; j < bl; j++) {
+                            const cost = a[i] === b[j] ? 0 : 1;
+                            v1[j + 1] = Math.min(v1[j] + 1, v0[j + 1] + 1, v0[j] + cost);
+                        }
+                        for (let j = 0; j <= bl; j++) v0[j] = v1[j];
+                    }
+                    return v1[bl];
+                }
+
         /**
          * Berechnet die verfügbaren Fabriken basierend auf dem aktuellen State.
          * Subtrahiert bereits gebaute Fabriken von den initialen Stapeln.
@@ -49,46 +78,79 @@ Wichtige Render-Funktionen:
          * @param {Object} state - Aktueller Game State
          * @returns {Object} Dictionary mit verfügbaren Fabriken pro Typ
          */
-        function calculateAvailableFactories(state) {
-            const factoriesPerStack = numPlayers <= 2 ? 1 : 2;
-            const initialCounts = {};
-            
+        function calculateAvailableFactories(state, entry) {
+            // Read authoritative per-factory blueprint counts directly from the game state JSON.
+            // Java serializes these as state.boardState.factories = { "sawmill_blue": 2, ... }
+            const jsonFactories = state?.boardState?.factories || {};
+
+            // Build a normalization lookup from the JSON keys to FACTORY_LAYOUT entries
+            // so we can bridge JSON enum-based keys to the layout ids used in the UI.
+            // Map: normalized layoutId -> layoutId (from FACTORY_LAYOUT)
+            const jsonKeyToLayoutId = {};
             for (const row of FACTORY_LAYOUT) {
                 for (const f of row.factories) {
-                    if (f.initial > 0) {
-                        initialCounts[f.name] = f.initial;
-                    } else {
-                        initialCounts[f.name] = factoriesPerStack;
-                    }
+                    const layoutId = f.id || f.name || "";
+                    const normId = normalizeKey(layoutId);
+                    if (normId) jsonKeyToLayoutId[normId] = layoutId;
                 }
             }
 
-            const built = {};
-            const players = Array.isArray(state?.players) ? state.players : [];
-            for (const player of players) {
-                const tiles = player?.tiles?.islandTiles || [];
-                for (const tile of tiles) {
-                    const name = tile?.name || "";
-                    if (name) {
-                        built[name] = (built[name] || 0) + 1;
+            // Build the available-by-id map using the JSON values, matched to layout ids.
+            const byId = {};
+            const normalizedById = {}; // normalized layoutId -> count
+            const nameLookup = {};
+            for (const [jsonKey, count] of Object.entries(jsonFactories)) {
+                if (typeof count !== 'number') continue;
+                const normKey = normalizeKey(jsonKey);
+                // attempt exact normalized match first
+                let layoutId = jsonKeyToLayoutId[normKey];
+                // fallback: substring match (json contains layout or layout contains json)
+                if (!layoutId) {
+                    for (const [layoutNorm, lid] of Object.entries(jsonKeyToLayoutId)) {
+                        if (!layoutNorm) continue;
+                        if (normKey.includes(layoutNorm) || layoutNorm.includes(normKey)) {
+                            layoutId = lid;
+                            break;
+                        }
                     }
+                }
+                // fallback: small edit distance
+                if (!layoutId) {
+                    let best = {dist: Infinity, lid: null};
+                    for (const [layoutNorm, lid] of Object.entries(jsonKeyToLayoutId)) {
+                        if (!layoutNorm) continue;
+                        const d = levenshtein(normKey, layoutNorm);
+                        if (d < best.dist) {
+                            best.dist = d; best.lid = lid;
+                        }
+                    }
+                    if (best.dist <= 2 && best.lid) {
+                        layoutId = best.lid;
+                    }
+                }
+                if (!layoutId) layoutId = jsonKey;
+                byId[layoutId] = count;
+                nameLookup[normKey] = layoutId;
+                const normLayout = normalizeKey(layoutId);
+                if (normLayout) normalizedById[normLayout] = count;
+            }
+
+            // friendly: display name (from FACTORY_LAYOUT.name) -> count
+            const friendly = {};
+            for (const row of FACTORY_LAYOUT) {
+                for (const f of row.factories) {
+                    const layoutId = f.id || f.name || "";
+                    const display = f.name || layoutId;
+                    friendly[display] = byId[layoutId] ?? 0;
                 }
             }
 
-            const available = {};
-            for (const [name, initial] of Object.entries(initialCounts)) {
-                available[name] = Math.max(0, initial - (built[name] || 0));
-            }
-
-            console.log("Factory calculation:", {
-                numPlayers,
-                factoriesPerStack,
-                builtCount: Object.keys(built).length,
-                sampleBuilt: Object.entries(built).slice(0, 5),
-                sampleAvailable: Object.entries(available).slice(0, 5)
-            });
-
-            return available;
+            return {
+                friendly: friendly,
+                byId: byId,
+                nameLookup: nameLookup,
+                normalizedById: normalizedById,
+            };
         }
 
         /**
@@ -444,12 +506,6 @@ Wichtige Render-Funktionen:
                     paragraph.className = "action-paragraph";
                     renderTextWithIcons(paragraph, itemText);
                     list.appendChild(paragraph);
-        /**
-         * Rendert die Kartenübersicht (Objective Cards und ResidentCards).
-         * Zeigt im Initial-State alle Objective Cards und für jeden Spieler die ResidentCards.
-         * 
-         * @param {Object} entry - State-Eintrag
-         */
                 }
                 wrapper.appendChild(list);
                 actionDetailsContainerEl.appendChild(wrapper);
@@ -663,6 +719,56 @@ Wichtige Render-Funktionen:
             return item;
         }
 
+        function createBlueprintIcon(iconCandidates, fallbackLabel) {
+            const icon = document.createElement("span");
+            icon.className = "pool-blueprint-icon";
+
+            for (const candidate of iconCandidates) {
+                const src = imageSrcFor(candidate);
+                if (!src) {
+                    continue;
+                }
+                const img = document.createElement("img");
+                img.src = src;
+                img.alt = fallbackLabel;
+                img.title = fallbackLabel;
+                icon.appendChild(img);
+                return icon;
+            }
+
+            icon.classList.add("text-fallback");
+            icon.textContent = fallbackLabel;
+            return icon;
+        }
+
+        function appendBlueprintRow(container, label, count, iconCandidates) {
+            const row = document.createElement("div");
+            row.className = "pool-blueprint-row";
+
+            const rowLabel = document.createElement("span");
+            rowLabel.className = "pool-blueprint-label";
+            rowLabel.textContent = label;
+            row.appendChild(rowLabel);
+
+            const icons = document.createElement("div");
+            icons.className = "pool-blueprint-icons";
+
+            const safeCount = Math.max(0, Number(count) || 0);
+            if (safeCount === 0) {
+                const empty = document.createElement("span");
+                empty.className = "pool-blueprint-empty";
+                empty.textContent = "keine";
+                icons.appendChild(empty);
+            } else {
+                for (let i = 0; i < safeCount; i += 1) {
+                    icons.appendChild(createBlueprintIcon(iconCandidates, label));
+                }
+            }
+
+            row.appendChild(icons);
+            container.appendChild(row);
+        }
+
         function workerStoneForLevel(levelKey) {
             const map = {
                 level1: "residents/farmer_stone.png",
@@ -697,27 +803,89 @@ Wichtige Render-Funktionen:
             resourceSection.appendChild(createTokenWithIcon("goods/explorerchip.png", `Explorerchips: ${resources.explorerChips ?? 0}`));
             container.appendChild(resourceSection);
 
-            const ships = player.ships || {};
-            const shipsSection = document.createElement("div");
-            shipsSection.className = "layer-section ships-row";
-            shipsSection.appendChild(createTokenWithIcon("ships/tradeship_lv1.png", `Trade-Schiffe: ${ships.tradeShips ?? 0}`));
-            shipsSection.appendChild(createTokenWithIcon("ships/explorership_lv1.png", `Explorer-Schiffe: ${ships.explorerShips ?? 0}`));
-            container.appendChild(shipsSection);
+            // ships-row removed: ships are no longer shown in a separate section
 
             const tiles = player.tiles || {};
             const islandSection = document.createElement("div");
             islandSection.className = "layer-section";
-            islandSection.innerHTML = `
-                <strong>Inselbereich</strong>
-                <div class=\"island-layout\">
-                    <div class=\"island-main-tile\">Hauptinsel</div>
-                    <div class=\"island-lower-row\">
-                        <div class=\"island-small-tile\">Neue Insel (L)</div>
-                        <div class=\"island-small-tile\">Neue Insel (R)</div>
-                    </div>
-                </div>
-                <div class=\"resource-row\" style=\"margin-top: 7px;\"><span class=\"token-pill\">Land frei: ${tiles.freeLand ?? 0}</span><span class=\"token-pill\">Küste frei: ${tiles.freeCoast ?? 0}</span><span class=\"token-pill\">See frei: ${tiles.freeSea ?? 0}</span></div>
-            `;
+
+            const islandTitle = document.createElement('strong');
+            islandTitle.textContent = 'Inselbereich';
+            islandSection.appendChild(islandTitle);
+
+            const layout = document.createElement('div');
+            layout.className = 'island-layout';
+
+            // left small tile (placeholder)
+            const leftTile = document.createElement('div');
+            leftTile.className = 'island-small-tile';
+            leftTile.textContent = 'Neue Insel (L)';
+            layout.appendChild(leftTile);
+
+            // main tile (placeholder)
+            const mainTile = document.createElement('div');
+            mainTile.className = 'island-main-tile';
+            mainTile.textContent = 'Hauptinsel';
+            layout.appendChild(mainTile);
+
+            // right small tile - if current entry is a DiscoverNewWorldIsland by this player, show discovered island image
+            const rightTile = document.createElement('div');
+            rightTile.className = 'island-small-tile';
+
+            // determine current entry and whether this player discovered a new world island
+            try {
+                const currentEntry = (typeof entries !== 'undefined' && entries[index]) ? entries[index] : null;
+                let discoveredImg = null;
+                if (currentEntry && String(currentEntry.executedAction || '').toLowerCase().includes('discovernewworldisland')) {
+                    const executedBy = String(currentEntry.executedByPlayer || '').trim();
+                    if (executedBy && player && String(player.name || '') === executedBy) {
+                        // try to extract image filename from executedActionDetails (if provided)
+                        const details = currentEntry.executedActionDetails;
+                        if (typeof details === 'string' && details) {
+                            // look for any known icon file name mentioned in the details
+                            for (const candidate of orderedIconFileNames || []) {
+                                if (candidate.toLowerCase().includes('island') && details.toLowerCase().includes(candidate.toLowerCase())) {
+                                    discoveredImg = candidate; break;
+                                }
+                            }
+                        }
+                        // fallback to a sensible default image
+                        if (!discoveredImg) discoveredImg = 'newWorldIsland_base.png';
+                    }
+                }
+                if (discoveredImg) {
+                    const img = document.createElement('img');
+                    const src = imageSrcFor(discoveredImg) || (iconBaseUri + '/' + discoveredImg);
+                    img.src = src;
+                    img.alt = discoveredImg;
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '100%';
+                    img.style.objectFit = 'contain';
+                    rightTile.appendChild(img);
+                } else {
+                    rightTile.textContent = 'Neue Insel (R)';
+                }
+            } catch (e) {
+                rightTile.textContent = 'Neue Insel (R)';
+            }
+
+            layout.appendChild(rightTile);
+
+            islandSection.appendChild(layout);
+            const resourceRow = document.createElement('div');
+            resourceRow.className = 'resource-row';
+            resourceRow.style.marginTop = '7px';
+            resourceRow.appendChild(createTokenWithIcon('token', `Land frei: ${tiles.freeLand ?? 0}`));
+            // instead of using token image, reuse token-pill markup
+            const pillLand = document.createElement('span'); pillLand.className = 'token-pill'; pillLand.textContent = `Land frei: ${tiles.freeLand ?? 0}`;
+            const pillCoast = document.createElement('span'); pillCoast.className = 'token-pill'; pillCoast.textContent = `Küste frei: ${tiles.freeCoast ?? 0}`;
+            const pillSea = document.createElement('span'); pillSea.className = 'token-pill'; pillSea.textContent = `See frei: ${tiles.freeSea ?? 0}`;
+            resourceRow.innerHTML = '';
+            resourceRow.appendChild(pillLand);
+            resourceRow.appendChild(pillCoast);
+            resourceRow.appendChild(pillSea);
+            islandSection.appendChild(resourceRow);
+
             container.appendChild(islandSection);
 
             const workersSection = document.createElement("div");
@@ -760,7 +928,8 @@ Wichtige Render-Funktionen:
             const cardsRow = document.createElement("div");
             cardsRow.className = "residentcards-row";
             const cards = Array.isArray(((player.cards || {}).residentCardDetails)) ? player.cards.residentCardDetails : [];
-            for (const card of cards.slice(0, 6)) {
+            // Render all resident cards the player has (not limited to 5/6)
+            for (const card of cards) {
                 const chip = document.createElement("span");
                 chip.className = "resident-chip";
                 const level = Number(card?.populationLevel || 2);
@@ -773,6 +942,15 @@ Wichtige Render-Funktionen:
                     chip.appendChild(img);
                 }
                 chip.appendChild(document.createTextNode(`Lv${Number.isFinite(level) ? level : 2}`));
+                // hover preview: show a rotated resident card (placeholder residentcard_lv2.png)
+                const preview = document.createElement('div');
+                preview.className = 'resident-card-preview';
+                const previewImg = document.createElement('img');
+                const previewSrc = imageSrcFor('residentcard_lv_2.png') || src || (iconBaseUri + '/' + iconName);
+                previewImg.src = previewSrc;
+                preview.appendChild(previewImg);
+                chip.appendChild(preview);
+
                 cardsRow.appendChild(chip);
             }
             if (!cards.length) {
@@ -828,42 +1006,172 @@ Wichtige Render-Funktionen:
             }
         }
 
-        function renderFactoryOverlay(state, boardCenterEl) {
-            const availableByType = calculateAvailableFactories(state);
+        function renderFactoryOverlay(state, boardCenterEl, entry) {
+            const availableByType = calculateAvailableFactories(state, entry);
+            const board = state?.boardState || {};
             const overlay = document.createElement("div");
             overlay.className = "board-factory-overlay";
             for (const row of FACTORY_LAYOUT) {
                 const rowEl = document.createElement("div");
                 rowEl.className = "board-factory-row";
                 for (const f of row.factories) {
+                    const fid = f.id || f.name || "";
+
+                    // Prefer authoritative boardState counters when present (they reflect current remaining pool)
+                    let boardCount = undefined;
+                    if (fid) {
+                        const lvMatch = fid.match(/_lv(\d+)/i);
+                        const levelKey = lvMatch ? `level${lvMatch[1]}` : null;
+                        if (/shipyard/i.test(fid) && levelKey && board.shipyards && typeof board.shipyards[levelKey] !== 'undefined') {
+                            boardCount = Number(board.shipyards[levelKey]);
+                        } else if (/tradeship/i.test(fid) && levelKey && board.ships && board.ships.tradeShips && typeof board.ships.tradeShips[levelKey] !== 'undefined') {
+                            boardCount = Number(board.ships.tradeShips[levelKey]);
+                        } else if (/explorership/i.test(fid) && levelKey && board.ships && board.ships.explorerShips && typeof board.ships.explorerShips[levelKey] !== 'undefined') {
+                            boardCount = Number(board.ships.explorerShips[levelKey]);
+                        }
+                    }
+
+                    let count = 0;
+                    if (typeof boardCount === 'number') {
+                        count = boardCount;
+                    } else {
+                        if (availableByType) {
+                            // direct lookup by layout id
+                            if (availableByType.byId && typeof availableByType.byId[fid] !== 'undefined') {
+                                count = Number(availableByType.byId[fid] || 0);
+                            }
+                            // fallback: normalized layout id lookup (handles id/name typos)
+                            if (!count && availableByType.normalizedById) {
+                                const normFid = normalizeKey(fid || f.name || "");
+                                if (normFid && typeof availableByType.normalizedById[normFid] !== 'undefined') {
+                                    count = Number(availableByType.normalizedById[normFid] || 0);
+                                }
+                            }
+                            // fallback: friendly name
+                            if (!count && availableByType.friendly) {
+                                count = Number(availableByType.friendly[f.name] || 0);
+                            }
+                            // final fallback: try nameLookup mapping from normalized json key -> layoutId
+                            if (!count && availableByType.nameLookup) {
+                                const norm = normalizeKey(fid || f.name || "");
+                                const mapped = availableByType.nameLookup[norm];
+                                if (mapped && typeof availableByType.byId[mapped] !== 'undefined') {
+                                    count = Number(availableByType.byId[mapped] || 0);
+                                }
+                            }
+                        }
+                    }
+
+                    // Always render a slot placeholder to keep board layout stable
                     const slot = document.createElement("div");
-                    slot.className = "board-factory-slot";
+                    slot.className = "board-factory-slot" + (count === 0 ? " empty" : "");
 
                     const img = document.createElement("img");
                     img.className = "board-factory-img";
                     img.src = iconBaseUri + "/" + (f.path || "");
-                    img.title = f.name;
+                    img.title = f.name || "";
                     slot.appendChild(img);
 
-                    const count = availableByType[f.name];
-                    if (count !== undefined) {
-                        const badge = document.createElement("div");
-                        badge.className = "board-slot-count" + (count === 0 ? " zero" : "");
-                        badge.textContent = count;
-                        slot.appendChild(badge);
-        /**
-         * Rendert die Bewohner-Steine (Resident Stones) aus dem Population Pool.
-         * Zeigt gestapelte Steine für jedes Level (Farmers, Workers, Artisans, Engineers, Investors).
-         * 
-         * @param {Object} state - Game State mit boardState.populationPool
-         */
-                    }
+                    const badge = document.createElement("div");
+                    badge.className = "board-slot-count stack-count" + (count === 0 ? " zero" : "");
+                    badge.textContent = count;
+                    slot.appendChild(badge);
 
                     rowEl.appendChild(slot);
                 }
-                overlay.appendChild(rowEl);
+
+                if (rowEl.childElementCount > 0) {
+                    overlay.appendChild(rowEl);
+                }
             }
             boardCenterEl.appendChild(overlay);
+        }
+
+        /**
+         * Rendert den Expeditionskarten-Stack unten rechts auf dem Mainboard.
+         * Liest die Anzahl aus state.cards.expeditionCards (Fallback: 22).
+         * Verwendet `residentcard_lv2.png` als Platzhalterbild.
+         *
+         * @param {Object} state - Game State
+         * @param {HTMLElement} boardCenterEl - Mainboard-Container-Element
+         */
+        function renderExpeditionStack(state, boardCenterEl) {
+            const bs = state?.boardState ?? {};
+            const cards = bs.cards ?? {};
+            const count = Number(cards.expeditionCards ?? 22);
+
+            const overlay = document.createElement("div");
+            overlay.className = "expedition-overlay";
+
+            const stackEl = document.createElement("div");
+            stackEl.className = "expedition-stack";
+
+            const img = document.createElement("img");
+            const imgPath = resolveImagePath("residentcard_lv2.png") || "residentcard_lv2.png";
+            img.src = iconBaseUri + "/" + imgPath;
+            img.title = `Expeditionskarten`;
+            stackEl.appendChild(img);
+
+            const countEl = document.createElement("div");
+            countEl.className = "expedition-count stack-count" + (count === 0 ? " zero" : "");
+            countEl.textContent = count;
+            stackEl.appendChild(countEl);
+
+            overlay.appendChild(stackEl);
+            boardCenterEl.appendChild(overlay);
+        }
+
+        /**
+         * Rendert rechts vom Mainboard zwei Insel-Stapel (New World oben, Old World unten)
+         * Liest die Counts aus state.boardState.islands.newWorldIslands / oldWorldIslands
+         * und verwendet die Platzhalter-Bilder `newWorldIsland_back.png` und `oldWorldIsland_back.png`.
+         * @param {Object} state
+         */
+        function renderIslandStacks(state) {
+            const wrapper = document.querySelector('.mainboard-wrapper');
+            if (!wrapper) return;
+            // remove existing to avoid duplicates
+            const existing = wrapper.querySelector('.island-stacks-container');
+            if (existing) existing.remove();
+
+            const bs = state?.boardState ?? {};
+            const islands = bs.islands ?? {};
+            const newCount = Number(islands.newWorldIslands ?? 0);
+            const oldCount = Number(islands.oldWorldIslands ?? 0);
+
+            const container = document.createElement('div');
+            container.className = 'island-stacks-container';
+
+            function makeStack(imgName, title, count, type) {
+                const stack = document.createElement('div');
+                stack.className = 'island-stack';
+                if (type === 'new') {
+                    stack.classList.add('island-stack-new-world');
+                } else if (type === 'old') {
+                    stack.classList.add('island-stack-old-world');
+                }
+
+                const img = document.createElement('img');
+                const imgPath = resolveImagePath(imgName) || imgName;
+                img.src = iconBaseUri + '/' + imgPath;
+                img.title = title;
+                stack.appendChild(img);
+
+                const countEl = document.createElement('div');
+                countEl.className = 'island-count stack-count' + (count === 0 ? ' zero' : '');
+                countEl.textContent = count;
+                stack.appendChild(countEl);
+
+                return stack;
+            }
+
+            const newStack = makeStack('newWorldIsland_back.png', 'New World Islands', newCount, 'new');
+            const oldStack = makeStack('oldWorldIsland_back.png', 'Old World Islands', oldCount, 'old');
+
+            container.appendChild(newStack);
+            container.appendChild(oldStack);
+
+            wrapper.appendChild(container);
         }
 
         function renderResidentCardsOverlay(state, boardCenterEl) {
@@ -889,7 +1197,7 @@ Wichtige Render-Funktionen:
                 stackEl.appendChild(img);
 
                 const countEl = document.createElement("div");
-                countEl.className = "resident-card-count" + (stack.count === 0 ? " zero" : "");
+                countEl.className = "resident-card-count stack-count" + (stack.count === 0 ? " zero" : "");
                 countEl.textContent = stack.count;
                 stackEl.appendChild(countEl);
 
@@ -926,28 +1234,60 @@ Wichtige Render-Funktionen:
                 const group = document.createElement("div");
                 group.className = "resident-stone-group";
 
-                const stackContainer = document.createElement("div");
-                stackContainer.className = "resident-stone-stack";
+                    const stackContainer = document.createElement("div");
+                    stackContainer.className = "resident-stone-stack";
 
-                const maxVisible = Math.min(resident.count, 50);
-                for (let i = 0; i < maxVisible; i++) {
-                    const img = document.createElement("img");
-                    img.className = "resident-stone-img";
-                    const imgPath = resolveImagePath(resident.img) || resident.img;
-                    img.src = iconBaseUri + "/" + imgPath;
-                    img.title = resident.label;
-                    img.style.left = `${i * 8}px`;
-                    img.style.bottom = `${i * 3}px`;
-                    img.style.zIndex = i;
-                    stackContainer.appendChild(img);
-                }
+                    // Split stones into chunks of up to 5. Display two chunks per row (left/right).
+                    const total = Number(resident.count || 0);
+                    const chunks = [];
+                    let rem = total;
+                    while (rem > 0) {
+                        chunks.push(Math.min(5, rem));
+                        rem -= Math.min(5, rem);
+                    }
+                    if (chunks.length === 0) chunks.push(0);
+
+                    for (let i = 0; i < chunks.length; i += 2) {
+                        const row = document.createElement("div");
+                        row.className = "resident-stone-row";
+
+                        const leftCount = chunks[i] || 0;
+                        const rightCount = (i + 1 < chunks.length) ? chunks[i + 1] : 0;
+
+                        const leftCell = document.createElement("div");
+                        leftCell.className = "resident-stone-cell";
+                        for (let j = 0; j < leftCount; j++) {
+                            const img = document.createElement("img");
+                            img.className = "resident-stone-img";
+                            const imgPath = resolveImagePath(resident.img) || resident.img;
+                            img.src = iconBaseUri + "/" + imgPath;
+                            img.title = resident.label;
+                            leftCell.appendChild(img);
+                        }
+
+                        const rightCell = document.createElement("div");
+                        rightCell.className = "resident-stone-cell";
+                        for (let j = 0; j < rightCount; j++) {
+                            const img = document.createElement("img");
+                            img.className = "resident-stone-img";
+                            const imgPath = resolveImagePath(resident.img) || resident.img;
+                            img.src = iconBaseUri + "/" + imgPath;
+                            img.title = resident.label;
+                            rightCell.appendChild(img);
+                        }
+
+                        row.appendChild(leftCell);
+                        row.appendChild(rightCell);
+                        stackContainer.appendChild(row);
+                    }
 
                 const countEl = document.createElement("div");
-                countEl.className = "resident-stone-count";
+                countEl.className = "resident-stone-count stack-count" + (resident.count === 0 ? " zero" : "");
                 countEl.textContent = `${resident.count}`;
-                
-                group.appendChild(stackContainer);
+
+                // place count above the stone grid
                 group.appendChild(countEl);
+                group.appendChild(stackContainer);
                 container.appendChild(group);
             }
         }
@@ -998,18 +1338,13 @@ Wichtige Render-Funktionen:
                 fallback.textContent = "mainboard.png nicht gefunden";
                 boardCenter.appendChild(fallback);
             }
-            renderFactoryOverlay(state, boardCenter);
+            renderFactoryOverlay(state, boardCenter, entry);
             renderResidentCardsOverlay(state, boardCenter);
+            renderExpeditionStack(state, boardCenter);
+            renderIslandStacks(state);
             mainBoardEl.appendChild(boardCenter);
 
-            const pools = document.createElement("div");
-            pools.className = "main-board-pools";
-            pools.innerHTML = `
-                <div class=\"pool-chip\">Old World Inseln frei: ${islands.oldWorldIslands ?? 0}<br>New World Inseln frei: ${islands.newWorldIslands ?? 0}</div>
-                <div class=\"pool-chip\">Gold-Pool: ${resources.goldPool ?? 0}<br>Tradechips-Pool: ${resources.tradeChips ?? 0}<br>Explorerchips-Pool: ${resources.explorerChips ?? 0}</div>
-                <div class=\"pool-chip\">Trade Ships Board: L1 ${ships.tradeShips?.level1 ?? 0} / L2 ${ships.tradeShips?.level2 ?? 0} / L3 ${ships.tradeShips?.level3 ?? 0}<br>Explorer Ships Board: L1 ${ships.explorerShips?.level1 ?? 0} / L2 ${ships.explorerShips?.level2 ?? 0} / L3 ${ships.explorerShips?.level3 ?? 0}</div>
-            `;
-            mainBoardEl.appendChild(pools);
+            // Pools under the mainboard were removed per user request.
         }
 
         function renderGameBoard(entry) {
@@ -1043,6 +1378,11 @@ Wichtige Render-Funktionen:
 
             prevBtn.disabled = index <= 0;
             nextBtn.disabled = index >= entries.length - 1;
+            // plus buttons disabled only when at the last state
+            const plus5El = document.getElementById("plus5Btn");
+            const plus10El = document.getElementById("plus10Btn");
+            if (plus5El) plus5El.disabled = index >= entries.length - 1;
+            if (plus10El) plus10El.disabled = index >= entries.length - 1;
         }
 
         function goPrevious() {
@@ -1059,6 +1399,15 @@ Wichtige Render-Funktionen:
             }
         }
 
+        function goNextBy(delta) {
+            if (!Number.isFinite(delta) || delta === 0) return;
+            const target = Math.min(entries.length - 1, Math.max(0, index + delta));
+            if (target !== index) {
+                index = target;
+                render();
+            }
+        }
+
         toggleDetailsBtn.addEventListener("click", () => {
             if (detailsLayer.classList.contains("hidden")) {
                 detailsLayer.classList.remove("hidden");
@@ -1067,8 +1416,36 @@ Wichtige Render-Funktionen:
             }
         });
 
+        // Toggle stack counts (show/hide) via body class `stack-count-hidden`
+        const toggleControlBarBtn = document.getElementById('toggleControlBarBtn');
+        if (toggleControlBarBtn) {
+            toggleControlBarBtn.addEventListener('click', () => {
+                const body = document.body;
+                body.classList.toggle('stack-count-hidden');
+                const hidden = body.classList.contains('stack-count-hidden');
+                // Button shows the next action (turn counts on/off)
+                toggleControlBarBtn.textContent = hidden ? 'Zahlen an' : 'Zahlen aus';
+            });
+        }
+
+        // Toggle panel borders (show/hide) via body class `panel-borders-hidden`
+        const togglePanelBordersBtn = document.getElementById('togglePanelBordersBtn');
+        if (togglePanelBordersBtn) {
+            togglePanelBordersBtn.addEventListener('click', () => {
+                const body = document.body;
+                body.classList.toggle('panel-borders-hidden');
+                const hidden = body.classList.contains('panel-borders-hidden');
+                togglePanelBordersBtn.textContent = hidden ? 'Rahmen an' : 'Rahmen aus';
+            });
+        }
+
         prevBtn.addEventListener("click", goPrevious);
         nextBtn.addEventListener("click", goNext);
+        // plus buttons: advance multiple states
+        const plus5Btn = document.getElementById("plus5Btn");
+        const plus10Btn = document.getElementById("plus10Btn");
+        if (plus5Btn) plus5Btn.addEventListener("click", () => goNextBy(5));
+        if (plus10Btn) plus10Btn.addEventListener("click", () => goNextBy(10));
         document.addEventListener("keydown", (event) => {
             if (event.key === "ArrowLeft") {
                 event.preventDefault();

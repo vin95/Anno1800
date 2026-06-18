@@ -23,4 +23,4 @@ Write-Host "  Game-States werden in game-states/ gespeichert"
 Write-Host "========================================================================"
 Write-Host ""
 
-& "$ProjectRoot\gradlew.bat" debugGame "-PgameArgs=$SEED $PLAYERS $MAX_ROUNDS"
+& "$ProjectRoot\gradlew.bat" -p "$ProjectRoot" debugGame "-PgameArgs=$SEED $PLAYERS $MAX_ROUNDS"

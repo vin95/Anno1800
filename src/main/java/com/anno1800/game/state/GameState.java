@@ -91,12 +91,13 @@ public record GameState(
         /**
          * Factory stacks state.
          */
-        public record FactoryState(int availableFactories) {
+        public record FactoryState(java.util.Map<com.anno1800.data.gamedata.Producers, Integer> blueprints) {
             static FactoryState fromBoard(Board board) {
-                int total = board.getFactoryStacks().stream()
-                    .mapToInt(stack -> stack.size())
-                    .sum();
-                return new FactoryState(total);
+                return new FactoryState(java.util.Collections.unmodifiableMap(board.getFactoryBlueprintCounts()));
+            }
+            /** Backwards-compat helper: total available blueprints across all factory types. */
+            public int availableFactories() {
+                return blueprints.values().stream().mapToInt(Integer::intValue).sum();
             }
         }
         

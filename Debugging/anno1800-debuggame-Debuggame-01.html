@@ -1288,14 +1288,7 @@
             }
             mainBoardEl.appendChild(boardCenter);
 
-            const pools = document.createElement("div");
-            pools.className = "main-board-pools";
-            pools.innerHTML = `
-                <div class="pool-chip">Old World Inseln frei: ${islands.oldWorldIslands ?? 0}<br>New World Inseln frei: ${islands.newWorldIslands ?? 0}</div>
-                <div class="pool-chip">Gold-Pool: ${resources.goldPool ?? 0}<br>Tradechips-Pool: ${resources.tradeChips ?? 0}<br>Explorerchips-Pool: ${resources.explorerChips ?? 0}</div>
-                <div class="pool-chip">Trade Ships Board: L1 ${ships.tradeShips?.level1 ?? 0} / L2 ${ships.tradeShips?.level2 ?? 0} / L3 ${ships.tradeShips?.level3 ?? 0}<br>Explorer Ships Board: L1 ${ships.explorerShips?.level1 ?? 0} / L2 ${ships.explorerShips?.level2 ?? 0} / L3 ${ships.explorerShips?.level3 ?? 0}</div>
-            `;
-            mainBoardEl.appendChild(pools);
+            // Pools under the mainboard were removed per request.
 
             const boardSpace = document.createElement("div");
             boardSpace.className = "layer-section";

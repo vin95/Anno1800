@@ -31,23 +31,23 @@
             <div class="controls">
                 <button id="prevBtn" type="button">Vorheriger</button>
                 <button id="nextBtn" type="button">Nächster</button>
+                <button id="plus5Btn" type="button">+5</button>
+                <button id="plus10Btn" type="button">+10</button>
                 <button id="toggleDetailsBtn" type="button" class="toggle-details">Details ein-/ausblenden</button>
+                <button id="toggleControlBarBtn" type="button" class="toggle-controlbar" title="Zahlen ein-/ausblenden">Zahlen an/aus</button>
+                <button id="togglePanelBordersBtn" type="button" class="toggle-controlbar" title="Rahmen ein-/ausblenden">Rahmen an/aus</button>
             </div>
         </div>
 
         <!-- Visuelle Spielansicht: Mainboard mit umgebenden Layers -->
-        <div class="panel">
-            <strong>Visuelle Spielansicht</strong>
-            <div id="visualLayer" class="visual-layer">
-                <div class="game-layout">
+        <div id="visualLayer" class="visual-layer">
+            <div class="game-layout">
                     <!-- Layer Oben Links: Spieler 1 Informationen -->
                     <section class="board-slot slot-ul">
-                        <h3>Layer Oben Links</h3>
                         <div id="layerUpperLeft"></div>
                     </section>
                     <!-- Layer Oben Rechts: Spieler 2 Informationen -->
                     <section class="board-slot slot-ur">
-                        <h3>Layer Oben Rechts</h3>
                         <div id="layerUpperRight"></div>
                     </section>
                     <!-- Zentrales Mainboard mit Resident Stones und Fabrik-Overlay -->
@@ -61,15 +61,12 @@
                     </section>
                     <!-- Layer Unten Links: Spieler 3 Informationen (falls vorhanden) -->
                     <section class="board-slot slot-ll">
-                        <h3>Layer Unten Links</h3>
                         <div id="layerLowerLeft"></div>
                     </section>
                     <!-- Layer Unten Rechts: Spieler 4 Informationen (falls vorhanden) -->
                     <section class="board-slot slot-lr">
-                        <h3>Layer Unten Rechts</h3>
                         <div id="layerLowerRight"></div>
                     </section>
-                </div>
             </div>
         </div>
 

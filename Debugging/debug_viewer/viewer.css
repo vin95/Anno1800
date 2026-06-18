@@ -54,6 +54,8 @@ body {
         linear-gradient(180deg, var(--bg-0), var(--bg-1));
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     padding: 10px;
+    /* reserve space for the fixed header so content is not obscured */
+    padding-top: 96px;
 }
 
 /* Haupt-Container: Grid-Layout mit Abständen */
@@ -65,6 +67,33 @@ body {
     gap: 10px;
 }
 
+/* Fixed header (control bar) */
+.panel.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1200;
+    transition: transform 220ms ease-in-out;
+}
+
+/* When collapsed, slide header out of view */
+.panel.header.collapsed {
+    transform: translateY(-110%);
+}
+
+/* Ensure page content is not hidden under fixed header */
+body > .container {
+    padding-top: 72px; /* space for fixed header */
+}
+
+/* Small styling for the toggle button */
+.toggle-controlbar {
+    margin-left: 8px;
+    padding: 4px 8px;
+    font-size: 0.9rem;
+}
+
 /* ============================================================================
    PANEL-SYSTEM
    ============================================================================ */
@@ -74,7 +103,6 @@ body {
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 14px;
     backdrop-filter: blur(4px);  /* Glasmorphismus-Effekt */
 }
 
@@ -85,6 +113,16 @@ body {
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
+}
+
+/* Fix the top header so controls are always reachable while scrolling */
+.panel.header {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    z-index: 1100;
+    box-shadow: 0 6px 18px rgba(2,6,23,0.6);
 }
 
 /* Hauptüberschrift: Responsive Font-Größe mit clamp() */
@@ -374,7 +412,6 @@ pre {
     border: 1px solid #334155;
     border-radius: 12px;
     background: rgba(7, 12, 24, 0.82);
-    padding: 12px;
     display: grid;
     gap: 8px;
     align-content: start;
@@ -454,10 +491,9 @@ pre {
     top: 3.6%;
     left: 2.4%;
     right: 2.4%;
-    bottom: 100%;
+    bottom: 26.5%;
     display: flex;
     flex-direction: column;
-    gap: 0.7%;
     pointer-events: none;  /* Klicks durchlassen */
 }
 
@@ -487,12 +523,16 @@ pre {
     object-fit: contain;
 }
 
+/* Dim empty slots so they remain visible but unobtrusive */
+.board-factory-slot.empty img {
+    opacity: 0.25;
+}
+
 /* Badge mit Anzahl verfügbarer Fabriken */
 .board-slot-count {
     font-size: 1.0em;
     font-weight: 800;
-    color: #826b38;  /* Gold-Farbe */
-    line-height: 1.1;
+    line-height: 1;
     padding-bottom: 1px;
 }
 
@@ -537,8 +577,24 @@ pre {
 .resident-card-count {
     font-size: 1em;
     font-weight: 800;
-    color: #826b38;
 }
+
+/* Einheitliche Klasse für Stapel-Anzeigen (Zahlen auf Stacks) */
+.stack-count {
+    color: white;
+    -webkit-text-stroke: 0.6px #000;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    font-weight: 800;
+}
+
+/* When present on body, hide all stack-count decorations */
+body.stack-count-hidden .stack-count {
+    visibility: hidden !important;
+    pointer-events: none;
+}
+
+/* Zero counts should be visually red when visible */
+.stack-count.zero { color: #ef4444; }
 
 /* Rote Farbe wenn Stapel leer */
 .resident-card-count.zero {
@@ -546,32 +602,136 @@ pre {
 }
 
 /* ============================================================================
+   EXPEDITION STACK (unten rechts)
+   ============================================================================ */
+.expedition-overlay {
+    position: absolute;
+    bottom: 1.7%;
+    right: 2%;
+    width: 16%;
+    height: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.expedition-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.expedition-stack img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.expedition-count {
+    font-size: 1.0em;
+    font-weight: 800;
+}
+
+.expedition-count.zero { color: #ef4444; }
+
+/* ============================================================================
+   ISLAND STACKS (rechts vom Mainboard)
+   ============================================================================ */
+.island-stacks-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 12%;
+    margin-left: 12px;
+    align-items: center;
+    pointer-events: none;
+    margin-top: 322px;
+}
+
+.island-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.island-stack-new-world {
+    /* Additional styles for New World island stack if needed */
+}
+
+.island-stack-old-world {
+    margin-top: 33px; /* Slight separation between the two stacks */
+}
+
+.island-stack img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.island-count {
+    font-size: 1.0em;
+    font-weight: 800;
+}
+
+.island-count.zero { color: #ef4444; }
+
+/* ============================================================================
    RESIDENT STONES (Bewohner-Steine)
    ============================================================================ */
 
 /* Container für Bewohner-Steine links vom Mainboard */
 .resident-stones-container {
-    width: 5%;
-    margin-top: 10%;
+    width: 16%;
+    margin-top: 15%;
 }
 
 /* Gestapelte Steine eines Typs */
 .resident-stone-stack{
-    margin-top: 20%;
-    height: auto;
-    object-fit: contain;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-/* Einzelne Stein-Bilder */
+/* Einzelne Stein-Bilder: two rows x five columns layout */
 .resident-stone-stack img{
-    width: 20%;
+    width: 22px;
     height: auto;
     object-fit: contain;
+    display: block;
 }
 
-/* ============================================================================
-   MAINBOARD-WRAPPER UND ZUSÄTZLICHE ELEMENTE
-   ============================================================================ */
+.resident-stone-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.resident-stone-cell {
+    display: flex;
+    gap: 6px;
+    min-width: calc(22px * 5 + 6px * 4); /* reserve space for 5 stones */
+    justify-content: flex-start;
+}
+
+/* Group container: count above stones, centered */
+.resident-stone-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 124px;
+}
+
+.resident-stone-count {
+    text-align: center;
+    width: 100%;
+}
 
 /* Wrapper für Resident Stones + Mainboard (Flexbox horizontal) */
 .mainboard-wrapper {
@@ -608,12 +768,64 @@ pre {
     font-size: 0.88rem;
 }
 
-/* Spezielle Größe für Schiff-Icons in Token-Pills */
-.ships-row .token-pill img {
-    width: 150px;
-    height: 150px;
+.pool-blueprint-title {
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.pool-blueprint-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.pool-blueprint-label {
+    width: 132px;
+    font-size: 0.78rem;
+    color: #cbd5e1;
+    flex-shrink: 0;
+}
+
+.pool-blueprint-icons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.pool-blueprint-icon {
+    width: 22px;
+    height: 22px;
+    border: 1px solid #334155;
+    border-radius: 5px;
+    background: rgba(15, 23, 42, 0.75);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.pool-blueprint-icon img {
+    width: 100%;
+    height: 100%;
     object-fit: contain;
 }
+
+.pool-blueprint-icon.text-fallback {
+    width: auto;
+    min-width: 22px;
+    padding: 0 5px;
+    color: #94a3b8;
+    font-size: 0.66rem;
+}
+
+.pool-blueprint-empty {
+    color: #ef4444;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+/* (ships-row removed) */
 
 /* ============================================================================
    FABRIK-BOARD (Alternative Darstellung)
@@ -689,50 +901,44 @@ pre {
 .island-layout {
     border: 1px dashed #32465f;
     border-radius: 10px;
-    padding: 8px;
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: 0.7fr 1fr 0.7fr; /* small left + main island + small right */
+    align-items: center;
     background: rgba(15, 23, 42, 0.52);
 }
 
 .island-main-tile {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 3 / 2;
     border: 1px solid #3b4f6a;
-    border-radius: 12px;
+    border-radius: 8px;
     background: linear-gradient(160deg, rgba(30, 64, 83, 0.5), rgba(15, 23, 42, 0.8));
     display: grid;
     place-items: center;
     color: #cbd5e1;
-    font-size: 0.85rem;
-}
-
-.island-lower-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    font-size: 0.72rem;
+    padding: 4px;
 }
 
 .island-small-tile {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 4 / 3;
     border: 1px solid #3b4f6a;
-    border-radius: 10px;
+    border-radius: 8px;
     background: linear-gradient(160deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.9));
     display: grid;
     place-items: center;
     color: #94a3b8;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
+    padding: 4px;
 }
 
 .layer-section {
     border: 1px solid #243246;
     border-radius: 10px;
-    padding: 8px;
     background: rgba(15, 23, 42, 0.6);
 }
 
-.resource-row, .workers-row, .ships-row, .residentcards-row {
+.resource-row, .workers-row, .residentcards-row {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
@@ -764,6 +970,56 @@ pre {
     object-fit: contain;
 }
 
+/* Allow resident card chips to show a rotated preview on hover */
+.resident-chip {
+    position: relative;
+    cursor: default;
+}
+
+.resident-card-preview {
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%) rotate(90deg);
+    transform-origin: center center;
+    display: none;
+    z-index: 1400;
+    width: 120px;
+    padding: 6px;
+    border-radius: 8px;
+    border: 1px solid #243246;
+    background: rgba(15,23,42,0.92);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+}
+
+.resident-card-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+    image-rendering: auto;
+}
+
+.resident-chip:hover .resident-card-preview {
+    display: block;
+}
+
+/* When enabled, hide panel borders and heavy box-shadows */
+body.panel-borders-hidden .panel {
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Also hide inner borders for board-slot elements to reduce visual noise */
+body.panel-borders-hidden .board-slot {
+    border-color: transparent !important;
+}
+
+/* Expanded: hide all element borders and shadows when toggled */
+body.panel-borders-hidden * {
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
 .objective-card {
     border: 1px solid #334155;
     border-radius: 10px;
@@ -782,9 +1038,6 @@ pre {
 }
 
 .objective-inline-strip {
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    background: #f8fafc;
     padding: 10px;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));

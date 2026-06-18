@@ -1481,6 +1481,52 @@ def migrate_debug_json_image_paths(state_root: Path) -> tuple[int, int]:
     return changed_files, changed_tokens
 
 
+def migrate_legacy_json_files(migrate_dir: str | None) -> None:
+    state_root = Path(migrate_dir) if migrate_dir else DEFAULT_GAME_STATES_DIR
+    changed_files, changed_tokens = migrate_debug_json_image_paths(state_root)
+    print(f"Migration abgeschlossen: {changed_files} Dateien, {changed_tokens} ersetzte Bild-Tokens")
+
+
+def run_terminal_interactively(sorted_paths: list[Path]) -> int:
+    if not sorted_paths:
+        print("Keine JSON-Dateien gefunden.", file=sys.stderr)
+        return 1
+
+    previous_state: dict[str, Any] | None = None
+    total = len(sorted_paths)
+
+    for index, path in enumerate(sorted_paths, start=1):
+        state = load_state(path)
+        clear_screen()
+        print(f"State {index}/{total}")
+        print(f"Datei: {path.name}")
+        print(f"Aktion: {action_label(path)}")
+        print(f"Runde: {state.get('round', '-')}")
+        print(f"Aktueller Spieler: {format_player_reference(state.get('currentPlayer'))}")
+        print()
+
+        if previous_state is None:
+            print("Dies ist der Initial-State.")
+        else:
+            print("Aenderungen seit dem vorherigen State:")
+            diffs = diff_values(state, previous_state)
+            if not diffs:
+                print("  Keine Aenderungen erkannt.")
+            else:
+                for line in diffs:
+                    print(f"  {line}")
+
+        print()
+        print("Beliebige Taste = weiter | Q = beenden")
+        key = read_key()
+        if key and key.lower() == "q":
+            break
+
+        previous_state = state
+
+    return 0
+
+
 def build_state_entries(files: list[Path]) -> list[dict[str, Any]]:
     previous_state: dict[str, Any] | None = None
     entries: list[dict[str, Any]] = []
@@ -1593,7 +1639,7 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
             {"id": "glass_maker_blue",         "path": "factories/glass_maker_blue_blueprint.png",         "name": "Glasmacher",            "initial": 0},
             {"id": "spectacle_factory_red",    "path": "factories/spectacle_factory_red_blueprint.png",    "name": "Brillenfabrik",         "initial": 0},
             {"id": "clockmakers",              "path": "factories/clockmakers_red_blueprint.png",          "name": "Uhrmacher",             "initial": 0},
-            {"id": "sewing_machine_red",       "path": "factories/sewing_machine_red_blueprint.png",       "name": "Nähmaschine",           "initial": 0},
+            {"id": "sewing_machine_factory_red",       "path": "factories/sewing_machine_red_blueprint.png",       "name": "Nähmaschine",           "initial": 0},
             {"id": "tradeship_lv1",            "path": "ships/tradeship_lv1_blueprint.png",               "name": "Handelsschiff L1",      "initial": 6},
             {"id": "tradeship_lv2",            "path": "ships/tradeship_lv2_blueprint.png",               "name": "Handelsschiff L2",      "initial": 6},
             {"id": "tradeship_lv3",            "path": "ships/tradeship_lv3_blueprint.png",               "name": "Handelsschiff L3",      "initial": 6},
@@ -1619,16 +1665,121 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
             {"id": "framework_knitters_blue",  "path": "factories/framework_knitters_blue_blueprint.png",  "name": "Strumpfwirker",         "initial": 0},
             {"id": "motor_assembly_purple",    "path": "factories/motor_assembly_purple_blueprint.png",    "name": "Motorenmontage",        "initial": 0},
             {"id": "car_factory_purple",       "path": "factories/car_factory_purple_blueprint.png",       "name": "Autofabrik",            "initial": 0},
-            {"id": "bicycle_purple",           "path": "factories/bicycle_purple_blueprint.png",           "name": "Fahrradfabrik",         "initial": 0},
-            {"id": "lightbulb_purple",         "path": "factories/lightbulb_purple_blueprint.png",         "name": "Glühbirnenfabrik",      "initial": 0},
-            {"id": "gramphone_purple",         "path": "factories/gramphone_purple_blueprint.png",         "name": "Grammophonfabrik",      "initial": 0},
-            {"id": "heavy_weapons_purple",         "path": "factories/heavy_weapons_purple_blueprint.png",         "name": "Schwerwaffenfabrik",    "initial": 0},
+            {"id": "bicycle_factory_purple",           "path": "factories/bicycle_purple_blueprint.png",           "name": "Fahrradfabrik",         "initial": 0},
+            {"id": "light_bulb_factory_purple",         "path": "factories/lightbulb_purple_blueprint.png",         "name": "Glühbirnenfabrik",      "initial": 0},
+            {"id": "gramophone_factory_purple",         "path": "factories/gramphone_purple_blueprint.png",         "name": "Grammophonfabrik",      "initial": 0},
+            {"id": "heavy_weapons_factory_purple",         "path": "factories/heavy_weapons_purple_blueprint.png",         "name": "Schwerwaffenfabrik",    "initial": 0},
         ]},
     ]
-    title = f""
+    template_path = SCRIPT_DIR / "debug_viewer" / "viewer.html"
+    assets_dir = SCRIPT_DIR / "debug_viewer"
 
-    return f"""
-"""
+    try:
+        css_uri = (assets_dir / "viewer.css").resolve().relative_to(output_dir).as_posix()
+    except ValueError:
+        css_uri = (assets_dir / "viewer.css").resolve().as_uri()
+
+    try:
+        js_uri = (assets_dir / "viewer.js").resolve().relative_to(output_dir).as_posix()
+    except ValueError:
+        js_uri = (assets_dir / "viewer.js").resolve().as_uri()
+
+    template_html = template_path.read_text(encoding="utf-8")
+    template_html = template_html.replace("{{", "{").replace("}}", "}")
+
+    init_script = "\n".join(
+        [
+            f"const stateDir = {json.dumps(str(state_dir), ensure_ascii=False)};",
+            "const entries = JSON.parse(document.getElementById('gameStateData').textContent);",
+            "const FACTORY_LAYOUT = JSON.parse(document.getElementById('factoryLayoutData').textContent);",
+            f"const iconBaseUri = {json.dumps(icon_base_uri, ensure_ascii=False)};",
+            f"const mainBoardImageUri = {json.dumps(main_board_image_uri, ensure_ascii=False)};",
+            f"const iconPathByName = {json.dumps(icon_lookup, ensure_ascii=False)};",
+            f"const allPicturePaths = {json.dumps(all_picture_paths, ensure_ascii=False)};",
+            f"const iconFileNames = {json.dumps(icon_file_names, ensure_ascii=False)};",
+            "const orderedIconFileNames = [...iconFileNames].sort((left, right) => right.length - left.length);",
+            f"const goodIconTokens = {json.dumps(GOOD_ICON_TOKENS, ensure_ascii=False)};",
+            "const orderedGoodIconTokens = Object.keys(goodIconTokens).sort((left, right) => right.length - left.length);",
+            f"const goodIconsByName = {json.dumps(GOOD_ICON_NAMES, ensure_ascii=False)};",
+            f"const actionImageCandidates = {json.dumps(action_image_candidates, ensure_ascii=False)};",
+            "const smallResourceIconNames = new Set(['gold.png', 'tradechip.png', 'explorerchip.png']);",
+            "const colorSquareTokens = {",
+            "    red_square: 'red',",
+            "    blue_square: 'blue',",
+            "    green_square: 'green',",
+            "    yellow_square: 'yellow',",
+            "    orange_square: 'orange',",
+            "    purple_square: 'purple',",
+            "    black_square: 'black',",
+            "    white_square: 'white',",
+            "};",
+            "const orderedColorSquareTokens = Object.keys(colorSquareTokens).sort((left, right) => right.length - left.length);",
+            "let index = 0;",
+            "let numPlayers = 2;",
+            "const stateDirEl = document.getElementById('stateDir');",
+            "const stateIndicatorEl = document.getElementById('stateIndicator');",
+            "const fileNameEl = document.getElementById('fileName');",
+            "const actionEl = document.getElementById('action');",
+            "const executedActionEl = document.getElementById('executedAction');",
+            "const actionDetailsContainerEl = document.getElementById('actionDetailsContainer');",
+            "const agentScoresContainerEl = document.getElementById('agentScoresContainer');",
+            "const agentScoresTitleEl = document.getElementById('agentScoresTitle');",
+            "const executedByEl = document.getElementById('executedBy');",
+            "const roundEl = document.getElementById('round');",
+            "const currentPlayerEl = document.getElementById('currentPlayer');",
+            "const diffContainerEl = document.getElementById('diffContainer');",
+            "const cardOverviewContainerEl = document.getElementById('cardOverviewContainer');",
+            "const rawJsonEl = document.getElementById('rawJson');",
+            "const prevBtn = document.getElementById('prevBtn');",
+            "const nextBtn = document.getElementById('nextBtn');",
+            "const toggleDetailsBtn = document.getElementById('toggleDetailsBtn');",
+            "const detailsLayer = document.getElementById('detailsLayer');",
+            "const mainBoardEl = document.getElementById('mainBoard');",
+            "const layerUpperLeftEl = document.getElementById('layerUpperLeft');",
+            "const layerUpperRightEl = document.getElementById('layerUpperRight');",
+            "const layerLowerLeftEl = document.getElementById('layerLowerLeft');",
+            "const layerLowerRightEl = document.getElementById('layerLowerRight');",
+        ]
+    )
+
+    template_html = re.sub(
+        r"<title>.*?</title>",
+        lambda _m: f"<title>Anno 1800 Debuggame States - {state_dir}</title>",
+        template_html,
+        flags=re.DOTALL,
+    )
+    template_html = re.sub(
+        r'<link rel="stylesheet" href="[^"]*">',
+        lambda _m: f'<link rel="stylesheet" href="{css_uri}">',
+        template_html,
+        count=1,
+    )
+    template_html = re.sub(
+        r'<script type="application/json" id="gameStateData">.*?</script>',
+        lambda _m: f'<script type="application/json" id="gameStateData">{payload}</script>',
+        template_html,
+        flags=re.DOTALL,
+    )
+    template_html = re.sub(
+        r'<script type="application/json" id="factoryLayoutData">.*?</script>',
+        lambda _m: f'<script type="application/json" id="factoryLayoutData">{json.dumps(factory_layout, ensure_ascii=False)}</script>',
+        template_html,
+        flags=re.DOTALL,
+    )
+    template_html = re.sub(
+        r'<script type="text/x-python-template">.*?</script>',
+        lambda _m: f"<script>\n{init_script}\n</script>",
+        template_html,
+        flags=re.DOTALL,
+    )
+    template_html = re.sub(
+        r'<script src="[^"]*viewer\.js"></script>',
+        lambda _m: f'<script src="{js_uri}"></script>',
+        template_html,
+        count=1,
+    )
+
+    return template_html
 
 
 def open_in_firefox(html_path: Path) -> bool:
