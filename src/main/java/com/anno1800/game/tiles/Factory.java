@@ -93,5 +93,22 @@ public class Factory extends Producer {
     public int workspaces() {
         return 2;
     }
+
+    // tile index on player's island (global index: land 0..landTiles-1, coast landTiles.., sea ...)
+    private int tileIndex = -1;
+
+    public int getTileIndex() {
+        return tileIndex;
+    }
+
+    public void setTileIndex(int tileIndex) {
+        this.tileIndex = tileIndex;
+    }
+
+    @Override
+    public String toString() {
+        String typeName = getType() == null ? "<unknown>" : getType().name();
+        return String.format("%s (level %d)", typeName, factoryLevel);
+    }
 }
 

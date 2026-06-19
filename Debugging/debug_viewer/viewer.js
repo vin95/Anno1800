@@ -187,7 +187,10 @@ Wichtige Render-Funktionen:
             return String(value || "")
                 .trim()
                 .toLowerCase()
-                .replace(/\\\\/g, "/");
+                .replace(/\\\\/g, "/")
+                .replace(/^file:\/+/i, "")
+                .replace(/^.*?:\/\//, "")
+                .replace(/^[^\/]*/i, (m) => m) ;
         }
 
         function resolveImagePath(value) {
@@ -195,7 +198,8 @@ Wichtige Render-Funktionen:
             if (!normalized) return null;
 
             if (iconPathByName[normalized]) {
-                return iconPathByName[normalized];
+                // clean accidental double-extensions in mapped values
+                return String(iconPathByName[normalized]).replace(/\.jpe?g(?=\.png$)/i, "");
             }
 /**
          * Generiert eine vollständige Bild-URL aus einem Bildnamen.
@@ -212,9 +216,30 @@ Wichtige Render-Funktionen:
          */
          
         
-            const fileName = normalized.split("/").pop();
+            // remove duplicate/stacked extensions like `.jpg.png` -> `.png`
+            let cleaned = normalized.replace(/\.(?:jpg|jpeg|png|gif|svg)(?=\.(?:jpg|jpeg|png|gif|svg)\b)/g, "");
+
+            // try direct filename lookup (last path segment)
+            const fileName = cleaned.split("/").pop();
             if (fileName && iconPathByName[fileName]) {
-                return iconPathByName[fileName];
+                return String(iconPathByName[fileName]).replace(/\.jpe?g(?=\.png$)/i, "");
+            }
+
+            // try common factory/pictures folder prefixes
+            const candidates = [cleaned, `factories/${fileName}`, `pictures/${fileName}`, `icons/${fileName}`, fileName];
+            for (const c of candidates) {
+                if (!c) continue;
+                if (iconPathByName[c]) return String(iconPathByName[c]).replace(/\.jpe?g(?=\.png$)/i, "");
+            }
+
+            // tolerant scan: try to match by normalized key among all known icons
+            const targetNorm = cleaned.replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, "");
+            for (const k of Object.keys(iconPathByName)) {
+                const kn = String(k || "").toLowerCase().replace(/\\\\/g, "/").replace(/\.(?:jpg|jpeg|png|gif|svg)(?=\.(?:jpg|jpeg|png|gif|svg)\b)/g, "");
+                const knFile = kn.split("/").pop();
+                if (kn === cleaned || knFile === fileName || knFile === cleaned || kn === targetNorm || knFile.replace(/[^a-z0-9]/g, "") === targetNorm) {
+                    return String(iconPathByName[k]).replace(/\.jpe?g(?=\.png$)/i, "");
+                }
             }
 
             if (normalized.startsWith("residentcard_lv_")) {
@@ -227,6 +252,46 @@ Wichtige Render-Funktionen:
         function imageSrcFor(value) {
             const resolved = resolveImagePath(value);
             return resolved ? `${iconBaseUri}/${resolved}` : null;
+        }
+
+        // Manual island -> icon mapping.
+        // Edit these entries to explicitly map island summary substrings to icon filenames.
+        // Keys are matched case-insensitively by substring; values are arrays of icon filenames
+        // (relative names as used in the pictures folder). Example key: 'new[plantations=cotton'
+        const ISLAND_ICON_MAP = {
+            // Beispiel‑Einträge — passe diese Dateinamen nach Bedarf an.
+            // Mapping für den OldWorld‑Summary aus deiner JSON (NewResidents[...] -> Explorer icon)
+            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_artisan.png'],
+            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_brick_factory_blue.png'],
+            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_coal_mine_blue.png'],
+            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_expeditioncards.png'],
+            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_explorerShip.png'],
+            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_farmer.png'],
+            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_sail_makers_blue.png'],
+            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_shipyard_lv1.png'],
+            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_steel_works_blue.png'],
+            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_tradeShip.png'],
+            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_warehouse_blue.png'],
+            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_worker.png'],
+        };
+
+        function lookupIslandIconsFromSummary(summary) {
+            if (!summary) return [];
+            const s = String(summary).toLowerCase();
+            const found = [];
+            for (const key of Object.keys(ISLAND_ICON_MAP)) {
+                try {
+                    if (s.includes(key.toLowerCase())) {
+                        const arr = ISLAND_ICON_MAP[key] || [];
+                        for (const a of arr) {
+                            if (a && !found.includes(a)) found.push(a);
+                        }
+                    }
+                } catch (e) {
+                    // ignore malformed keys
+                }
+            }
+            return found;
         }
 
         function rewardToIconText(rewardValue) {
@@ -773,7 +838,7 @@ Wichtige Render-Funktionen:
             const map = {
                 level1: "residents/farmer_stone.png",
                 level2: "residents/worker_stone.png",
-                level3: "residents/artesian_stone.png",
+                level3: "residents/artisan_stone.png",
                 level4: "residents/engineer_stone.png",
                 level5: "residents/investor_stone.png",
             };
@@ -822,48 +887,411 @@ Wichtige Render-Funktionen:
             leftTile.textContent = 'Neue Insel (L)';
             layout.appendChild(leftTile);
 
-            // main tile (placeholder)
+            // main tile: show player's island image full-area if available
             const mainTile = document.createElement('div');
             mainTile.className = 'island-main-tile';
-            mainTile.textContent = 'Hauptinsel';
+
+            // Try to resolve a suitable player island image from known candidates
+            (function() {
+                const candidates = ['player_island.png', 'player_island.jpg', 'player_island'];
+                let imgSrc = null;
+                for (const c of candidates) {
+                    const resolved = imageSrcFor(c);
+                    if (resolved) { imgSrc = resolved; break; }
+                }
+                if (imgSrc) {
+                    const img = document.createElement('img');
+                    img.className = 'island-main-image';
+                    img.src = imgSrc; // imageSrcFor already returns full URL
+                    img.alt = 'player_island';
+                    // When image loads, adjust container aspect-ratio to match image
+                    img.addEventListener('load', function () {
+                        try {
+                            const w = img.naturalWidth || img.width;
+                            const h = img.naturalHeight || img.height;
+                            if (w && h) {
+                                // Use numeric aspect ratio (width/height)
+                                // set as inline style to override default 3/2
+                                mainTile.style.aspectRatio = `${w} / ${h}`;
+                            }
+                        } catch (e) {
+                            // ignore
+                        }
+                    });
+                    mainTile.appendChild(img);
+                    return;
+                }
+
+                // Fallback text when no image found
+                mainTile.textContent = 'Hauptinsel';
+            })();
             layout.appendChild(mainTile);
+
+            // Create a 5x5 overlay grid on top of the main tile. Each cell may contain
+            // a factory/ship/shipyard image or remain empty but still take up space.
+            (function createIslandGrid() {
+                try {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'island-grid-overlay';
+
+                    // Allow data to come from several possible sources:
+                    // - player.islandGrid (array of 25 values, e.g. image names)
+                    // - currentEntry.state.boardState.islandGrid
+                    const currentEntry = (typeof entries !== 'undefined' && entries[index]) ? entries[index] : null;
+                    const srcArray = (player && Array.isArray(player.islandGrid) && player.islandGrid.length === 25)
+                        ? player.islandGrid
+                        : (currentEntry && currentEntry.state && Array.isArray(currentEntry.state.boardState?.islandGrid) && currentEntry.state.boardState.islandGrid.length === 25)
+                            ? currentEntry.state.boardState.islandGrid
+                            : null;
+
+                    // default images for row 1 (top row, cells 0..4)
+                    const forcedRow1 = [
+                        'farmer_house.png',
+                        'worker_house.png',
+                        'artisan_house.png',
+                        'engineer_house.png',
+                        'investor_house.png'
+                    ];
+
+                    // Build rows from GameState tiles (player.tiles)
+                    // First row remains hardcoded (houses) above.
+                    const landTiles = Array.isArray(player.landtiles || player.tiles?.landtiles)
+                        ? (player.tiles?.landtiles || player.landtiles || [])
+                        : [];
+                    const coastTiles = Array.isArray(player.coasttiles || player.tiles?.coasttiles)
+                        ? (player.tiles?.coasttiles || player.coasttiles || [])
+                        : [];
+                    const seaTiles = Array.isArray(player.seatiles || player.tiles?.seatiles)
+                        ? (player.tiles?.seatiles || player.seatiles || [])
+                        : [];
+
+                    // Ensure arrays have expected lengths (land: up to 10, coast: up to 5, sea: up to 5)
+                    const forcedRow2 = [];
+                    const forcedRow3 = [];
+                    for (let i = 0; i < 5; i++) {
+                        forcedRow2.push((landTiles[i] && landTiles[i] !== 'empty') ? `${landTiles[i]}.png` : null);
+                    }
+                    for (let i = 0; i < 5; i++) {
+                        forcedRow3.push((landTiles[5 + i] && landTiles[5 + i] !== 'empty') ? `${landTiles[5 + i]}.png` : null);
+                    }
+
+                    const forcedRow4 = [];
+                    for (let i = 0; i < 5; i++) {
+                        const val = coastTiles[i];
+                        forcedRow4.push((val && val !== 'empty') ? `${val}.png` : null);
+                    }
+
+                    const forcedRow5 = [];
+                    for (let i = 0; i < 5; i++) {
+                        const val = seaTiles[i];
+                        forcedRow5.push((val && val !== 'empty') ? `${val}.png` : null);
+                    }
+
+                    for (let i = 0; i < 25; i += 1) {
+                        const cell = document.createElement('div');
+                        cell.className = 'island-grid-cell';
+                        cell.dataset.cellIndex = String(i);
+
+                        let filled = false;
+                        // First, if this is in the top row (i 0..4), force the specified house images
+                        if (i >= 0 && i < 5) {
+                            const token = forcedRow1[i];
+                            const resolved = imageSrcFor(token) || imageSrcFor(token + '.png') || imageSrcFor(token + '.jpg');
+                            if (resolved) {
+                                const ci = document.createElement('img');
+                                ci.className = 'island-grid-cell-image';
+                                ci.src = resolved;
+                                ci.alt = token;
+                                cell.appendChild(ci);
+                                filled = true;
+                            } else {
+                                const lbl = document.createElement('div');
+                                lbl.className = 'island-grid-cell-label';
+                                lbl.textContent = token;
+                                cell.appendChild(lbl);
+                                filled = true;
+                            }
+                        }
+
+                        // If this is in the second row (i 5..9), use land tiles from GameState
+                        if (!filled && i >= 5 && i < 10) {
+                            const token = forcedRow2[i - 5];
+                            if (token) {
+                                const resolved = imageSrcFor(token) || imageSrcFor(token.replace(/\.png$/i, ''));
+                                if (resolved) {
+                                    const ci = document.createElement('img');
+                                    ci.className = 'island-grid-cell-image';
+                                    ci.src = resolved;
+                                    ci.alt = token;
+                                    cell.appendChild(ci);
+                                    filled = true;
+                                }
+                            }
+                        }
+
+                        // If this is in the third row (i 10..14), use land tiles (second half)
+                        if (!filled && i >= 10 && i < 15) {
+                            const token = forcedRow3[i - 10];
+                            if (token) {
+                                const resolved = imageSrcFor(token) || imageSrcFor(token.replace(/\.png$/i, ''));
+                                if (resolved) {
+                                    const ci = document.createElement('img');
+                                    ci.className = 'island-grid-cell-image';
+                                    ci.src = resolved;
+                                    ci.alt = token;
+                                    cell.appendChild(ci);
+                                    filled = true;
+                                }
+                            }
+                        }
+
+                        // If this is in the fourth row (i 15..19), use coast tiles
+                        if (!filled && i >= 15 && i < 20) {
+                            const token = forcedRow4[i - 15];
+                            if (token) {
+                                const resolved = imageSrcFor(token) || imageSrcFor(token.replace(/\.png$/i, ''));
+                                if (resolved) {
+                                    const ci = document.createElement('img');
+                                    ci.className = 'island-grid-cell-image';
+                                    ci.src = resolved;
+                                    ci.alt = token;
+                                    cell.appendChild(ci);
+                                    filled = true;
+                                }
+                            }
+                        }
+
+                        // If this is in the fifth row (i 20..24), use sea tiles (ships)
+                        if (!filled && i >= 20 && i < 25) {
+                            const token = forcedRow5[i - 20];
+                            if (token) {
+                                const resolved = imageSrcFor(token) || imageSrcFor(token.replace(/\.png$/i, ''));
+                                if (resolved) {
+                                    const ci = document.createElement('img');
+                                    ci.className = 'island-grid-cell-image';
+                                    ci.src = resolved;
+                                    ci.alt = token;
+                                    cell.appendChild(ci);
+                                    filled = true;
+                                }
+                            }
+                        }
+
+                        // Next, try to fill from provided data if not already filled
+                        if (!filled && srcArray && srcArray[i]) {
+                            const token = String(srcArray[i] || '').trim();
+                            if (token) {
+                                // try to resolve an image path
+                                const resolved = imageSrcFor(token) || imageSrcFor(token + '.png') || imageSrcFor(token + '.jpg');
+                                if (resolved) {
+                                    const ci = document.createElement('img');
+                                    ci.className = 'island-grid-cell-image';
+                                    ci.src = resolved;
+                                    ci.alt = token;
+                                    cell.appendChild(ci);
+                                    filled = true;
+                                } else {
+                                    const lbl = document.createElement('div');
+                                    lbl.className = 'island-grid-cell-label';
+                                    lbl.textContent = token;
+                                    cell.appendChild(lbl);
+                                    filled = true;
+                                }
+                            }
+                        }
+
+                        if (!filled) {
+                            cell.classList.add('empty');
+                        }
+
+                        overlay.appendChild(cell);
+                    }
+
+                    // append overlay onto the main tile so it follows the tile's aspect ratio
+                    mainTile.appendChild(overlay);
+                } catch (e) {
+                    // don't break rendering if overlay fails
+                    console.warn('Failed to create island grid overlay', e);
+                }
+            })();
 
             // right small tile - if current entry is a DiscoverNewWorldIsland by this player, show discovered island image
             const rightTile = document.createElement('div');
             rightTile.className = 'island-small-tile';
 
-            // determine current entry and whether this player discovered a new world island
+            // determine current entry and whether this player discovered an island (new or old)
             try {
                 const currentEntry = (typeof entries !== 'undefined' && entries[index]) ? entries[index] : null;
-                let discoveredImg = null;
+
                 if (currentEntry && String(currentEntry.executedAction || '').toLowerCase().includes('discovernewworldisland')) {
+                    // New World: try to pick a matching island image from details or fallback
                     const executedBy = String(currentEntry.executedByPlayer || '').trim();
                     if (executedBy && player && String(player.name || '') === executedBy) {
-                        // try to extract image filename from executedActionDetails (if provided)
-                        const details = currentEntry.executedActionDetails;
-                        if (typeof details === 'string' && details) {
-                            // look for any known icon file name mentioned in the details
+                        const details = currentEntry.executedActionDetails || '';
+                        let discoveredImg = null;
+                        // Always show the base new world island image; plantations will be overlaid later.
+                        discoveredImg = 'newWorldIsland_base.png';
+                        const img = document.createElement('img');
+                        const src = imageSrcFor(discoveredImg) || (iconBaseUri + '/' + discoveredImg);
+                        img.src = src;
+                        img.alt = discoveredImg;
+                        img.style.maxWidth = '100%';
+                        img.style.maxHeight = '100%';
+                        img.style.objectFit = 'contain';
+                        rightTile.appendChild(img);
+                    } else {
+                        rightTile.textContent = 'Neue Insel (R)';
+                    }
+
+                } else if (currentEntry && String(currentEntry.executedAction || '').toLowerCase().includes('discoveroldworldisland')) {
+                    // Old World: there may be 0..2 old-world tiles referenced in action details/blocks
+                    const executedBy = String(currentEntry.executedByPlayer || '').trim();
+                    if (executedBy && player && String(player.name || '') === executedBy) {
+                        const detailsText = String(currentEntry.actionDetails || currentEntry.executedActionDetails || '') + ' ' +
+                            ((currentEntry.actionDetailsBlocks || []).map(b => (b.items || []).join(' ')).join(' '));
+                        const hay = detailsText.toLowerCase();
+                        const found = [];
+
+                        // Try manual mapping first
+                        const manual = lookupIslandIconsFromSummary(detailsText);
+                        if (manual && manual.length > 0) {
+                            for (const m of manual) {
+                                found.push(m);
+                                if (found.length >= 2) break;
+                            }
+                        }
+
+                        // If none from manual mapping, try direct mention match among known icons
+                        if (found.length === 0) {
                             for (const candidate of orderedIconFileNames || []) {
-                                if (candidate.toLowerCase().includes('island') && details.toLowerCase().includes(candidate.toLowerCase())) {
-                                    discoveredImg = candidate; break;
+                                const name = candidate.toLowerCase();
+                                if (!name.includes('oldworldisland')) continue;
+                                if (hay.includes(name)) {
+                                    found.push(candidate);
+                                    if (found.length >= 2) break;
                                 }
                             }
                         }
-                        // fallback to a sensible default image
-                        if (!discoveredImg) discoveredImg = 'newWorldIsland_base.png';
+
+                        // If still none found by direct mention, fall back to a generic mapping based on reward keywords
+                        if (found.length === 0) {
+                            const rewardText = String(currentEntry.actionDetails || '').toLowerCase();
+                            const rewardCandidates = orderedIconFileNames.filter(n => n.toLowerCase().includes('oldworldisland'));
+                            // try to match common reward tokens inside rewardText
+                            for (const candidate of rewardCandidates) {
+                                const name = candidate.toLowerCase();
+                                if (rewardText.includes('farmer') && name.includes('farmer')) found.push(candidate);
+                                if (rewardText.includes('worker') && name.includes('worker')) found.push(candidate);
+                                if (rewardText.includes('warehouse') && name.includes('warehouse')) found.push(candidate);
+                                if (rewardText.includes('coal') && name.includes('coal')) found.push(candidate);
+                                if (rewardText.includes('brick') && name.includes('brick')) found.push(candidate);
+                                if (rewardText.includes('steel') && name.includes('steel')) found.push(candidate);
+                                if (rewardText.includes('trade') && name.includes('trade')) found.push(candidate);
+                                if (rewardText.includes('explorer') && name.includes('explorer')) found.push(candidate);
+                                if (rewardText.includes('shipyard') && name.includes('shipyard')) found.push(candidate);
+                                if (rewardText.includes('sail') && name.includes('sail')) found.push(candidate);
+                                if (found.length >= 2) break;
+                            }
+                        }
+
+                        // dedupe and limit to 2
+                        const unique = [...new Set(found)].slice(0, 2);
+                        if (unique.length > 0) {
+                            for (const u of unique) {
+                                const img = document.createElement('img');
+                                const src = imageSrcFor(u) || (iconBaseUri + '/' + u);
+                                img.src = src;
+                                img.alt = u;
+                                img.style.maxWidth = '100%';
+                                img.style.maxHeight = '100%';
+                                img.style.objectFit = 'contain';
+                                img.style.marginRight = '6px';
+                                rightTile.appendChild(img);
+                            }
+                        } else {
+                            // generic fallback old-world back image
+                            const fallback = 'oldWorldIsland_back.png';
+                            const img = document.createElement('img');
+                            img.src = imageSrcFor(fallback) || (iconBaseUri + '/' + fallback);
+                            img.alt = fallback;
+                            img.style.maxWidth = '100%';
+                            img.style.maxHeight = '100%';
+                            img.style.objectFit = 'contain';
+                            rightTile.appendChild(img);
+                        }
+                    } else {
+                        rightTile.textContent = 'Neue Insel (R)';
                     }
-                }
-                if (discoveredImg) {
-                    const img = document.createElement('img');
-                    const src = imageSrcFor(discoveredImg) || (iconBaseUri + '/' + discoveredImg);
-                    img.src = src;
-                    img.alt = discoveredImg;
-                    img.style.maxWidth = '100%';
-                    img.style.maxHeight = '100%';
-                    img.style.objectFit = 'contain';
-                    rightTile.appendChild(img);
+
                 } else {
-                    rightTile.textContent = 'Neue Insel (R)';
+                    // If the current entry is not a discovery action, still show any
+                    // islands that are stored in the player's discovered lists (persisted in GameState).
+                    try {
+                        const oldDiscovered = (player && Array.isArray(player.discoveredOldWorldIslands)) ? player.discoveredOldWorldIslands : [];
+                        const newDiscovered = (player && Array.isArray(player.discoveredNewWorldIslands)) ? player.discoveredNewWorldIslands : [];
+
+                        let rendered = false;
+                        // Prefer explicit old-world discovered icons
+                        if (oldDiscovered.length > 0) {
+                            const foundIcons = [];
+                            for (const summary of oldDiscovered) {
+                                // try manual mapping first
+                                const manual = lookupIslandIconsFromSummary(summary);
+                                if (manual && manual.length > 0) {
+                                    for (const m of manual) {
+                                        foundIcons.push(m);
+                                    }
+                                    if (foundIcons.length >= 2) break;
+                                    continue;
+                                }
+
+                                const textSummary = String(summary || '').toLowerCase();
+                                for (const candidate of orderedIconFileNames || []) {
+                                    const name = candidate.toLowerCase();
+                                    if (!name.includes('oldworldisland')) continue;
+                                    if (textSummary.includes(name) || textSummary.includes(name.replace(/[^a-z0-9]/g, '')) || textSummary.includes('reward=') && name.includes('oldworldisland')) {
+                                        foundIcons.push(candidate);
+                                        break;
+                                    }
+                                }
+                                if (foundIcons.length >= 2) break;
+                            }
+                            const unique = [...new Set(foundIcons)].slice(0,2);
+                            if (unique.length > 0) {
+                                for (const u of unique) {
+                                    const img = document.createElement('img');
+                                    img.src = imageSrcFor(u) || (iconBaseUri + '/' + u);
+                                    img.alt = u;
+                                    img.style.maxWidth = '100%';
+                                    img.style.maxHeight = '100%';
+                                    img.style.objectFit = 'contain';
+                                    img.style.marginRight = '6px';
+                                    rightTile.appendChild(img);
+                                }
+                                rendered = true;
+                            }
+                        }
+
+                        // If none from old world, and there are new world discoveries,
+                        // always render the base new world island image (plantations will be overlaid later).
+                        if (!rendered && newDiscovered.length > 0) {
+                            const img = document.createElement('img');
+                            const src = imageSrcFor('newWorldIsland_base.png') || (iconBaseUri + '/newWorldIsland_base.png');
+                            img.src = src;
+                            img.alt = 'newWorldIsland_base.png';
+                            img.style.maxWidth = '100%';
+                            img.style.maxHeight = '100%';
+                            img.style.objectFit = 'contain';
+                            rightTile.appendChild(img);
+                            rendered = true;
+                        }
+
+                        if (!rendered) {
+                            rightTile.textContent = 'Neue Insel (R)';
+                        }
+                    } catch (e) {
+                        rightTile.textContent = 'Neue Insel (R)';
+                    }
                 }
             } catch (e) {
                 rightTile.textContent = 'Neue Insel (R)';
@@ -1223,7 +1651,7 @@ Wichtige Render-Funktionen:
             const residents = [
                 { type: "farmers", count: pool.farmers ?? 0, img: "residents/farmer_stone.png", label: "Farmers" },
                 { type: "workers", count: pool.workers ?? 0, img: "residents/worker_stone.png", label: "Workers" },
-                { type: "artisans", count: pool.artisans ?? 0, img: "residents/artesian_stone.png", label: "Artisans" },
+                { type: "artisans", count: pool.artisans ?? 0, img: "residents/artisan_stone.png", label: "Artisans" },
                 { type: "engineers", count: pool.engineers ?? 0, img: "residents/engineer_stone.png", label: "Engineers" },
                 { type: "investors", count: pool.investors ?? 0, img: "residents/investor_stone.png", label: "Investors" }
             ];

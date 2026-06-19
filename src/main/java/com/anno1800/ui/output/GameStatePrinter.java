@@ -138,7 +138,7 @@ public class GameStatePrinter {
             System.out.printf("%s| Position: %2d                                                          |%n",
                 marker, player.position());
             System.out.printf("%s| Free Tiles:      Land: %2d | Coast: %2d | Sea: %2d                       |%n",
-                marker, player.tiles().freeLandTiles(), player.tiles().freeCoastTiles(), player.tiles().freeSeaTiles());
+                marker, player.tiles().landtiles().size(), player.tiles().coasttiles().size(), player.tiles().seatiles().size());
             System.out.printf("%s| Buildings:  Factories: %2d | Shipyards: %2d                             |%n",
                 marker, player.buildings().factoryCount(), player.buildings().shipyardCount());
             System.out.printf("%s| Ships:      Trade: %2d | Explorer: %2d                                  |%n",

@@ -89,6 +89,17 @@ public enum Producers {
         return produces;
     }
 
+    /**
+     * Returns true if this producer represents a Factory/StartFactory (i.e. not a Plantation).
+     */
+    public boolean isFactory() {
+        return switch (this) {
+            case CACAO_PLANTATION, SUGAR_PLANTATION, TOBACCO_PLANTATION,
+                 COFFEE_PLANTATION, COTTON_PLANTATION, RUBBER_PLANTATION -> false;
+            default -> true;
+        };
+    }
+
     @Override
     public String toString() {
         return displayName;

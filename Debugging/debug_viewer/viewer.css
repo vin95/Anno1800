@@ -463,7 +463,7 @@ pre {
     position: relative;
     border: 1px solid #2c3f56;
     border-radius: 12px;
-    overflow: hidden;
+    overflow: visible; /* allow overlays to expand outside without being clipped */
 }
 
 /* Mainboard-Hintergrundbild */
@@ -913,11 +913,83 @@ body.stack-count-hidden .stack-count {
     border: 1px solid #3b4f6a;
     border-radius: 8px;
     background: linear-gradient(160deg, rgba(30, 64, 83, 0.5), rgba(15, 23, 42, 0.8));
-    display: grid;
-    place-items: center;
+    display: block;
+    position: relative; /* allow absolutely-positioned image to fill */
     color: #cbd5e1;
     font-size: 0.72rem;
-    padding: 4px;
+    /* allow image to fill the tile fully */
+    padding: 0;
+    overflow: visible; /* allow hovered cell content to expand outside the tile */
+}
+
+/* Full-area image for the main island tile */
+.island-main-tile .island-main-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    border-radius: inherit;
+}
+
+/* Overlay: 5x5 grid over the main island tile */
+.island-grid-overlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 2px;
+    padding: 2px;
+    pointer-events: none; /* overlay itself non-interactive; cells enable events */
+}
+
+.island-grid-overlay .island-grid-cell { pointer-events: auto; }
+
+.island-grid-cell {
+    position: relative;
+    border: 1px solid rgba(59,79,106,0.35);
+    border-radius: 6px;
+    background: rgba(7,12,24,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0; /* ensure flex/grid sizing works */
+    min-height: 0;
+    overflow: visible; /* allow hovered content to expand outward */
+}
+
+.island-grid-cell.empty {
+    opacity: 0.45; /* visually indicate empty but occupy space */
+}
+
+.island-grid-cell img.island-grid-cell-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* fill the cell while preserving aspect ratio */
+    display: block;
+    transition: transform 160ms cubic-bezier(.2,.9,.3,1);
+    transform-origin: center center;
+    will-change: transform;
+}
+
+.island-grid-cell .island-grid-cell-label {
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-align: center;
+    padding: 2px;
+    transition: transform 160ms cubic-bezier(.2,.9,.3,1);
+    transform-origin: center center;
+    will-change: transform;
+}
+
+/* hover: scale content 1.5x from center and bring above neighbors */
+.island-grid-cell:hover { z-index: 40; }
+.island-grid-cell:hover img.island-grid-cell-image,
+.island-grid-cell:hover .island-grid-cell-label,
+.island-grid-cell:hover * {
+    transform: scale(1.5);
 }
 
 .island-small-tile {

@@ -1699,9 +1699,30 @@ public class TerminalGameUI {
                     writer.printf("      \"name\": \"%s\",%n", player.name());
                     writer.printf("      \"position\": %d,%n", player.position());
                     writer.println("      \"tiles\": {");
-                    writer.printf("        \"freeLand\": %d,%n", player.tiles().freeLandTiles());
-                    writer.printf("        \"freeCoast\": %d,%n", player.tiles().freeCoastTiles());
-                    writer.printf("        \"freeSea\": %d%n", player.tiles().freeSeaTiles());
+                    // landtiles
+                    writer.print("        \"landtiles\": [");
+                    for (int ti = 0; ti < player.tiles().landtiles().size(); ti++) {
+                        String t = player.tiles().landtiles().get(ti).replace("\"", "\\\"");
+                        writer.print("\"" + t + "\"");
+                        if (ti < player.tiles().landtiles().size() - 1) writer.print(", ");
+                    }
+                    writer.println("],");
+                    // coasttiles
+                    writer.print("        \"coasttiles\": [");
+                    for (int ti = 0; ti < player.tiles().coasttiles().size(); ti++) {
+                        String t = player.tiles().coasttiles().get(ti).replace("\"", "\\\"");
+                        writer.print("\"" + t + "\"");
+                        if (ti < player.tiles().coasttiles().size() - 1) writer.print(", ");
+                    }
+                    writer.println("],");
+                    // seatiles
+                    writer.print("        \"seatiles\": [");
+                    for (int ti = 0; ti < player.tiles().seatiles().size(); ti++) {
+                        String t = player.tiles().seatiles().get(ti).replace("\"", "\\\"");
+                        writer.print("\"" + t + "\"");
+                        if (ti < player.tiles().seatiles().size() - 1) writer.print(", ");
+                    }
+                    writer.println("]");
                     writer.println("      },");
                     writer.println("      \"buildings\": {");
                     writer.printf("        \"factories\": %d,%n", player.buildings().factoryCount());
@@ -1748,7 +1769,24 @@ public class TerminalGameUI {
                     writer.printf("          \"fit\": %d,%n", fit);
                     writer.printf("          \"exhausted\": %d%n", exhausted);
                     writer.println("        }");
-                    writer.println("      }");
+                    writer.println("      },");
+                        // Discovered islands
+                        writer.println("      \"discoveredIslands\": {");
+                        // Old World
+                        writer.print("        \"oldWorld\": [");
+                        for (int oi = 0; oi < player.discoveredOldWorldIslands().size(); oi++) {
+                            writer.print("\"" + player.discoveredOldWorldIslands().get(oi).replace("\"", "\\\"") + "\"");
+                            if (oi < player.discoveredOldWorldIslands().size() - 1) writer.print(", ");
+                        }
+                        writer.println("],");
+                        // New World
+                        writer.print("        \"newWorld\": [");
+                        for (int ni = 0; ni < player.discoveredNewWorldIslands().size(); ni++) {
+                            writer.print("\"" + player.discoveredNewWorldIslands().get(ni).replace("\"", "\\\"") + "\"");
+                            if (ni < player.discoveredNewWorldIslands().size() - 1) writer.print(", ");
+                        }
+                        writer.println("]");
+                        writer.println("      }");
                     writer.print("    }");
                     if (i < state.players().size() - 1) {
                         writer.println(",");

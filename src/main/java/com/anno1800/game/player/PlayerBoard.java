@@ -37,6 +37,10 @@ public class PlayerBoard {
     int landTiles = 10;
     int coastTiles = 5;
     int seaTiles = 5;
+    // Tile occupancy tracking (stores placed tile type or null)
+    private String[] landTileTypes;
+    private String[] coastTileTypes;
+    private String[] seaTileTypes;
     int numShips = 0;
     int numFactories = 0;
     int numFactoriesOnLand = 0;
@@ -106,6 +110,10 @@ public class PlayerBoard {
 
     ArrayList<ExpeditionCard> expeditionCards = new ArrayList<>();
 
+    // Owned islands (keep references so we can serialize which specific islands a player discovered)
+    private final List<com.anno1800.game.tiles.OldWorldIsland> ownedOldWorldIslands = new ArrayList<>();
+    private final List<com.anno1800.game.tiles.NewWorldIsland> ownedNewWorldIslands = new ArrayList<>();
+
     /**
      * Rewards that have been earned but not yet activated.
      * Rewards are added when a ResidentCard is fulfilled (FulfillNeeds action).
@@ -132,6 +140,16 @@ public class PlayerBoard {
         initializeDefaultFactories();
         // Default factories occupy land tiles
         numFactoriesOnLand = 10; // 10 start factories (5 GREEN + 5 RED)
+        // initialize tile arrays
+        landTileTypes = new String[landTiles];
+        coastTileTypes = new String[coastTiles];
+        seaTileTypes = new String[seaTiles];
+        // mark default factories occupying first land tiles
+        for (int i = 0; i < defaultFactories.size() && i < landTiles; i++) {
+            var df = defaultFactories.get(i);
+            landTileTypes[i] = df.getType().name().toLowerCase();
+            df.setTileIndex(i);
+        }
     }
 
     // ========== Trade Tracking Methods ==========
@@ -442,7 +460,17 @@ public class PlayerBoard {
     private void addFactory(Factory factory) {
         ensureFactoryCapacity();
         factories[numFactories] = factory;
-        numFactoriesOnLand++;
+        // assign a land tile if available, otherwise coast
+        String typeName = factory.getType().name().toLowerCase();
+        if (getFreeLandTiles() > 0) {
+            int idx = claimFreeLandTile(typeName);
+            factory.setTileIndex(idx);
+            numFactoriesOnLand++;
+        } else {
+            int idx = claimFreeCoastTile(typeName);
+            factory.setTileIndex(landTiles + idx);
+            numFactoriesOnCoast++;
+        }
         numFactories++;
     }
 
@@ -473,8 +501,56 @@ public class PlayerBoard {
         }
     }
 
+    // ===== Tile helpers =====
+    public String[] getLandTileTypes() { return landTileTypes; }
+    public String[] getCoastTileTypes() { return coastTileTypes; }
+    public String[] getSeaTileTypes() { return seaTileTypes; }
+
+    private int claimFreeLandTile(String tileType) {
+        for (int i = 0; i < landTileTypes.length; i++) {
+            if (landTileTypes[i] == null) {
+                landTileTypes[i] = tileType;
+                return i;
+            }
+        }
+        throw new IllegalStateException("No free land tiles");
+    }
+
+    private int claimFreeCoastTile(String tileType) {
+        for (int i = 0; i < coastTileTypes.length; i++) {
+            if (coastTileTypes[i] == null) {
+                coastTileTypes[i] = tileType;
+                return i;
+            }
+        }
+        throw new IllegalStateException("No free coast tiles");
+    }
+
+    private int claimFreeSeaTile(String tileType) {
+        for (int i = 0; i < seaTileTypes.length; i++) {
+            if (seaTileTypes[i] == null) {
+                seaTileTypes[i] = tileType;
+                return i;
+            }
+        }
+        throw new IllegalStateException("No free sea tiles");
+    }
+
+    private void clearTileByGlobalIndex(int globalIndex) {
+        if (globalIndex < 0) return;
+        if (globalIndex < landTiles) {
+            landTileTypes[globalIndex] = null;
+        } else if (globalIndex < landTiles + coastTiles) {
+            coastTileTypes[globalIndex - landTiles] = null;
+        } else {
+            seaTileTypes[globalIndex - landTiles - coastTiles] = null;
+        }
+    }
+
     private void addShipyard(int level) {
         Shipyard newShipyard = new Shipyard(level);
+        int coastIdx = claimFreeCoastTile("shipyard_lv" + level);
+        newShipyard.setTileIndex(landTiles + coastIdx);
         shipyards.add(newShipyard);
         numShipyards++;
     }
@@ -491,11 +567,15 @@ public class PlayerBoard {
         switch (type) {
             case ExplorerShip -> {
                 ExplorerShip ship = new ExplorerShip(level);
+                int seaIdx = claimFreeSeaTile("explorerShip_lv" + level);
+                ship.setTileIndex(landTiles + coastTiles + seaIdx);
                 explorerShips.add(ship);
                 availableExplorerChips += gameBoard.takeExplorerChip(level);
             }
             case TradeShip -> {
                 TradeShip ship = new TradeShip(level);
+                int seaIdx = claimFreeSeaTile("tradeShip_lv" + level);
+                ship.setTileIndex(landTiles + coastTiles + seaIdx);
                 tradeShips.add(ship);
                 availableTradeChips += gameBoard.takeTradeChip(level);
             }
@@ -529,10 +609,15 @@ public class PlayerBoard {
         ensureFactoryCapacity();
         factories[numFactories] = factory;
 
-        // Prefer land tiles over coast tiles
+        // Assign tile index and set tile type
+        String typeName = factory.getType().name().toLowerCase();
         if (getFreeLandTiles() > 0) {
+            int idx = claimFreeLandTile(typeName);
+            factory.setTileIndex(idx);
             numFactoriesOnLand++;
         } else {
+            int idx = claimFreeCoastTile(typeName);
+            factory.setTileIndex(landTiles + idx);
             numFactoriesOnCoast++;
         }
 
@@ -552,6 +637,8 @@ public class PlayerBoard {
             throw new IllegalStateException("No free coast tiles available to place shipyard");
         }
 
+        int coastIdx = claimFreeCoastTile("shipyard_lv" + shipyard.getLevel());
+        shipyard.setTileIndex(landTiles + coastIdx);
         shipyards.add(shipyard);
         numShipyards++;
     }
@@ -574,6 +661,8 @@ public class PlayerBoard {
         switch (shipType) {
             case ExplorerShip -> {
                 if (ship instanceof com.anno1800.game.tiles.ExplorerShip explorerShip) {
+                    int seaIdx = claimFreeSeaTile("explorerShip_lv" + level);
+                    explorerShip.setTileIndex(landTiles + coastTiles + seaIdx);
                     explorerShips.add(explorerShip);
                     availableExplorerChips += level;
                 } else {
@@ -583,6 +672,8 @@ public class PlayerBoard {
             }
             case TradeShip -> {
                 if (ship instanceof com.anno1800.game.tiles.TradeShip tradeShip) {
+                    int seaIdx = claimFreeSeaTile("tradeShip_lv" + level);
+                    tradeShip.setTileIndex(landTiles + coastTiles + seaIdx);
                     tradeShips.add(tradeShip);
                     availableTradeChips += level;
                 } else {
@@ -747,6 +838,9 @@ public class PlayerBoard {
         addIslandShipyards(island.getShipyards());
         addIslandTradeShips(island.getTradeShips());
         addIslandExplorerShips(island.getExplorerShips());
+
+        // remember the actual island object for serialization/debugging
+        ownedOldWorldIslands.add(island);
     }
 
     /**
@@ -763,6 +857,23 @@ public class PlayerBoard {
         for (Plantation plantation : island.getPlantations()) {
             addPlantation(plantation);
         }
+
+        // remember the actual island object for serialization/debugging
+        ownedNewWorldIslands.add(island);
+    }
+
+    /**
+     * Returns the list of Old World Islands owned by this player (in discovery order).
+     */
+    public List<com.anno1800.game.tiles.OldWorldIsland> getOwnedOldWorldIslands() {
+        return java.util.Collections.unmodifiableList(ownedOldWorldIslands);
+    }
+
+    /**
+     * Returns the list of New World Islands owned by this player (in discovery order).
+     */
+    public List<com.anno1800.game.tiles.NewWorldIsland> getOwnedNewWorldIslands() {
+        return java.util.Collections.unmodifiableList(ownedNewWorldIslands);
     }
 
     /**
@@ -779,6 +890,8 @@ public class PlayerBoard {
      */
     private void addIslandShipyards(Shipyard[] islandShipyards) {
         for (Shipyard shipyard : islandShipyards) {
+            int coastIdx = claimFreeCoastTile("shipyard_lv" + shipyard.getLevel());
+            shipyard.setTileIndex(landTiles + coastIdx);
             shipyards.add(shipyard);
             numShipyards++;
         }
@@ -789,6 +902,8 @@ public class PlayerBoard {
      */
     private void addIslandTradeShips(TradeShip[] islandTradeShips) {
         for (TradeShip tradeShip : islandTradeShips) {
+            int seaIdx = claimFreeSeaTile("tradeShip_lv" + tradeShip.getLevel());
+            tradeShip.setTileIndex(landTiles + coastTiles + seaIdx);
             tradeShips.add(tradeShip);
         }
     }
@@ -798,6 +913,8 @@ public class PlayerBoard {
      */
     private void addIslandExplorerShips(ExplorerShip[] islandExplorerShips) {
         for (ExplorerShip explorerShip : islandExplorerShips) {
+            int seaIdx = claimFreeSeaTile("explorerShip_lv" + explorerShip.getLevel());
+            explorerShip.setTileIndex(landTiles + coastTiles + seaIdx);
             explorerShips.add(explorerShip);
         }
     }
@@ -918,6 +1035,13 @@ public class PlayerBoard {
     private void removeFactoryFromArray(Factory factory) {
         for (int i = 0; i < factories.length; i++) {
             if (factories[i] == factory) {
+                int idx = factory.getTileIndex();
+                // free occupied tile
+                clearTileByGlobalIndex(idx);
+                if (idx >= 0) {
+                    if (idx < landTiles) numFactoriesOnLand = Math.max(0, numFactoriesOnLand - 1);
+                    else if (idx < landTiles + coastTiles) numFactoriesOnCoast = Math.max(0, numFactoriesOnCoast - 1);
+                }
                 factories[i] = null;
                 numFactories--;
                 break;

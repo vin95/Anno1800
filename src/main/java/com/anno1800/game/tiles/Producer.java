@@ -21,4 +21,11 @@ public abstract class Producer {
     public Goods produces() {
         return type.getProduces();
     }
+
+    /**
+     * Convenience wrapper: returns whether this producer represents a Factory (not a Plantation).
+     */
+    public boolean isFactory() {
+        return type.isFactory();
+    }
 }

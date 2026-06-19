@@ -159,6 +159,9 @@ public class Board {
             if (isStartFactory(producer)) {
                 continue; // Skip StartFactories
             }
+            if (!producer.isFactory()) {
+                continue; // Skip non-factory producers (e.g. Plantations)
+            }
             try {
                 com.anno1800.data.gamedata.FactoryData.getFactory(producer);
                 // It's a Factory, add to index
@@ -282,7 +285,9 @@ public class Board {
             if (isStartFactory(producer)) {
                 continue;
             }
-            // Only add if this producer is a Factory (not Plantation)
+            if (!producer.isFactory()) {
+                continue; // Skip non-factory producers (e.g. Plantations)
+            }
             try {
                 com.anno1800.game.tiles.Factory template = com.anno1800.data.gamedata.FactoryData.getFactory(producer);
                 java.util.Deque<com.anno1800.game.tiles.Factory> stack = new java.util.ArrayDeque<>();
@@ -871,12 +876,16 @@ public class Board {
      */
     public void returnFactory(Factory factory) {
         Producers type = factory.getType();
-        int stackIndex = type.ordinal();
-        
+        Integer stackIndex = factoryStackIndex.get(type);
+        if (stackIndex == null) {
+            // No stack for this producer (e.g. Plantation). Ignore return.
+            System.out.println("Warning: No factory stack for type " + type + "; ignoring return.");
+            return;
+        }
         if (stackIndex < 0 || stackIndex >= factoryStacks.size()) {
             throw new IllegalArgumentException("Invalid factory type: " + type);
         }
-        
+
         Deque<Factory> stack = factoryStacks.get(stackIndex);
         stack.addLast(factory);
     }

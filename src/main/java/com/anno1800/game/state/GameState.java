@@ -241,7 +241,9 @@ public record GameState(
         PlayerShipState ships,
         PlayerResourceState resources,
         ResidentState residents,
-        CardState cards
+        CardState cards,
+        java.util.List<String> discoveredOldWorldIslands,
+        java.util.List<String> discoveredNewWorldIslands
     ) {
         /**
          * Creates PlayerState list from Player array.
@@ -280,9 +282,15 @@ public record GameState(
                 player.getName(),
                 player.getPosition(),
                 new TileState(
-                    board.getFreeLandTiles(),
-                    board.getFreeCoastTiles(),
-                    board.getFreeSeaTiles()
+                    java.util.Arrays.stream(board.getLandTileTypes() == null ? new String[0] : board.getLandTileTypes())
+                        .map(s -> s == null ? "empty" : s)
+                        .toList(),
+                    java.util.Arrays.stream(board.getCoastTileTypes() == null ? new String[0] : board.getCoastTileTypes())
+                        .map(s -> s == null ? "empty" : s)
+                        .toList(),
+                    java.util.Arrays.stream(board.getSeaTileTypes() == null ? new String[0] : board.getSeaTileTypes())
+                        .map(s -> s == null ? "empty" : s)
+                        .toList()
                 ),
                 new BuildingState(
                     board.getAllActiveFactories().size(),
@@ -309,7 +317,35 @@ public record GameState(
                 ),
                 new CardState(
                     board.getResidentCards().size()
-                )
+                ),
+                // discovered old/new world islands (serialize as short summaries)
+                board.getOwnedOldWorldIslands().stream().map(isl -> {
+                    StringBuilder s = new StringBuilder();
+                    s.append("old[land=").append(isl.getFreeLandTiles())
+                     .append(",coast=").append(isl.getFreeCoastTiles())
+                     .append(",sea=").append(isl.getFreeSeaTiles())
+                     .append(",reward=").append(isl.getReward() == null ? "none" : isl.getReward().toString());
+                    if (isl.getFactories() != null && isl.getFactories().length > 0) {
+                        s.append(",factories=");
+                        for (int fi = 0; fi < isl.getFactories().length; fi++) {
+                            if (fi > 0) s.append("|");
+                            s.append(isl.getFactories()[fi].getType().name());
+                        }
+                    }
+                    s.append("]");
+                    return s.toString();
+                }).toList(),
+                board.getOwnedNewWorldIslands().stream().map(isl -> {
+                    StringBuilder s = new StringBuilder();
+                    s.append("new[plantations=");
+                    var pls = isl.getPlantations();
+                    for (int pi = 0; pi < pls.length; pi++) {
+                        if (pi > 0) s.append("|");
+                        s.append(pls[pi].getType().name());
+                    }
+                    s.append("]");
+                    return s.toString();
+                }).toList()
             );
         }
         
@@ -317,9 +353,9 @@ public record GameState(
          * Player's tile state (free tiles on player board).
          */
         public record TileState(
-            int freeLandTiles,
-            int freeCoastTiles,
-            int freeSeaTiles
+            java.util.List<String> landtiles,
+            java.util.List<String> coasttiles,
+            java.util.List<String> seatiles
         ) {}
         
         /**

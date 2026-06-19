@@ -685,9 +685,30 @@ public class DebugGameRunner {
                     w.printf ("      \"name\": \"%s\",%n",     p.name());
                     w.printf ("      \"position\": %d,%n",     p.position());
                     w.println("      \"tiles\": {");
-                    w.printf ("        \"freeLand\": %d,%n",   p.tiles().freeLandTiles());
-                    w.printf ("        \"freeCoast\": %d,%n",  p.tiles().freeCoastTiles());
-                    w.printf ("        \"freeSea\": %d%n",     p.tiles().freeSeaTiles());
+                    // landtiles
+                    w.print("        \"landtiles\": [");
+                    for (int ti = 0; ti < p.tiles().landtiles().size(); ti++) {
+                        String t = p.tiles().landtiles().get(ti).replace("\"", "\\\"");
+                        w.print("\"" + t + "\"");
+                        if (ti < p.tiles().landtiles().size() - 1) w.print(", ");
+                    }
+                    w.println("],");
+                    // coasttiles
+                    w.print("        \"coasttiles\": [");
+                    for (int ti = 0; ti < p.tiles().coasttiles().size(); ti++) {
+                        String t = p.tiles().coasttiles().get(ti).replace("\"", "\\\"");
+                        w.print("\"" + t + "\"");
+                        if (ti < p.tiles().coasttiles().size() - 1) w.print(", ");
+                    }
+                    w.println("],");
+                    // seatiles
+                    w.print("        \"seatiles\": [");
+                    for (int ti = 0; ti < p.tiles().seatiles().size(); ti++) {
+                        String t = p.tiles().seatiles().get(ti).replace("\"", "\\\"");
+                        w.print("\"" + t + "\"");
+                        if (ti < p.tiles().seatiles().size() - 1) w.print(", ");
+                    }
+                    w.println("]");
                     w.println("      },");
                     w.println("      \"buildings\": {");
                     w.printf ("        \"factories\": %d,%n",  p.buildings().factoryCount());
@@ -799,6 +820,24 @@ public class DebugGameRunner {
                     w.println("          }");
                     w.println("        }");
                     w.println("      }");
+                        // Discovered islands (old and new world) - populated from GameState.PlayerState
+                        w.println("      ,");
+                        w.println("      \"discoveredIslands\": {");
+                        // Old World
+                        w.print("        \"oldWorld\": [");
+                        for (int oi = 0; oi < p.discoveredOldWorldIslands().size(); oi++) {
+                            w.print("\"" + escapeJson(p.discoveredOldWorldIslands().get(oi)) + "\"");
+                            if (oi < p.discoveredOldWorldIslands().size() - 1) w.print(", ");
+                        }
+                        w.println("],");
+                        // New World
+                        w.print("        \"newWorld\": [");
+                        for (int ni = 0; ni < p.discoveredNewWorldIslands().size(); ni++) {
+                            w.print("\"" + escapeJson(p.discoveredNewWorldIslands().get(ni)) + "\"");
+                            if (ni < p.discoveredNewWorldIslands().size() - 1) w.print(", ");
+                        }
+                        w.println("]");
+                        w.println("      }");
                     w.print("    }");
                     w.println(i < state.players().size() - 1 ? "," : "");
                 }
