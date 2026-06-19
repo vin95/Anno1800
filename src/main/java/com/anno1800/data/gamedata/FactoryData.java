@@ -281,10 +281,10 @@ public class FactoryData {
             2
         ));
         
-        PRODUCER_CONFIGS.put(COFFEE_ROASTERS_RED, new Factory(
-            COFFEE_ROASTERS_RED,
+        PRODUCER_CONFIGS.put(COFFEE_ROASTER_RED, new Factory(
+            COFFEE_ROASTER_RED,
             new Goods[]{COFFEE_BEANS, COAL},
-            Producers.COFFEE_ROASTERS_RED.getProduces(),
+            Producers.COFFEE_ROASTER_RED.getProduces(),
             3,
             2
         ));

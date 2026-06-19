@@ -1,0 +1,715 @@
+{
+  "timestamp": "2026-06-19T21:27:59.057791500Z",
+  "round": 83,
+  "currentPlayer": 0,
+  "label": "action_254",
+  "executedAction": "Carneval[]",
+  "executedByPlayer": "Player 1",
+  "executedActionDetails": null,
+  "agentStrategyName": "adaptiveResidentStrategy",
+  "agentMainActionScores": [
+    {
+      "mainAction": "Carneval",
+      "score": 4.0006,
+      "selected": true,
+      "bestActionVariant": "Carneval[]"
+    },
+    {
+      "mainAction": "ActivateReward",
+      "score": -999.9992,
+      "selected": false,
+      "bestActionVariant": "ActivateReward[reward=NewResidents[amount=1, populationLevel=4]]"
+    },
+    {
+      "mainAction": "ViewResidentCards",
+      "score": -1499.9999,
+      "selected": false,
+      "bestActionVariant": "ViewResidentCards[]"
+    }
+  ],
+  "objectiveCards": [
+    {
+      "title": "Engineer Master",
+      "description": "6 VP per Factory: Light Bulbs, Sewing Machines"
+    },
+    {
+      "title": "Expedition Master",
+      "description": "Most Expedition Cards: 1st place = 10 VP, 2nd place = 4 VP"
+    },
+    {
+      "title": "Investment Tycoon",
+      "description": "Most Investors (Level 5): 1st place = 10 VP, 2nd place = 4 VP"
+    },
+    {
+      "title": "Single Island Master",
+      "description": "18 VP if you have at most 1 Old World Island"
+    },
+    {
+      "title": "New World Importer",
+      "description": "6 VP per Factory: Chocolate, Coffee, Cigars, Rum"
+    }
+  ],
+  "boardState": {
+    "factories": {
+      "cotton_mill_blue": 2,
+      "champagne_cellar_red": 2,
+      "sewing_machine_factory_red": 2,
+      "cigar_factory_red": 1,
+      "cannons_factory_red": 2,
+      "sailmakers_blue": 0,
+      "glass_maker_blue": 0,
+      "cotton_mill_red": 1,
+      "sawmill_blue": 0,
+      "coffee_roaster_red": 2,
+      "bakery_blue": 0,
+      "spectacle_factory_red": 2,
+      "bicycle_factory_purple": 2,
+      "coal_mine_blue": 0,
+      "dynamite_factory_red": 2,
+      "slaughterhouse_blue": 0,
+      "framework_knitters_blue": 0,
+      "rum_distillery_red": 2,
+      "window_maker_red": 2,
+      "steel_works_blue": 0,
+      "clockmakers_red": 2,
+      "brick_factory_blue": 0,
+      "brewery_blue": 1,
+      "fur_dealer_red": 2,
+      "car_factory_purple": 2,
+      "warehouse_blue": 0,
+      "light_bulb_factory_purple": 2,
+      "heavy_weapons_factory_purple": 2,
+      "distillery_blue": 0,
+      "cannery_blue": 0,
+      "motor_assembly_purple": 2,
+      "soap_factory_blue": 0,
+      "gramophone_factory_purple": 2,
+      "brass_foundry_red": 0,
+      "chocolate_factory_red": 1
+    },
+    "shipyards": {
+      "level1": 0,
+      "level2": 2,
+      "level3": 4
+    },
+    "ships": {
+      "tradeShips": {
+        "level1": 0,
+        "level2": 5,
+        "level3": 6
+      },
+      "explorerShips": {
+        "level1": 0,
+        "level2": 5,
+        "level3": 6
+      }
+    },
+    "cards": {
+      "residentStack1": 2,
+      "residentStack2": 22,
+      "residentStack3": 0,
+      "totalResidentCards": 24,
+      "expeditionCards": 0
+    },
+    "islands": {
+      "oldWorldIslands": 3,
+      "newWorldIslands": 0
+    },
+    "populationPool": {
+      "farmers": 0,
+      "workers": 0,
+      "artisans": 0,
+      "engineers": 17,
+      "investors": 15
+    },
+    "resources": {
+      "goldPool": 997,
+      "tradeChips": 983,
+      "explorerChips": 989
+    }
+  },
+  "players": [
+    {
+      "name": "Player 1",
+      "position": 2,
+      "tiles": {
+        "landtiles": ["sawmill_green", "grain_farm_green", "potato_farm_green", "pig_farm_green", "sheep_farm_green", "coal_mine_red", "brick_factory_red", "warehouse_red", "steel_works_red", "sailmakers_red", "bakery_blue", "warehouse_blue", "warehouse_blue", "glass_maker_blue", "soap_factory_blue"],
+        "coasttiles": ["shipyard_lv1", "cannery_blue", "sawmill_blue", "sailmakers_blue", "coal_mine_blue", "brick_factory_blue", "steel_works_blue", "slaughterhouse_blue", "brass_foundry_red", "framework_knitters_blue", "chocolate_factory_red"],
+        "seatiles": ["tradeShip_lv1", "tradeShip_lv1", "explorerShip_lv1", "tradeShip_lv1", "tradeShip_lv1", "tradeShip_lv1", "explorerShip_lv1", "explorerShip_lv1", "explorerShip_lv1", "empty"]
+      },
+      "buildings": {
+        "factories": 25,
+        "shipyards": 1
+      },
+      "ships": {
+        "tradeShips": 5,
+        "explorerShips": 4
+      },
+      "resources": {
+        "gold": 50,
+        "tradeChips": 5,
+        "explorerChips": 4
+      },
+      "cards": {
+        "residentCards": 11,
+        "residentCardDetails": [
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "3 Trade Points"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Steel Bars",
+              "Cigars",
+              "Highbikes"
+            ],
+            "reward": "2 Expedition Cards"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Snaps",
+              "Pocketwatches",
+              "Highbikes"
+            ],
+            "reward": "Discard 2 ResidentCard(s)"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Bricks",
+              "Gramophones",
+              "Coffee"
+            ],
+            "reward": "6 Trade Points"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "3 Trade Points"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Cotton Fabric",
+              "Soap",
+              "Trade Chip"
+            ],
+            "reward": "Discard 2 ResidentCard(s)"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Glasses",
+              "Cotton Fabric",
+              "Trade Chip"
+            ],
+            "reward": "2 Expedition Cards"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Cotton Fabric",
+              "Bread",
+              "Trade Chip"
+            ],
+            "reward": "Discard 2 ResidentCard(s)"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Cotton Fabric",
+              "Soap",
+              "Trade Chip"
+            ],
+            "reward": "2 Expedition Cards"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Cotton Fabric",
+              "Canned Meat",
+              "Trade Chip"
+            ],
+            "reward": "2 Expedition Cards"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Pocketwatches",
+              "Cotton Fabric",
+              "Trade Chip"
+            ],
+            "reward": "Discard 2 ResidentCard(s)"
+          }
+        ]
+      },
+      "residents": {
+        "total": 18,
+        "byLevel": {
+          "level1": 1,
+          "level2": 8,
+          "level3": 9,
+          "level4": 0,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 0,
+          "fit": 18,
+          "exhausted": 0
+        },
+        "byStatusByLevel": {
+          "fit": {
+            "level1": 1,
+            "level2": 8,
+            "level3": 9,
+            "level4": 0,
+            "level5": 0
+          },
+          "working": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          },
+          "exhausted": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          }
+        }
+      }
+      ,
+      "discoveredIslands": {
+        "oldWorld": ["old[land=2,coast=2,sea=2,reward=ExpeditionCards[]]", "old[land=1,coast=2,sea=2,reward=factory,factories=WAREHOUSE_BLUE]", "old[land=2,coast=2,sea=1,reward=explorerShip_lv1]"],
+        "newWorld": ["new[plantations=COTTON_PLANTATION|CACAO_PLANTATION|RUBBER_PLANTATION]", "new[plantations=COTTON_PLANTATION|SUGAR_PLANTATION|COFFEE_PLANTATION]"]
+      }
+    },
+    {
+      "name": "Player 2",
+      "position": 3,
+      "tiles": {
+        "landtiles": ["sawmill_green", "grain_farm_green", "potato_farm_green", "pig_farm_green", "sheep_farm_green", "coal_mine_red", "brick_factory_red", "warehouse_red", "steel_works_red", "sailmakers_red", "cotton_mill_red", "brick_factory_blue", "steel_works_blue", "glass_maker_blue", "sailmakers_blue"],
+        "coasttiles": ["shipyard_lv1", "shipyard_lv1", "shipyard_lv1", "shipyard_lv1", "shipyard_lv1", "warehouse_blue", "distillery_blue", "shipyard_lv2", "shipyard_lv2", "shipyard_lv2", "shipyard_lv2"],
+        "seatiles": ["tradeShip_lv1", "tradeShip_lv1", "explorerShip_lv1", "explorerShip_lv1", "explorerShip_lv1", "tradeShip_lv2", "explorerShip_lv2", "empty", "empty", "empty", "empty"]
+      },
+      "buildings": {
+        "factories": 17,
+        "shipyards": 9
+      },
+      "ships": {
+        "tradeShips": 3,
+        "explorerShips": 4
+      },
+      "resources": {
+        "gold": 48,
+        "tradeChips": 0,
+        "explorerChips": 5
+      },
+      "cards": {
+        "residentCards": 16,
+        "residentCardDetails": [
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Work Clothes",
+              "Snaps"
+            ],
+            "reward": "4 Gold"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Soap",
+              "Beer"
+            ],
+            "reward": "4 Gold"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Beer",
+              "Cigars",
+              "Cars"
+            ],
+            "reward": "3x Upgrade Stufe 2 -> 3"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Canned Meat",
+              "Pocketwatches",
+              "Glasses"
+            ],
+            "reward": "2 Expedition Cards"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Soap",
+              "Coffee",
+              "Cars"
+            ],
+            "reward": "3x Upgrade Stufe 2 -> 3"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Coats",
+              "Sausages",
+              "Trade Chip"
+            ],
+            "reward": "2 Expedition Cards"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Gramophones",
+              "Cotton Fabric",
+              "Trade Chip"
+            ],
+            "reward": "2 Expedition Cards"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Beer",
+              "Cotton Fabric",
+              "Trade Chip"
+            ],
+            "reward": "6 Trade Points"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip",
+              "Exploration Chip",
+              "Exploration Chip",
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "Free Goods Choice [Cacao, Coffee Beans, Rubber, Sugarcane, Tobacco]"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Champagne",
+              "Coffee",
+              "Gramophones"
+            ],
+            "reward": "Discard 2 ResidentCard(s)"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Cars",
+              "Cotton Fabric",
+              "Trade Chip"
+            ],
+            "reward": "Discard 2 ResidentCard(s)"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Soap",
+              "Cotton Fabric",
+              "Trade Chip"
+            ],
+            "reward": "2 Expedition Cards"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Canned Meat",
+              "Sewing Machines",
+              "Trade Chip"
+            ],
+            "reward": "Extra Action"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip",
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "2 Gold + 4 Trade Points"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip",
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "2 Gold + 4 Trade Points"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Cotton Fabric",
+              "Snaps",
+              "Trade Chip"
+            ],
+            "reward": "Extra Action"
+          }
+        ]
+      },
+      "residents": {
+        "total": 20,
+        "byLevel": {
+          "level1": 2,
+          "level2": 12,
+          "level3": 6,
+          "level4": 0,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 0,
+          "fit": 20,
+          "exhausted": 0
+        },
+        "byStatusByLevel": {
+          "fit": {
+            "level1": 2,
+            "level2": 12,
+            "level3": 6,
+            "level4": 0,
+            "level5": 0
+          },
+          "working": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          },
+          "exhausted": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          }
+        }
+      }
+      ,
+      "discoveredIslands": {
+        "oldWorld": ["old[land=2,coast=2,sea=2,reward=NewResidents[amount=1, populationLevel=3]]", "old[land=2,coast=2,sea=2,reward=NewResidents[amount=2, populationLevel=2]]", "old[land=1,coast=2,sea=2,reward=factory,factories=SAILMAKERS_BLUE]"],
+        "newWorld": ["new[plantations=COTTON_PLANTATION|TOBACCO_PLANTATION|RUBBER_PLANTATION]", "new[plantations=COTTON_PLANTATION|RUBBER_PLANTATION|SUGAR_PLANTATION]", "new[plantations=COTTON_PLANTATION|COFFEE_PLANTATION|RUBBER_PLANTATION]"]
+      }
+    },
+    {
+      "name": "Player 3",
+      "position": 1,
+      "tiles": {
+        "landtiles": ["sawmill_green", "grain_farm_green", "potato_farm_green", "pig_farm_green", "sheep_farm_green", "coal_mine_red", "brick_factory_red", "warehouse_red", "steel_works_red", "sailmakers_red", "steel_works_blue", "brick_factory_blue", "brass_foundry_red", "framework_knitters_blue"],
+        "coasttiles": ["shipyard_lv1", "sawmill_blue", "cannery_blue", "sailmakers_blue", "coal_mine_blue", "bakery_blue", "distillery_blue", "brewery_blue", "slaughterhouse_blue", "soap_factory_blue", "cigar_factory_red"],
+        "seatiles": ["tradeShip_lv1", "tradeShip_lv1", "explorerShip_lv1", "tradeShip_lv1", "tradeShip_lv1", "tradeShip_lv1", "explorerShip_lv1", "explorerShip_lv1", "empty", "empty", "empty"]
+      },
+      "buildings": {
+        "factories": 24,
+        "shipyards": 1
+      },
+      "ships": {
+        "tradeShips": 5,
+        "explorerShips": 3
+      },
+      "resources": {
+        "gold": 61,
+        "tradeChips": 8,
+        "explorerChips": 3
+      },
+      "cards": {
+        "residentCards": 14,
+        "residentCardDetails": [
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "3 Trade Points"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Rum",
+              "Light Bulbs",
+              "Gramophones"
+            ],
+            "reward": "Extra Action"
+          },
+          {
+            "populationLevel": 5,
+            "needs": [
+              "Beer",
+              "Light Bulbs",
+              "Sewing Machines"
+            ],
+            "reward": "Extra Action"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "3 Trade Points"
+          },
+          {
+            "populationLevel": 2,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "3 Trade Points"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Canned Meat",
+              "Cotton Fabric",
+              "Trade Chip"
+            ],
+            "reward": "Extra Action"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Cotton Fabric",
+              "Sausages",
+              "Trade Chip"
+            ],
+            "reward": "Extra Action"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Cotton Fabric",
+              "Beer",
+              "Trade Chip"
+            ],
+            "reward": "2 Expedition Cards"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Work Clothes",
+              "Big Berta",
+              "Trade Chip"
+            ],
+            "reward": "3 Exploration Points"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Bread",
+              "Cotton Fabric",
+              "Trade Chip"
+            ],
+            "reward": "2 Expedition Cards"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Work Clothes",
+              "Pocketwatches",
+              "Trade Chip"
+            ],
+            "reward": "Extra Action"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip",
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "2 Gold + 4 Trade Points"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Exploration Chip",
+              "Exploration Chip",
+              "Exploration Chip",
+              "Exploration Chip"
+            ],
+            "reward": "2 Gold + 4 Trade Points"
+          },
+          {
+            "populationLevel": 7,
+            "needs": [
+              "Highbikes",
+              "Snaps",
+              "Trade Chip"
+            ],
+            "reward": "Extra Action"
+          }
+        ]
+      },
+      "residents": {
+        "total": 20,
+        "byLevel": {
+          "level1": 1,
+          "level2": 6,
+          "level3": 10,
+          "level4": 3,
+          "level5": 0
+        },
+        "byStatus": {
+          "onBoard": 0,
+          "working": 0,
+          "fit": 20,
+          "exhausted": 0
+        },
+        "byStatusByLevel": {
+          "fit": {
+            "level1": 1,
+            "level2": 6,
+            "level3": 10,
+            "level4": 3,
+            "level5": 0
+          },
+          "working": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          },
+          "exhausted": {
+            "level1": 0,
+            "level2": 0,
+            "level3": 0,
+            "level4": 0,
+            "level5": 0
+          }
+        }
+      }
+      ,
+      "discoveredIslands": {
+        "oldWorld": ["old[land=1,coast=2,sea=2,reward=factory,factories=STEEL_WORKS_BLUE]", "old[land=1,coast=2,sea=2,reward=factory,factories=BRICK_FACTORY_BLUE]", "old[land=2,coast=2,sea=2,reward=NewResidents[amount=2, populationLevel=1]]"],
+        "newWorld": ["new[plantations=COTTON_PLANTATION|CACAO_PLANTATION|TOBACCO_PLANTATION]", "new[plantations=COTTON_PLANTATION|COFFEE_PLANTATION|TOBACCO_PLANTATION]", "new[plantations=COTTON_PLANTATION|CACAO_PLANTATION|SUGAR_PLANTATION]"]
+      }
+    }
+  ]
+}

@@ -1809,8 +1809,8 @@ public class TerminalGameUI {
      * Main entry point for terminal game.
      * 
      * Supports CLI args for scripted/debug mode:
-     *   debug [seed] [numPlayers] [maxRounds]
-     *   Example: debug 42 3 200
+    *   debug [seed] [numPlayers] [maxRounds]
+    *   Example: debug 42 3 100
      * If no args are given, interactive mode is used.
      */
     public static void main(String[] args) {
@@ -1818,7 +1818,7 @@ public class TerminalGameUI {
         if (args.length > 0 && args[0].equalsIgnoreCase("debug")) {
             long seed = args.length > 1 ? Long.parseLong(args[1]) : System.currentTimeMillis();
             int numPlayers = args.length > 2 ? Integer.parseInt(args[2]) : 3;
-            int maxRounds = args.length > 3 ? Integer.parseInt(args[3]) : 200;
+            int maxRounds = args.length > 3 ? Integer.parseInt(args[3]) : 100;
             System.out.println("=".repeat(80));
             System.out.println("DEBUG MODE - Seeded Game");
             System.out.printf("  Players: %d | Seed: %d | Max rounds: %d%n", numPlayers, seed, maxRounds);

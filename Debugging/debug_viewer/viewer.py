@@ -1811,7 +1811,7 @@ def render_web_view(state_dir: Any, entries: list[dict[str, Any]], html_output_p
         {"label": "Reihe 3 — Fortgeschrittene Fabriken + Expeditionsschiffe", "factories": [
             {"id": "cotton_mill_red",          "path": "factories/cotton_mill_red_blueprint.png",          "name": "Baumwollmühle (rot)",   "initial": 0},
             {"id": "cotton_mill_blue",         "path": "factories/cotton_mill_blue_blue_blueprint.png",    "name": "Baumwollmühle (blau)",  "initial": 0},
-            {"id": "coffee_rosters_red",       "path": "factories/coffee_rosters_red_blueprint.png",       "name": "Kaffeerösterei",        "initial": 0},
+            {"id": "coffee_roaster",         "path": "factories/coffee_roaster_red_blueprint.png",       "name": "Kaffeerösterei",        "initial": 0},
             {"id": "slaughterhouse_blue",      "path": "factories/slaughterhouse_blue_blueprint.png",      "name": "Schlachthaus",          "initial": 0},
             {"id": "soap_factory_blue",        "path": "factories/soap_factory_blue_blueprint.png",        "name": "Seifenfabrik",          "initial": 0},
             {"id": "fur_dealer_red",           "path": "factories/fur_dealer_red_blueprint.png",           "name": "Pelzhändler",           "initial": 0},

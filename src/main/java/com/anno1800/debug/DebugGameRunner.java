@@ -82,13 +82,13 @@ public class DebugGameRunner {
     /**
      * Hauptmethode – wird vom Gradle-Task debugGame aufgerufen.
      *
-     * Args: [seed] [numPlayers] [maxRounds]
-     * Defaults: seed=42, numPlayers=3, maxRounds=200
+    * Args: [seed] [numPlayers] [maxRounds]
+    * Defaults: seed=42, numPlayers=3, maxRounds=100
      */
     public static void main(String[] args) {
         long seed       = args.length > 0 ? Long.parseLong(args[0]) : 42L;
         int numPlayers  = args.length > 1 ? Integer.parseInt(args[1]) : 3;
-        int maxRounds   = args.length > 2 ? Integer.parseInt(args[2]) : 200;
+        int maxRounds   = args.length > 2 ? Integer.parseInt(args[2]) : 100;
 
         System.out.println("=".repeat(72));
         System.out.println("  Anno 1800 - Debug Game (Agent-Simulation)");

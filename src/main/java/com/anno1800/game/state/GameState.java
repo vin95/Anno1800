@@ -323,8 +323,44 @@ public record GameState(
                     StringBuilder s = new StringBuilder();
                     s.append("old[land=").append(isl.getFreeLandTiles())
                      .append(",coast=").append(isl.getFreeCoastTiles())
-                     .append(",sea=").append(isl.getFreeSeaTiles())
-                     .append(",reward=").append(isl.getReward() == null ? "none" : isl.getReward().toString());
+                     .append(",sea=").append(isl.getFreeSeaTiles());
+
+                    // Determine reward description: prefer ships (if present), otherwise
+                    // a sanitized reward description without raw gold amounts.
+                    String rewardDesc = "none";
+                    // Ships on island (explicit ship reward)
+                    if (isl.getTradeShips() != null && isl.getTradeShips().length > 0) {
+                        rewardDesc = java.util.Arrays.stream(isl.getTradeShips())
+                            .map(ts -> "tradeShip_lv" + ts.getLevel())
+                            .collect(java.util.stream.Collectors.joining("|"));
+                    } else if (isl.getExplorerShips() != null && isl.getExplorerShips().length > 0) {
+                        rewardDesc = java.util.Arrays.stream(isl.getExplorerShips())
+                            .map(es -> "explorerShip_lv" + es.getLevel())
+                            .collect(java.util.stream.Collectors.joining("|"));
+                    } else {
+                        var r = isl.getReward();
+                        if (r == null) {
+                            // If there's no explicit Reward object but the island contains factories,
+                            // present a generic factory reward marker so the UI can highlight it.
+                            if (isl.getFactories() != null && isl.getFactories().length > 0) {
+                                rewardDesc = "factory";
+                            } else {
+                                rewardDesc = "none";
+                            }
+                        } else if (r instanceof com.anno1800.game.rewards.Reward.Gold) {
+                            // Old World islands must not report gold as a reward
+                            rewardDesc = "none";
+                        } else if (r instanceof com.anno1800.game.rewards.Reward.GoldAndTradePoints) {
+                            // treat combined gold+tradepoints as none for island descriptions
+                            rewardDesc = "none";
+                        } else {
+                            // other reward types: keep toString() (e.g., NewResidents, ExpeditionCards)
+                            rewardDesc = r.toString();
+                        }
+                    }
+
+                    s.append(",reward=").append(rewardDesc);
+
                     if (isl.getFactories() != null && isl.getFactories().length > 0) {
                         s.append(",factories=");
                         for (int fi = 0; fi < isl.getFactories().length; fi++) {

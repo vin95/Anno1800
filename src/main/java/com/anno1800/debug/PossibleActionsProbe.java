@@ -51,7 +51,7 @@ public class PossibleActionsProbe {
         long seed = args.length > 0 ? Long.parseLong(args[0]) : 42L;
         int targetActionNumber = args.length > 1 ? Integer.parseInt(args[1]) : 7;
         int numPlayers = 3;
-        int maxRounds = 200;
+        int maxRounds = 100;
 
         Game game = new Game(numPlayers, seed, maxRounds);
         ActionGenerator actionGenerator = new ActionGenerator();

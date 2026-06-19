@@ -56,11 +56,11 @@ public class OldWorldIslandData {
         );
         
         islands.add(
-            new OldWorldIsland(
+                new OldWorldIsland(
                 1,
                 2,
                 2,
-                new Reward.Gold(0),
+                null,
                 new Factory[]{FactoryData.getFactory(WAREHOUSE_BLUE)},
                 new Shipyard[]{},
                 new TradeShip[]{},
@@ -69,11 +69,11 @@ public class OldWorldIslandData {
         );
 
         islands.add(
-            new OldWorldIsland(
+                new OldWorldIsland(
                 1,
                 2,
                 2,
-                new Reward.Gold(0),
+                null,
                 new Factory[]{FactoryData.getFactory(BRICK_FACTORY_BLUE)},
                 new Shipyard[]{},
                 new TradeShip[]{},
@@ -82,11 +82,11 @@ public class OldWorldIslandData {
         );
 
         islands.add(
-            new OldWorldIsland(
+                new OldWorldIsland(
                 1,
                 2,
                 2,
-                new Reward.Gold(0),
+                null,
                 new Factory[]{FactoryData.getFactory(COAL_MINE_BLUE)},
                 new Shipyard[]{},
                 new TradeShip[]{},
@@ -95,11 +95,11 @@ public class OldWorldIslandData {
         );
 
         islands.add(
-            new OldWorldIsland(
+                new OldWorldIsland(
                 1,
                 2,
                 2,
-                new Reward.Gold(0),
+                null,
                 new Factory[]{FactoryData.getFactory(STEEL_WORKS_BLUE)},
                 new Shipyard[]{},
                 new TradeShip[]{},
@@ -108,11 +108,11 @@ public class OldWorldIslandData {
         );
 
         islands.add(
-            new OldWorldIsland(
+                new OldWorldIsland(
                 1,
                 2,
                 2,
-                new Reward.Gold(0),
+                null,
                 new Factory[]{FactoryData.getFactory(SAILMAKERS_BLUE)},
                 new Shipyard[]{},
                 new TradeShip[]{},
@@ -125,7 +125,7 @@ public class OldWorldIslandData {
                 2,
                 2,
                 1,
-                new Reward.Gold(0),
+                null,
                 new Factory[]{},
                 new Shipyard[]{},
                 new TradeShip[]{new TradeShip(1)},
@@ -138,7 +138,7 @@ public class OldWorldIslandData {
                 2,
                 2,
                 1,
-                new Reward.Gold(0),
+                null,
                 new Factory[]{},
                 new Shipyard[]{},
                 new TradeShip[]{},
@@ -151,7 +151,7 @@ public class OldWorldIslandData {
                 2,
                 1,
                 2,
-                new Reward.Gold(0),
+                null,
                 new Factory[]{},
                 new Shipyard[]{new Shipyard(1)},
                 new TradeShip[]{},

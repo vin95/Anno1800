@@ -272,6 +272,36 @@ button:disabled {
     image-rendering: auto;
 }
 
+/* Utility image classes used by viewer.js (moved from inline styles) */
+.img-fit {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.img-margin-right { margin-right: 6px; }
+
+/* Top error banner (used by global error handler) */
+.top-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    background: #b91c1c;
+    color: #fff;
+    padding: 16px 20px;
+    font-size: 14px;
+    font-family: monospace;
+    white-space: pre-wrap;
+}
+
+/* Small helpers for margins previously set inline in JS */
+.resident-title { margin-top: 12px; }
+.action-header { margin: 8px 0 4px; }
+.resource-row--spaced { margin-top: 7px; }
+
 /* Kleine Ressourcen-Icons (Gold, Chips) */
 .icon-inline img.resource-small {
     width: 1.58em;
@@ -392,13 +422,11 @@ pre {
 /* Visual Layer: Container für das gesamte Spielfeld */
 .visual-layer {
     display: grid;
-    gap: 10px;
 }
 
 /* Game Layout: 3x2 Grid für Mainboard und Player-Layers */
 .game-layout {
     display: grid;
-    gap: 10px;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: minmax(380px, auto) minmax(560px, auto) minmax(380px, auto);
     grid-template-areas:
@@ -902,8 +930,9 @@ body.stack-count-hidden .stack-count {
     border: 1px dashed #32465f;
     border-radius: 10px;
     display: grid;
-    grid-template-columns: 0.7fr 1fr 0.7fr; /* small left + main island + small right */
-    align-items: center;
+    grid-template-columns: 0.82fr 1fr 0.82fr; /* small left + main island + small right */
+    /* align small tiles to the bottom of the layout */
+    align-items: end;
     background: rgba(15, 23, 42, 0.52);
 }
 
@@ -993,15 +1022,41 @@ body.stack-count-hidden .stack-count {
 }
 
 .island-small-tile {
-    aspect-ratio: 4 / 3;
     border: 1px solid #3b4f6a;
     border-radius: 8px;
     background: linear-gradient(160deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.9));
-    display: grid;
-    place-items: center;
+    /* stack two sub-tiles vertically: top = new world, bottom = old world */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
     color: #94a3b8;
     font-size: 0.65rem;
-    padding: 4px;
+    height: 100%;
+}
+
+/* Sub-tile inside small tile (top/bottom) */
+.island-sub-tile {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.island-sub-old {
+    height: 60%;
+}
+
+.island-sub-new {
+    height: 40%;
+}
+
+/* Images inside sub-tiles should scale to fit their half of the tile */
+.island-sub-tile img {
+    max-width: 65%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
 }
 
 .layer-section {

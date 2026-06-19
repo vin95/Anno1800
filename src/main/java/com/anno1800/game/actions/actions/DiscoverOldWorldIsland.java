@@ -5,6 +5,7 @@ import com.anno1800.game.engine.Game;
 import com.anno1800.game.player.Player;
 import com.anno1800.game.player.PlayerBoard;
 import com.anno1800.game.tiles.OldWorldIsland;
+import com.anno1800.game.rewards.Reward;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -59,8 +60,13 @@ public class DiscoverOldWorldIsland {
         if (chosenIsland != null) {
             playerBoard.addOldWorldIsland(chosenIsland);
 
-            // Activate the reward of the chosen island
-            ActivateReward.activateReward(player, chosenIsland.getReward(), game);
+            // Activate the reward of the chosen island (if any)
+            Reward reward = chosenIsland.getReward();
+            if (reward != null) {
+                ActivateReward.activateReward(player, reward, game);
+            } else {
+                System.out.println("Chosen OldWorldIsland has no reward to activate.");
+            }
         }
     }
 

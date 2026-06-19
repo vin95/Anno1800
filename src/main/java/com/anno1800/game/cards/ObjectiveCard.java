@@ -373,7 +373,7 @@ public sealed interface ObjectiveCard {
         
         private static final Set<Producers> COUNTED_FACTORIES = Set.of(
             Producers.CHOCOLATE_FACTORY_RED,
-            Producers.COFFEE_ROASTERS_RED,
+            Producers.COFFEE_ROASTER_RED,
             Producers.CIGAR_FACTORY_RED,
             Producers.RUM_DISTILLERY_RED
         );

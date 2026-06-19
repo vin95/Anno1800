@@ -827,20 +827,42 @@ public class PlayerBoard {
     public void addOldWorldIsland(OldWorldIsland island) {
         // Increment island count
         numOldWorldIslands++;
-        
-        // Add tiles from the island to the player's available tiles
-        landTiles += island.getFreeLandTiles();
-        coastTiles += island.getFreeCoastTiles();
-        seaTiles += island.getFreeSeaTiles();
-        
-        // Add buildings from the island to the player board
-        addIslandFactories(island.getFactories());
-        addIslandShipyards(island.getShipyards());
-        addIslandTradeShips(island.getTradeShips());
-        addIslandExplorerShips(island.getExplorerShips());
+        // Add tiles from the island and resize arrays; get previous bases
+        int[] bases = reserveTilesAndResize(
+            island.getFreeLandTiles(),
+            island.getFreeCoastTiles(),
+            island.getFreeSeaTiles()
+        );
+        int oldLandBase = bases[0];
+        int oldCoastBase = bases[1];
+
+        // Add buildings from the island to the player board using the previous bases
+        addIslandFactories(island.getFactories(), oldLandBase);
+        addIslandShipyards(island.getShipyards(), oldLandBase, oldCoastBase);
+        addIslandTradeShips(island.getTradeShips(), oldLandBase, oldCoastBase);
+        addIslandExplorerShips(island.getExplorerShips(), oldLandBase, oldCoastBase);
 
         // remember the actual island object for serialization/debugging
         ownedOldWorldIslands.add(island);
+    }
+
+    /**
+     * Reserve additional tiles and resize internal tile arrays.
+     * Returns an int[2] with the previous bases: {oldLandBase, oldCoastBase}.
+     */
+    private int[] reserveTilesAndResize(int addLand, int addCoast, int addSea) {
+        int oldLandBase = landTiles;
+        int oldCoastBase = coastTiles;
+
+        landTiles += addLand;
+        coastTiles += addCoast;
+        seaTiles += addSea;
+
+        landTileTypes = Arrays.copyOf(landTileTypes, landTiles);
+        coastTileTypes = Arrays.copyOf(coastTileTypes, coastTiles);
+        seaTileTypes = Arrays.copyOf(seaTileTypes, seaTiles);
+
+        return new int[] { oldLandBase, oldCoastBase };
     }
 
     /**
@@ -879,19 +901,26 @@ public class PlayerBoard {
     /**
      * Helper method to add factories from an island to the player board.
      */
-    private void addIslandFactories(Factory[] islandFactories) {
+    private void addIslandFactories(Factory[] islandFactories, int landBase) {
         for (Factory factory : islandFactories) {
-            addFactory(factory);
+            ensureFactoryCapacity();
+            factories[numFactories] = factory;
+            // claim a local land slot
+            String typeName = factory.getType().name().toLowerCase();
+            int localIdx = claimFreeLandTile(typeName);
+            factory.setTileIndex(landBase + localIdx);
+            numFactoriesOnLand++;
+            numFactories++;
         }
     }
 
     /**
      * Helper method to add shipyards from an island to the player board.
      */
-    private void addIslandShipyards(Shipyard[] islandShipyards) {
+    private void addIslandShipyards(Shipyard[] islandShipyards, int landBase, int coastBase) {
         for (Shipyard shipyard : islandShipyards) {
-            int coastIdx = claimFreeCoastTile("shipyard_lv" + shipyard.getLevel());
-            shipyard.setTileIndex(landTiles + coastIdx);
+            int localCoastIdx = claimFreeCoastTile("shipyard_lv" + shipyard.getLevel());
+            shipyard.setTileIndex(landBase + localCoastIdx);
             shipyards.add(shipyard);
             numShipyards++;
         }
@@ -900,10 +929,10 @@ public class PlayerBoard {
     /**
      * Helper method to add trade ships from an island to the player board.
      */
-    private void addIslandTradeShips(TradeShip[] islandTradeShips) {
+    private void addIslandTradeShips(TradeShip[] islandTradeShips, int landBase, int coastBase) {
         for (TradeShip tradeShip : islandTradeShips) {
-            int seaIdx = claimFreeSeaTile("tradeShip_lv" + tradeShip.getLevel());
-            tradeShip.setTileIndex(landTiles + coastTiles + seaIdx);
+            int localSeaIdx = claimFreeSeaTile("tradeShip_lv" + tradeShip.getLevel());
+            tradeShip.setTileIndex(landBase + coastBase + localSeaIdx);
             tradeShips.add(tradeShip);
         }
     }
@@ -911,10 +940,10 @@ public class PlayerBoard {
     /**
      * Helper method to add explorer ships from an island to the player board.
      */
-    private void addIslandExplorerShips(ExplorerShip[] islandExplorerShips) {
+    private void addIslandExplorerShips(ExplorerShip[] islandExplorerShips, int landBase, int coastBase) {
         for (ExplorerShip explorerShip : islandExplorerShips) {
-            int seaIdx = claimFreeSeaTile("explorerShip_lv" + explorerShip.getLevel());
-            explorerShip.setTileIndex(landTiles + coastTiles + seaIdx);
+            int localSeaIdx = claimFreeSeaTile("explorerShip_lv" + explorerShip.getLevel());
+            explorerShip.setTileIndex(landBase + coastBase + localSeaIdx);
             explorerShips.add(explorerShip);
         }
     }

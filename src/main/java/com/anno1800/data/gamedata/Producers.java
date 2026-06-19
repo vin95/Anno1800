@@ -49,7 +49,7 @@ public enum Producers {
     CLOCKMAKERS_RED("Clockmakers", POCKETWATCHES),
     SEWING_MACHINE_FACTORY_RED("Sewing Machine Factory", SEWING_MACHINES),
     COTTON_MILL_RED("Cotton Mill", COTTON_FABRIC),
-    COFFEE_ROASTERS_RED("Coffee Roasters", COFFEE),
+    COFFEE_ROASTER_RED("Coffee Roaster", COFFEE),
     FUR_DEALER_RED("Fur Dealer", COATS),
     DYNAMITE_FACTORY_RED("Dynamite Factory", DYNAMITE),
     CANNONS_FACTORY_RED("Cannons Factory", CANNONS),

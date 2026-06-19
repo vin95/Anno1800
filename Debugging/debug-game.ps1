@@ -6,7 +6,7 @@
 
 $SEED       = 42       # Seed fuer reproduzierbares Spiel (beliebige Ganzzahl)
 $PLAYERS    = 3        # Anzahl Spieler (1-4)
-$MAX_ROUNDS = 200      # Maximale Rundenzahl bevor das Spiel abbricht
+$MAX_ROUNDS = 100      # Maximale Rundenzahl bevor das Spiel abbricht
 
 # =============================================================================
 # Ab hier nichts aendern

@@ -25,115 +25,94 @@ Wichtige Render-Funktionen:
         // Globaler Error-Handler für besseres Debugging
         window.onerror = function(msg, src, line, col, err) {
             const banner = document.createElement('div');
-            banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#b91c1c;color:#fff;padding:16px 20px;font-size:14px;font-family:monospace;white-space:pre-wrap;';
+            banner.classList.add('top-banner');
             banner.textContent = 'JS ERROR: ' + msg + ' | at ' + src + ':' + line + ':' + col + (err && err.stack ? ' | ' + err.stack : '');
             document.body.appendChild(banner);
             return false;
         };
 
-        /**
-         * Hilfsfunktion: Gibt einen Text-Wert zurück oder einen Fallback
-         * @param {any} value - Wert zum Anzeigen
-         * @param {string} fallback - Fallback wenn value leer/null/undefined
-         * @returns {string} Anzuzeigender Text
-         */
+        // (Removed temporary alias mappings for coffee image misspellings)
+
+        // Small helper: return meaningful text or a fallback string
         function text(value, fallback = "(nicht im JSON vorhanden)") {
             if (value === null || value === undefined || value === "") return fallback;
             return String(value);
         }
 
-                /**
-                 * Normalizes a key for matching factory IDs/JSON keys.
-                 * Removes non-alphanumeric characters and lowercases.
-                 * @param {string} s
-                 */
-                function normalizeKey(s) {
-                    return String(s || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
-                }
-
-                // simple Levenshtein distance for short tokens (used for tolerant matching)
-                function levenshtein(a, b) {
-                    if (a === b) return 0;
-                    const al = a.length, bl = b.length;
-                    if (al === 0) return bl;
-                    if (bl === 0) return al;
-                    const v0 = new Array(bl + 1);
-                    const v1 = new Array(bl + 1);
-                    for (let i = 0; i <= bl; i++) v0[i] = i;
-                    for (let i = 0; i < al; i++) {
-                        v1[0] = i + 1;
-                        for (let j = 0; j < bl; j++) {
-                            const cost = a[i] === b[j] ? 0 : 1;
-                            v1[j + 1] = Math.min(v1[j] + 1, v0[j + 1] + 1, v0[j] + cost);
-                        }
-                        for (let j = 0; j <= bl; j++) v0[j] = v1[j];
-                    }
-                    return v1[bl];
-                }
-
         /**
-         * Berechnet die verfügbaren Fabriken basierend auf dem aktuellen State.
-         * Subtrahiert bereits gebaute Fabriken von den initialen Stapeln.
-         * 
-         * @param {Object} state - Aktueller Game State
-         * @returns {Object} Dictionary mit verfügbaren Fabriken pro Typ
-         */
-        function calculateAvailableFactories(state, entry) {
-            // Read authoritative per-factory blueprint counts directly from the game state JSON.
-            // Java serializes these as state.boardState.factories = { "sawmill_blue": 2, ... }
-            const jsonFactories = state?.boardState?.factories || {};
+         * Hilfsfunktion: Gibt einen Text-Wert zurück oder einen Fallback
+         * @param {any} value - Wert zum Anzeigen
+         * @param {string} fallback - Fallback wenn value leer/null/undefined
+                    } else {
+                        // Use precomputed playerOldSummaries / playerNewSummaries from above
+                        try {
+                            let rendered = false;
+                            if (playerOldSummaries.length > 0) {
+                                const icons = [];
+                                for (let i = 0; i < Math.min(2, playerOldSummaries.length); i += 1) {
+                                    const summary = playerOldSummaries[i];
+                                    const manual = lookupIslandIconsFromSummary(summary || '');
+                                    if (manual && manual.length > 0) { icons.push(manual[0]); continue; }
+                                    const textSummary = String(summary || '').toLowerCase();
+                                    let matched = null;
 
-            // Build a normalization lookup from the JSON keys to FACTORY_LAYOUT entries
-            // so we can bridge JSON enum-based keys to the layout ids used in the UI.
-            // Map: normalized layoutId -> layoutId (from FACTORY_LAYOUT)
-            const jsonKeyToLayoutId = {};
-            for (const row of FACTORY_LAYOUT) {
-                for (const f of row.factories) {
-                    const layoutId = f.id || f.name || "";
-                    const normId = normalizeKey(layoutId);
-                    if (normId) jsonKeyToLayoutId[normId] = layoutId;
-                }
-            }
+                                    // If the summary explicitly lists factories, prefer mapping those to island icons.
+                                    try {
+                                        const m = textSummary.match(/factories=([^\]]+)/i);
+                                        if (m && m[1]) {
+                                            const factories = m[1].split('|').map(x => String(x || '').trim()).filter(Boolean);
+                                            for (const fRaw of factories) {
+                                                const f = fRaw.toLowerCase();
+                                                // direct ISLAND_ICON_MAP hit
+                                                if (HARDCODED_OLDWORLD_MAP[f]) { const cand = resolveIslandIcon(HARDCODED_OLDWORLD_MAP[f]); if (cand) { icons.push(cand); matched = true; break; } }
+                                                    // try base token (strip color suffix)
+                                                    const base = f.split('_')[0];
+                                                    if (HARDCODED_OLDWORLD_MAP[base]) { const cand2 = resolveIslandIcon(HARDCODED_OLDWORLD_MAP[base]); if (cand2) { icons.push(cand2); matched = true; break; } }
+                                            }
+                                            if (matched) continue;
+                                        }
+                                    } catch (e) {
+                                        // fall through to generic matching
+                                    }
 
-            // Build the available-by-id map using the JSON values, matched to layout ids.
-            const byId = {};
-            const normalizedById = {}; // normalized layoutId -> count
-            const nameLookup = {};
-            for (const [jsonKey, count] of Object.entries(jsonFactories)) {
-                if (typeof count !== 'number') continue;
-                const normKey = normalizeKey(jsonKey);
-                // attempt exact normalized match first
-                let layoutId = jsonKeyToLayoutId[normKey];
-                // fallback: substring match (json contains layout or layout contains json)
-                if (!layoutId) {
-                    for (const [layoutNorm, lid] of Object.entries(jsonKeyToLayoutId)) {
-                        if (!layoutNorm) continue;
-                        if (normKey.includes(layoutNorm) || layoutNorm.includes(normKey)) {
-                            layoutId = lid;
-                            break;
+                                    for (const candidate of orderedIconFileNames || []) {
+                                        const name = candidate.toLowerCase();
+                                        if (!name.includes('oldworldisland')) continue;
+                                        if (textSummary.includes(name) || textSummary.includes(name.replace(/[^a-z0-9]/g, '')) || (textSummary.includes('reward=') && matchesRewardCandidate(name, textSummary))) { matched = candidate; break; }
+                                    }
+                                    if (!matched) {
+                                        try { console.debug('No old-world icon matched (left small):', { summary: textSummary, manual: manual, candidates: (orderedIconFileNames||[]).filter(n=>n.toLowerCase().includes('oldworldisland')).slice(0,20) }); } catch(e){}
+                                    }
+                                    if (matched) icons.push(matched);
+                                }
+
+                                for (const u of icons) {
+                                    const img = document.createElement('img');
+                                    img.src = imageSrcFor(u) || (iconBaseUri + '/' + u);
+                                    img.alt = u;
+                                    img.classList.add('img-fit','img-margin-right');
+                                    rightTile.appendChild(img);
+                                }
+                                rendered = true;
+                            }
+
+                            if (!rendered && playerNewSummaries.length > 0) {
+                                const img = document.createElement('img');
+                                const src = imageSrcFor('newWorldIsland_base.png') || (iconBaseUri + '/newWorldIsland_base.png');
+                                img.src = src;
+                                img.alt = 'newWorldIsland_base.png';
+                                img.classList.add('img-fit');
+                                rightTile.appendChild(img);
+                                rendered = true;
+                            }
+
+                            if (!rendered) {
+                                rightTile.textContent = 'Neue Insel (R)';
+                            }
+                        } catch (e) {
+                            rightTile.textContent = 'Neue Insel (R)';
                         }
                     }
-                }
-                // fallback: small edit distance
-                if (!layoutId) {
-                    let best = {dist: Infinity, lid: null};
-                    for (const [layoutNorm, lid] of Object.entries(jsonKeyToLayoutId)) {
-                        if (!layoutNorm) continue;
-                        const d = levenshtein(normKey, layoutNorm);
-                        if (d < best.dist) {
-                            best.dist = d; best.lid = lid;
-                        }
-                    }
-                    if (best.dist <= 2 && best.lid) {
-                        layoutId = best.lid;
-                    }
-                }
-                if (!layoutId) layoutId = jsonKey;
-                byId[layoutId] = count;
-                nameLookup[normKey] = layoutId;
-                const normLayout = normalizeKey(layoutId);
-                if (normLayout) normalizedById[normLayout] = count;
-            }
 
             // friendly: display name (from FACTORY_LAYOUT.name) -> count
             const friendly = {};
@@ -254,43 +233,154 @@ Wichtige Render-Funktionen:
             return resolved ? `${iconBaseUri}/${resolved}` : null;
         }
 
-        // Manual island -> icon mapping.
-        // Edit these entries to explicitly map island summary substrings to icon filenames.
-        // Keys are matched case-insensitively by substring; values are arrays of icon filenames
-        // (relative names as used in the pictures folder). Example key: 'new[plantations=cotton'
+        // Manual island -> icon mapping (NEW-WORLD & generic hints only).
+        // Old-World icon mappings have been removed and must be provided
+        // explicitly via `HARDCODED_OLDWORLD_MAP` below.
+        // Keys are matched case-insensitively by substring; values are arrays
+        // of icon filenames (relative to the pictures folder).
         const ISLAND_ICON_MAP = {
-            // Beispiel‑Einträge — passe diese Dateinamen nach Bedarf an.
-            // Mapping für den OldWorld‑Summary aus deiner JSON (NewResidents[...] -> Explorer icon)
-            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_artisan.png'],
-            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_brick_factory_blue.png'],
-            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_coal_mine_blue.png'],
-            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_expeditioncards.png'],
-            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_explorerShip.png'],
-            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_farmer.png'],
-            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_sail_makers_blue.png'],
-            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_shipyard_lv1.png'],
-            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_steel_works_blue.png'],
-            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_tradeShip.png'],
-            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_warehouse_blue.png'],
-            'old[land=2,coast=2,sea=2,reward=newresidents': ['islands/oldWorldIsland_worker.png'],
+            // New World plantation hints
+            'new[plantations=cotton': ['islands/newWorldIsland_cotton.png'],
+            'new[plantations=coffee': ['islands/newWorldIsland_coffee.png'],
+            'new[plantations=cacao': ['islands/newWorldIsland_cacao.png'],
+
+            // generic fallbacks by token found in summary
+            'new[plantations=': ['islands/newWorldIsland_back.png']
         };
 
+        // Explicit hardcoded mapping for Old-World island tokens -> icon filenames.
+        // Edit this object to control exactly which `islands/oldWorldIsland_*.png` is used
+        // for a given factory/token name. Keys should be lowercase tokens found in the
+        // `factories=` or summary strings (e.g. 'brick_factory', 'coal_mine').
+        const HARDCODED_OLDWORLD_MAP = {
+            // example mappings (adjust as desired):
+            // 'brick_factory': 'islands/oldWorldIsland_brick_factory_blue.png',
+            // 'coal_mine': 'islands/oldWorldIsland_coal_mine_blue.png',
+            // 'warehouse': 'islands/oldWorldIsland_warehouse_blue.png',
+        };
+
+        // Resolve an island icon candidate to a usable filename (or null).
+        function resolveIslandIcon(candidate) {
+            if (!candidate) return null;
+            try { if (imageSrcFor(candidate)) return candidate; } catch (e) {}
+            const candLower = String(candidate).toLowerCase();
+            try { if ((orderedIconFileNames || []).map(n=>n.toLowerCase()).includes(candLower)) return candidate; } catch (e) {}
+            try { if (iconPathByName && iconPathByName[candLower]) return candidate; } catch (e) {}
+            const file = candLower.split('/').pop();
+            try { if ((orderedIconFileNames || []).map(n=>n.toLowerCase()).includes(file)) return file; } catch (e) {}
+            try { if (iconPathByName && iconPathByName[file]) return file; } catch (e) {}
+            return null;
+        }
+
+        // Narrow helper: when an action detail contains a generic `reward=` token,
+        // only match island candidates that include a likely reward keyword.
+        function matchesRewardCandidate(name, hay) {
+            if (!name || !hay) return false;
+            const kws = ['farmer','worker','artisan','warehouse','coal','brick','steel','trade','explorer','shipyard','sail','expeditioncards','gold'];
+            const lname = String(name || '').toLowerCase();
+            const lhay = String(hay || '').toLowerCase();
+            for (const kw of kws) {
+                if (lhay.includes(kw) && lname.includes(kw)) return true;
+            }
+            return false;
+        }
+
+        // Lookup island icons by analyzing an island summary string.
+        // Returns an array of candidate filenames (may be empty).
         function lookupIslandIconsFromSummary(summary) {
-            if (!summary) return [];
-            const s = String(summary).toLowerCase();
             const found = [];
-            for (const key of Object.keys(ISLAND_ICON_MAP)) {
-                try {
-                    if (s.includes(key.toLowerCase())) {
+            if (!summary) return found;
+            const text = String(summary || '').toLowerCase();
+
+            // 1) ISLAND_ICON_MAP substring matches (new-world & generic hints)
+            try {
+                for (const key of Object.keys(ISLAND_ICON_MAP || {})) {
+                    if (!key) continue;
+                    if (text.includes(key)) {
                         const arr = ISLAND_ICON_MAP[key] || [];
-                        for (const a of arr) {
-                            if (a && !found.includes(a)) found.push(a);
+                        if (arr.length > 0) {
+                            const cand = resolveIslandIcon(arr[0]);
+                            if (cand && !found.includes(cand)) found.push(cand);
                         }
                     }
-                } catch (e) {
-                    // ignore malformed keys
                 }
+            } catch (e) {}
+
+            // 2) HARDCODED_OLDWORLD_MAP via factories= tokens
+            try {
+                const m = text.match(/factories=([^\]]+)/i);
+                if (m && m[1]) {
+                    const factories = m[1].split('|').map(x => String(x || '').trim()).filter(Boolean);
+                    for (const fRaw of factories) {
+                        const f = fRaw.toLowerCase();
+                        if (HARDCODED_OLDWORLD_MAP[f]) {
+                            const cand = resolveIslandIcon(HARDCODED_OLDWORLD_MAP[f]);
+                            if (cand && !found.includes(cand)) found.push(cand);
+                        }
+                        const base = f.split('_')[0];
+                        if (HARDCODED_OLDWORLD_MAP[base]) {
+                            const candb = resolveIslandIcon(HARDCODED_OLDWORLD_MAP[base]);
+                            if (candb && !found.includes(candb)) found.push(candb);
+                        }
+                    }
+                }
+            } catch (e) {}
+
+            // 2b) Precise reward mapping: NewResidents(amount=1, populationLevel=3) -> artisan icon
+            try {
+                const rw = text.match(/newresidents\s*\[\s*amount\s*=\s*(\d+)\s*,\s*populationlevel\s*=\s*(\d+)\s*\]/i);
+                if (rw) {
+                    const amt = Number(rw[1] || 0);
+                    const lvl = Number(rw[2] || 0);
+                    if (amt === 1 && lvl === 3) {
+                        const cand = resolveIslandIcon('islands/oldWorldIsland_artisan.png');
+                        if (cand && !found.includes(cand)) found.push(cand);
+                    }
+                }
+            } catch (e) {}
+
+            // 2c) Ship/explorer specific mappings
+            try {
+                // Specific old[] pattern that should map to shipyard level 1
+                if (/old\[\s*land\s*=\s*2\s*,\s*coast\s*=\s*1\s*,\s*sea\s*=\s*2\s*,\s*reward\s*=\s*none\s*\]/i.test(text)) {
+                    const cand = resolveIslandIcon('islands/oldWorldIsland_shipyard_lv1.png');
+                    if (cand && !found.includes(cand)) found.push(cand);
+                }
+
+                // ExplorerShip presence => explorerShip icon
+                if (/explorer(ship)?/i.test(text) || text.includes('explorership')) {
+                    const cand = resolveIslandIcon('islands/oldWorldIsland_explorerShip.png');
+                    if (cand && !found.includes(cand)) found.push(cand);
+                }
+
+                // Shipyard presence => shipyard icon
+                if (/shipyard/i.test(text) || text.includes('shipyard_lv1')) {
+                    const cand = resolveIslandIcon('islands/oldWorldIsland_shipyard_lv1.png');
+                    if (cand && !found.includes(cand)) found.push(cand);
+                }
+            } catch (e) {}
+
+            // 3) Direct mentions of known icon filenames
+            try {
+                for (const candidate of (orderedIconFileNames || [])) {
+                    const name = String(candidate || '').toLowerCase();
+                    if (!name) continue;
+                    if (text.includes(name) || text.includes(name.replace(/[^a-z0-9]/g, ''))) {
+                        if (!found.includes(candidate)) found.push(candidate);
+                    }
+                }
+            } catch (e) {}
+
+            // 4) reward-based fallback
+            if (found.length === 0 && text.includes('reward=')) {
+                try {
+                    const rewardCandidates = (orderedIconFileNames || []).filter(n => String(n || '').toLowerCase().includes('oldworldisland'));
+                    for (const candidate of rewardCandidates) {
+                        if (matchesRewardCandidate(candidate, text) && !found.includes(candidate)) found.push(candidate);
+                    }
+                } catch (e) {}
             }
+
             return found;
         }
 
@@ -610,16 +700,14 @@ Wichtige Render-Funktionen:
 
                 const players = Array.isArray(state.players) ? state.players : [];
                 const residentTitle = document.createElement("p");
-                residentTitle.className = "action-title";
-                residentTitle.style.marginTop = "12px";
+                residentTitle.className = "action-title resident-title";
                 residentTitle.textContent = "ResidentCards je Spieler";
                 cardOverviewContainerEl.appendChild(residentTitle);
 
                 for (const player of players) {
                     const playerName = String(player?.name || "Spieler");
                     const header = document.createElement("p");
-                    header.className = "action-title";
-                    header.style.margin = "8px 0 4px";
+                    header.className = "action-title action-header";
                     header.textContent = playerName.replace("Player ", "Spieler ");
                     cardOverviewContainerEl.appendChild(header);
 
@@ -881,10 +969,126 @@ Wichtige Render-Funktionen:
             const layout = document.createElement('div');
             layout.className = 'island-layout';
 
-            // left small tile (placeholder)
+            // Gather discovered islands for this player so both left and right
+            // "Neue Insel" areas can render them consistently. We merge multiple
+            // possible JSON shapes and also scan historical entries up to current
+            // index so discoveries persist across subsequent states.
+            let playerOldSummaries = [];
+            let playerNewSummaries = [];
+            try {
+                const oldFromPlayer = (player && Array.isArray(player.discoveredOldWorldIslands)) ? player.discoveredOldWorldIslands : [];
+                const newFromPlayer = (player && Array.isArray(player.discoveredNewWorldIslands)) ? player.discoveredNewWorldIslands : [];
+                const discoveredIslandsObj = (player && player.discoveredIslands) ? player.discoveredIslands : null;
+                const oldFromObj = (discoveredIslandsObj && Array.isArray(discoveredIslandsObj.oldWorld)) ? discoveredIslandsObj.oldWorld : [];
+                const newFromObj = (discoveredIslandsObj && Array.isArray(discoveredIslandsObj.newWorld)) ? discoveredIslandsObj.newWorld : [];
+
+                const historicalOld = [];
+                for (let i = 0; i <= index; i += 1) {
+                    const e = entries[i];
+                    if (!e) continue;
+                    const act = String(e.executedAction || '').toLowerCase();
+                    if (act.includes('discoveroldworldisland') || act.includes('discoveroldworld')) {
+                        const executedBy = String(e.executedByPlayer || '').trim();
+                        if (executedBy && player && String(player.name || '') === executedBy) {
+                            const detailsText = String(e.executedActionDetails || e.actionDetails || '') + ' ' + ((e.actionDetailsBlocks || []).map(b => (b.items || []).join(' ')).join(' '));
+                            if (detailsText && !historicalOld.includes(detailsText)) historicalOld.push(detailsText);
+                        }
+                    }
+                }
+
+                // merge sources (preserve order: explicit player arrays first)
+                for (const s of oldFromPlayer) if (s && !playerOldSummaries.includes(s)) playerOldSummaries.push(s);
+                for (const s of oldFromObj) if (s && !playerOldSummaries.includes(s)) playerOldSummaries.push(s);
+                for (const s of historicalOld) if (s && !playerOldSummaries.includes(s)) playerOldSummaries.push(s);
+
+                for (const s of newFromPlayer) if (s && !playerNewSummaries.includes(s)) playerNewSummaries.push(s);
+                for (const s of newFromObj) if (s && !playerNewSummaries.includes(s)) playerNewSummaries.push(s);
+            } catch (e) {
+                // ignore
+            }
+
+            // left small tile container: split into top (new world) and bottom (old world)
             const leftTile = document.createElement('div');
             leftTile.className = 'island-small-tile';
-            leftTile.textContent = 'Neue Insel (L)';
+            const leftTop = document.createElement('div');
+            leftTop.className = 'island-sub-tile island-sub-new';
+            const leftBottom = document.createElement('div');
+            leftBottom.className = 'island-sub-tile island-sub-old';
+
+            // Top: render older discovered new-world islands (3rd and 4th)
+            if (playerNewSummaries.length > 2) {
+                const icons = [];
+                for (let i = 2; i < Math.min(4, playerNewSummaries.length); i += 1) {
+                    const summary = playerNewSummaries[i];
+                    const manual = lookupIslandIconsFromSummary(summary || '');
+                    if (manual && manual.length > 0) { icons.push(manual[0]); continue; }
+                    const textSummary = String(summary || '').toLowerCase();
+                    let matched = null;
+                    for (const candidate of orderedIconFileNames || []) {
+                        const name = candidate.toLowerCase();
+                        if (!name.includes('newworldisland')) continue;
+                        if (textSummary.includes(name) || textSummary.includes(name.replace(/[^a-z0-9]/g, ''))) { matched = candidate; break; }
+                    }
+                    icons.push(matched || 'newWorldIsland_base.png');
+                }
+                leftTop.innerHTML = '';
+                for (const u of icons) {
+                    const img = document.createElement('img');
+                    img.src = imageSrcFor(u) || (iconBaseUri + '/' + u);
+                    img.alt = u;
+                    img.classList.add('img-fit');
+                    leftTop.appendChild(img);
+                }
+            } else {
+                leftTop.textContent = 'Neue Insel (L) - NewWorld';
+            }
+
+            // Bottom: render older discovered old-world islands (3rd and 4th)
+            if (playerOldSummaries.length > 2) {
+                const icons = [];
+                for (let i = 2; i < Math.min(4, playerOldSummaries.length); i += 1) {
+                    const summary = playerOldSummaries[i];
+                    const manual = lookupIslandIconsFromSummary(summary || '');
+                    if (manual && manual.length > 0) { icons.push(manual[0]); continue; }
+                    const textSummary = String(summary || '').toLowerCase();
+                    let matched = null;
+                    try {
+                        const m = textSummary.match(/factories=([^\]]+)/i);
+                        if (m && m[1]) {
+                            const factories = m[1].split('|').map(x => String(x || '').trim()).filter(Boolean);
+                                for (const fRaw of factories) {
+                                const f = fRaw.toLowerCase();
+                                if (HARDCODED_OLDWORLD_MAP[f]) { const cand = resolveIslandIcon(HARDCODED_OLDWORLD_MAP[f]); if (cand) { icons.push(cand); matched = true; break; } }
+                                const base = f.split('_')[0];
+                                if (HARDCODED_OLDWORLD_MAP[base]) { const candb = resolveIslandIcon(HARDCODED_OLDWORLD_MAP[base]); if (candb) { icons.push(candb); matched = true; break; } }
+                            }
+                            if (matched) continue;
+                        }
+                    } catch (e) {}
+                    for (const candidate of orderedIconFileNames || []) {
+                        const name = candidate.toLowerCase();
+                        if (!name.includes('oldworldisland')) continue;
+                        if (textSummary.includes(name) || textSummary.includes(name.replace(/[^a-z0-9]/g, '')) || (textSummary.includes('reward=') && matchesRewardCandidate(name, textSummary))) { matched = candidate; break; }
+                    }
+                    if (!matched) {
+                        try { console.debug('No old-world icon matched (left bottom factory scan):', { summary: textSummary, candidates: (orderedIconFileNames||[]).filter(n=>n.toLowerCase().includes('oldworldisland')).slice(0,20) }); } catch(e){}
+                    }
+                    if (matched) icons.push(matched);
+                }
+                leftBottom.innerHTML = '';
+                for (const u of icons) {
+                    const img = document.createElement('img');
+                    img.src = imageSrcFor(u) || (iconBaseUri + '/' + u);
+                    img.alt = u;
+                    img.classList.add('img-fit');
+                    leftBottom.appendChild(img);
+                }
+            } else {
+                leftBottom.textContent = 'Neue Insel (L) - OldWorld';
+            }
+
+            leftTile.appendChild(leftTop);
+            leftTile.appendChild(leftBottom);
             layout.appendChild(leftTile);
 
             // main tile: show player's island image full-area if available
@@ -1115,9 +1319,13 @@ Wichtige Render-Funktionen:
                 }
             })();
 
-            // right small tile - if current entry is a DiscoverNewWorldIsland by this player, show discovered island image
+            // right small tile container: split into top (new world) and bottom (old world)
             const rightTile = document.createElement('div');
             rightTile.className = 'island-small-tile';
+            const rightTop = document.createElement('div');
+            rightTop.className = 'island-sub-tile island-sub-new';
+            const rightBottom = document.createElement('div');
+            rightBottom.className = 'island-sub-tile island-sub-old';
 
             // determine current entry and whether this player discovered an island (new or old)
             try {
@@ -1126,27 +1334,23 @@ Wichtige Render-Funktionen:
                 if (currentEntry && String(currentEntry.executedAction || '').toLowerCase().includes('discovernewworldisland')) {
                     // New World: try to pick a matching island image from details or fallback
                     const executedBy = String(currentEntry.executedByPlayer || '').trim();
-                    if (executedBy && player && String(player.name || '') === executedBy) {
-                        const details = currentEntry.executedActionDetails || '';
-                        let discoveredImg = null;
-                        // Always show the base new world island image; plantations will be overlaid later.
-                        discoveredImg = 'newWorldIsland_base.png';
-                        const img = document.createElement('img');
-                        const src = imageSrcFor(discoveredImg) || (iconBaseUri + '/' + discoveredImg);
-                        img.src = src;
-                        img.alt = discoveredImg;
-                        img.style.maxWidth = '100%';
-                        img.style.maxHeight = '100%';
-                        img.style.objectFit = 'contain';
-                        rightTile.appendChild(img);
-                    } else {
-                        rightTile.textContent = 'Neue Insel (R)';
-                    }
+                        if (executedBy && player && String(player.name || '') === executedBy) {
+                            const details = currentEntry.executedActionDetails || '';
+                            let discoveredImg = 'newWorldIsland_base.png';
+                            const img = document.createElement('img');
+                            const src = imageSrcFor(discoveredImg) || (iconBaseUri + '/' + discoveredImg);
+                            img.src = src;
+                            img.alt = discoveredImg;
+                            img.classList.add('img-fit');
+                            rightTop.appendChild(img);
+                        } else {
+                            rightTop.textContent = 'Neue Insel (R) - NewWorld';
+                        }
 
                 } else if (currentEntry && String(currentEntry.executedAction || '').toLowerCase().includes('discoveroldworldisland')) {
                     // Old World: there may be 0..2 old-world tiles referenced in action details/blocks
                     const executedBy = String(currentEntry.executedByPlayer || '').trim();
-                    if (executedBy && player && String(player.name || '') === executedBy) {
+                        if (executedBy && player && String(player.name || '') === executedBy) {
                         const detailsText = String(currentEntry.actionDetails || currentEntry.executedActionDetails || '') + ' ' +
                             ((currentEntry.actionDetailsBlocks || []).map(b => (b.items || []).join(' ')).join(' '));
                         const hay = detailsText.toLowerCase();
@@ -1159,6 +1363,23 @@ Wichtige Render-Funktionen:
                                 found.push(m);
                                 if (found.length >= 2) break;
                             }
+                        }
+
+                        // If still none, prefer factory-driven mapping when action details mention factories=
+                        if (found.length === 0) {
+                            try {
+                                const fm = detailsText.toLowerCase().match(/factories=([^\]]+)/i);
+                                if (fm && fm[1]) {
+                                    const fl = fm[1].split('|').map(x => String(x||'').trim()).filter(Boolean);
+                                        for (const fRaw of fl) {
+                                        const f = fRaw.toLowerCase();
+                                        const base = f.split('_')[0];
+                                        if (HARDCODED_OLDWORLD_MAP[f]) { const cand = resolveIslandIcon(HARDCODED_OLDWORLD_MAP[f]); if (cand) found.push(cand); }
+                                        else if (HARDCODED_OLDWORLD_MAP[base]) { const candb = resolveIslandIcon(HARDCODED_OLDWORLD_MAP[base]); if (candb) found.push(candb); }
+                                        if (found.length >= 2) break;
+                                    }
+                                }
+                            } catch (e) {}
                         }
 
                         // If none from manual mapping, try direct mention match among known icons
@@ -1202,107 +1423,151 @@ Wichtige Render-Funktionen:
                                 const src = imageSrcFor(u) || (iconBaseUri + '/' + u);
                                 img.src = src;
                                 img.alt = u;
-                                img.style.maxWidth = '100%';
-                                img.style.maxHeight = '100%';
-                                img.style.objectFit = 'contain';
-                                img.style.marginRight = '6px';
-                                rightTile.appendChild(img);
+                                img.classList.add('img-fit');
+                                rightBottom.appendChild(img);
                             }
                         } else {
-                            // generic fallback old-world back image
-                            const fallback = 'oldWorldIsland_back.png';
-                            const img = document.createElement('img');
-                            img.src = imageSrcFor(fallback) || (iconBaseUri + '/' + fallback);
-                            img.alt = fallback;
-                            img.style.maxWidth = '100%';
-                            img.style.maxHeight = '100%';
-                            img.style.objectFit = 'contain';
-                            rightTile.appendChild(img);
+                            try { console.debug('No old-world icons found for discovery action (fallback removed):', { detailsText: detailsText, manual: manual, foundCandidates: found.slice(0,10), rewardSample: String(currentEntry.actionDetails||'').toLowerCase() }); } catch(e){}
+                            rightBottom.textContent = 'Neue Insel (R) - OldWorld';
                         }
                     } else {
-                        rightTile.textContent = 'Neue Insel (R)';
+                        rightBottom.textContent = 'Neue Insel (R) - OldWorld';
                     }
 
                 } else {
-                    // If the current entry is not a discovery action, still show any
-                    // islands that are stored in the player's discovered lists (persisted in GameState).
-                    try {
-                        const oldDiscovered = (player && Array.isArray(player.discoveredOldWorldIslands)) ? player.discoveredOldWorldIslands : [];
-                        const newDiscovered = (player && Array.isArray(player.discoveredNewWorldIslands)) ? player.discoveredNewWorldIslands : [];
+                        // If the current entry is not a discovery action, still show any
+                        // islands that are stored in the player's discovered lists (persisted in GameState)
+                        // or were discovered in any previous entry. This ensures old-world
+                        // islands remain visible in subsequent states even if the immediate
+                        // entry is not a discovery action.
+                        try {
+                            // collect discovered summaries from multiple possible shapes in the JSON
+                            const oldDiscoveredFromPlayer = (player && Array.isArray(player.discoveredOldWorldIslands)) ? player.discoveredOldWorldIslands : [];
+                            const newDiscoveredFromPlayer = (player && Array.isArray(player.discoveredNewWorldIslands)) ? player.discoveredNewWorldIslands : [];
+                            const discoveredIslandsObj = (player && player.discoveredIslands) ? player.discoveredIslands : null;
+                            const oldDiscoveredFromObj = (discoveredIslandsObj && Array.isArray(discoveredIslandsObj.oldWorld)) ? discoveredIslandsObj.oldWorld : [];
+                            const newDiscoveredFromObj = (discoveredIslandsObj && Array.isArray(discoveredIslandsObj.newWorld)) ? discoveredIslandsObj.newWorld : [];
 
-                        let rendered = false;
-                        // Prefer explicit old-world discovered icons
-                        if (oldDiscovered.length > 0) {
-                            const foundIcons = [];
-                            for (const summary of oldDiscovered) {
-                                // try manual mapping first
-                                const manual = lookupIslandIconsFromSummary(summary);
-                                if (manual && manual.length > 0) {
-                                    for (const m of manual) {
-                                        foundIcons.push(m);
+                            // scan previous entries up to current index for any discoveroldworldisland actions
+                            const historicalOld = [];
+                            for (let i = 0; i <= index; i += 1) {
+                                const e = entries[i];
+                                if (!e) continue;
+                                const act = String(e.executedAction || '').toLowerCase();
+                                if (act.includes('discoveroldworldisland') || act.includes('discoveroldworld')) {
+                                    const executedBy = String(e.executedByPlayer || '').trim();
+                                    if (executedBy && player && String(player.name || '') === executedBy) {
+                                        // collect textual details if present
+                                        const detailsText = String(e.executedActionDetails || e.actionDetails || '') + ' ' + ((e.actionDetailsBlocks || []).map(b => (b.items || []).join(' ')).join(' '));
+                                        if (detailsText && !historicalOld.includes(detailsText)) historicalOld.push(detailsText);
+                                    }
+                                }
+                            }
+
+                            // merge sources, prefer explicit player arrays, then discoveredIslands obj, then historical detections
+                            const oldSummaries = [];
+                            for (const s of oldDiscoveredFromPlayer) if (s && !oldSummaries.includes(s)) oldSummaries.push(s);
+                            for (const s of oldDiscoveredFromObj) if (s && !oldSummaries.includes(s)) oldSummaries.push(s);
+                            for (const s of historicalOld) if (s && !oldSummaries.includes(s)) oldSummaries.push(s);
+
+                            const newSummaries = [];
+                            for (const s of newDiscoveredFromPlayer) if (s && !newSummaries.includes(s)) newSummaries.push(s);
+                            for (const s of newDiscoveredFromObj) if (s && !newSummaries.includes(s)) newSummaries.push(s);
+
+                            let rendered = false;
+                            // Prefer explicit old-world discovered icons (limit to first two)
+                            if (oldSummaries.length > 0) {
+                                const foundIcons = [];
+                                for (const summary of oldSummaries) {
+                                    // try manual mapping first
+                                    const manual = lookupIslandIconsFromSummary(summary);
+                                    if (manual && manual.length > 0) {
+                                        for (const m of manual) {
+                                            if (!foundIcons.includes(m)) foundIcons.push(m);
+                                        }
+                                        if (foundIcons.length >= 2) break;
+                                        continue;
+                                    }
+
+                                    const textSummary = String(summary || '').toLowerCase();
+                                    for (const candidate of orderedIconFileNames || []) {
+                                        const name = candidate.toLowerCase();
+                                        if (!name.includes('oldworldisland')) continue;
+                                        if (textSummary.includes(name) || textSummary.includes(name.replace(/[^a-z0-9]/g, '')) || (textSummary.includes('reward=') && matchesRewardCandidate(name, textSummary))) {
+                                            if (!foundIcons.includes(candidate)) foundIcons.push(candidate);
+                                            break;
+                                        }
+                                    }
+                                    // Try factory-driven mapping as a last attempt for this summary
+                                    if (foundIcons.length === 0) {
+                                        try {
+                                            const fm = String(summary || '').toLowerCase().match(/factories=([^\]]+)/i);
+                                            if (fm && fm[1]) {
+                                                const fl = fm[1].split('|').map(x=>String(x||'').trim()).filter(Boolean);
+                                                    for (const fRaw of fl) {
+                                                    const f = fRaw.toLowerCase();
+                                                    const base = f.split('_')[0];
+                                                    if (HARDCODED_OLDWORLD_MAP[f]) {
+                                                        const cand = resolveIslandIcon(HARDCODED_OLDWORLD_MAP[f]);
+                                                        if (cand && !foundIcons.includes(cand)) foundIcons.push(cand);
+                                                    }
+                                                    else if (HARDCODED_OLDWORLD_MAP[base]) {
+                                                        const candb = resolveIslandIcon(HARDCODED_OLDWORLD_MAP[base]);
+                                                        if (candb && !foundIcons.includes(candb)) foundIcons.push(candb);
+                                                    }
+                                                    if (foundIcons.length >= 2) break;
+                                                }
+                                            }
+                                        } catch (e) {}
                                     }
                                     if (foundIcons.length >= 2) break;
-                                    continue;
                                 }
-
-                                const textSummary = String(summary || '').toLowerCase();
-                                for (const candidate of orderedIconFileNames || []) {
-                                    const name = candidate.toLowerCase();
-                                    if (!name.includes('oldworldisland')) continue;
-                                    if (textSummary.includes(name) || textSummary.includes(name.replace(/[^a-z0-9]/g, '')) || textSummary.includes('reward=') && name.includes('oldworldisland')) {
-                                        foundIcons.push(candidate);
-                                        break;
+                                const unique = [...new Set(foundIcons)].slice(0,2);
+                                if (unique.length > 0) {
+                                    for (const u of unique) {
+                                        const img = document.createElement('img');
+                                        img.src = imageSrcFor(u) || (iconBaseUri + '/' + u);
+                                        img.alt = u;
+                                        img.classList.add('img-fit');
+                                        // img.style.marginRight = '6px';
+                                        rightBottom.appendChild(img);
                                     }
+                                    rendered = true;
                                 }
-                                if (foundIcons.length >= 2) break;
                             }
-                            const unique = [...new Set(foundIcons)].slice(0,2);
-                            if (unique.length > 0) {
-                                for (const u of unique) {
-                                    const img = document.createElement('img');
-                                    img.src = imageSrcFor(u) || (iconBaseUri + '/' + u);
-                                    img.alt = u;
-                                    img.style.maxWidth = '100%';
-                                    img.style.maxHeight = '100%';
-                                    img.style.objectFit = 'contain';
-                                    img.style.marginRight = '6px';
-                                    rightTile.appendChild(img);
-                                }
+
+                            // If none from old world, and there are new world discoveries,
+                            // always render the base new world island image (plantations will be overlaid later).
+                            if (!rendered && newSummaries.length > 0) {
+                                const img = document.createElement('img');
+                                const src = imageSrcFor('newWorldIsland_base.png') || (iconBaseUri + '/newWorldIsland_base.png');
+                                img.src = src;
+                                img.alt = 'newWorldIsland_base.png';
+                                img.classList.add('img-fit');
+                                rightTop.appendChild(img);
                                 rendered = true;
                             }
-                        }
 
-                        // If none from old world, and there are new world discoveries,
-                        // always render the base new world island image (plantations will be overlaid later).
-                        if (!rendered && newDiscovered.length > 0) {
-                            const img = document.createElement('img');
-                            const src = imageSrcFor('newWorldIsland_base.png') || (iconBaseUri + '/newWorldIsland_base.png');
-                            img.src = src;
-                            img.alt = 'newWorldIsland_base.png';
-                            img.style.maxWidth = '100%';
-                            img.style.maxHeight = '100%';
-                            img.style.objectFit = 'contain';
-                            rightTile.appendChild(img);
-                            rendered = true;
-                        }
-
-                        if (!rendered) {
+                            if (!rendered) {
+                                rightTop.textContent = 'Neue Insel (R) - NewWorld';
+                                rightBottom.textContent = 'Neue Insel (R) - OldWorld';
+                            }
+                        } catch (e) {
                             rightTile.textContent = 'Neue Insel (R)';
                         }
-                    } catch (e) {
-                        rightTile.textContent = 'Neue Insel (R)';
-                    }
                 }
             } catch (e) {
                 rightTile.textContent = 'Neue Insel (R)';
             }
 
+            // append both sub-tiles into rightTile container
+            rightTile.appendChild(rightTop);
+            rightTile.appendChild(rightBottom);
             layout.appendChild(rightTile);
 
             islandSection.appendChild(layout);
             const resourceRow = document.createElement('div');
-            resourceRow.className = 'resource-row';
-            resourceRow.style.marginTop = '7px';
+            resourceRow.className = 'resource-row resource-row--spaced';
             resourceRow.appendChild(createTokenWithIcon('token', `Land frei: ${tiles.freeLand ?? 0}`));
             // instead of using token image, reuse token-pill markup
             const pillLand = document.createElement('span'); pillLand.className = 'token-pill'; pillLand.textContent = `Land frei: ${tiles.freeLand ?? 0}`;
@@ -1444,6 +1709,14 @@ Wichtige Render-Funktionen:
                 rowEl.className = "board-factory-row";
                 for (const f of row.factories) {
                     const fid = f.id || f.name || "";
+
+                    // Debugging: log availableByType lookups for problematic factories
+                    try {
+                        const sampleKeys = availableByType && availableByType.byId ? Object.keys(availableByType.byId).slice(0,50) : [];
+                        console.log('Factory lookup', { fid: fid, name: f.name, byIdValue: availableByType && availableByType.byId ? availableByType.byId[fid] : undefined, normalizedMatch: availableByType && availableByType.normalizedById ? availableByType.normalizedById[normalizeKey(fid || f.name || '')] : undefined, friendly: availableByType && availableByType.friendly ? availableByType.friendly[f.name] : undefined, nameLookup: availableByType && availableByType.nameLookup ? availableByType.nameLookup[normalizeKey(fid || f.name || '')] : undefined, sampleByIdKeys: sampleKeys });
+                    } catch (e) {
+                        console.warn('Failed to log factory lookup', e);
+                    }
 
                     // Prefer authoritative boardState counters when present (they reflect current remaining pool)
                     let boardCount = undefined;
@@ -1869,6 +2142,15 @@ Wichtige Render-Funktionen:
 
         prevBtn.addEventListener("click", goPrevious);
         nextBtn.addEventListener("click", goNext);
+        // Jump to the last available state and render immediately
+        const lastBtn = document.getElementById("lastBtn");
+        if (lastBtn) {
+            lastBtn.addEventListener("click", () => {
+                if (!Array.isArray(entries) || entries.length === 0) return;
+                index = Math.max(0, entries.length - 1);
+                render();
+            });
+        }
         // plus buttons: advance multiple states
         const plus5Btn = document.getElementById("plus5Btn");
         const plus10Btn = document.getElementById("plus10Btn");
@@ -1894,7 +2176,103 @@ Wichtige Render-Funktionen:
             render();
         } catch (e) {
             const banner = document.createElement('div');
-            banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#b91c1c;color:#fff;padding:16px 20px;font-size:14px;font-family:monospace;white-space:pre-wrap;';
+            banner.classList.add('top-banner');
             banner.textContent = 'render() ERROR: ' + e.message + ' | ' + (e.stack || '');
             document.body.appendChild(banner);
+        }
+
+        // Berechnet verfügbare Fabriken/Schiffe aus dem Board-State.
+        // Liefert ein Objekt mit folgenden Feldern:
+        // - friendly: displayName -> count (für FACTORY_LAYOUT Anzeige)
+        // - byId: id -> count (keys wie in FACTORY_LAYOUT f.id)
+        // - nameLookup: displayName -> id
+        // - normalizedById: normalizedId -> count (lowercased, stripped)
+        function calculateAvailableFactories(state, entry) {
+            const board = state?.boardState || {};
+            const byId = {};
+            const normalizedById = {};
+            const nameLookup = {};
+
+            // factories (generic named factories)
+            if (board.factories && typeof board.factories === 'object') {
+                for (const [k, v] of Object.entries(board.factories)) {
+                    const cnt = Number(v || 0);
+                    byId[k] = cnt;
+                    normalizedById[String(k).toLowerCase().replace(/[^a-z0-9_]/g, '')] = cnt;
+                }
+            }
+
+            // shipyards (level keys like level1 -> produce id shipyard_lv1)
+            if (board.shipyards && typeof board.shipyards === 'object') {
+                for (const [levelKey, v] of Object.entries(board.shipyards)) {
+                    const m = String(levelKey).match(/level(\d+)/i);
+                    const lv = m ? m[1] : levelKey.replace(/[^0-9]/g, '') || '';
+                    const id = `shipyard_lv${lv}`;
+                    const cnt = Number(v || 0);
+                    byId[id] = cnt;
+                    normalizedById[id.toLowerCase()] = cnt;
+                }
+            }
+
+            // ships (tradeShips / explorerShips)
+            if (board.ships && typeof board.ships === 'object') {
+                if (board.ships.tradeShips && typeof board.ships.tradeShips === 'object') {
+                    for (const [levelKey, v] of Object.entries(board.ships.tradeShips)) {
+                        const m = String(levelKey).match(/level(\d+)/i);
+                        const lv = m ? m[1] : levelKey.replace(/[^0-9]/g, '') || '';
+                        const id = `tradeShip_lv${lv}`;
+                        const cnt = Number(v || 0);
+                        byId[id] = cnt;
+                        normalizedById[id.toLowerCase()] = cnt;
+                    }
+                }
+                if (board.ships.explorerShips && typeof board.ships.explorerShips === 'object') {
+                    for (const [levelKey, v] of Object.entries(board.ships.explorerShips)) {
+                        const m = String(levelKey).match(/level(\d+)/i);
+                        const lv = m ? m[1] : levelKey.replace(/[^0-9]/g, '') || '';
+                        const id = `explorerShip_lv${lv}`;
+                        const cnt = Number(v || 0);
+                        byId[id] = cnt;
+                        normalizedById[id.toLowerCase()] = cnt;
+                    }
+                }
+            }
+
+            // Build friendly/nameLookup from FACTORY_LAYOUT when available
+            const friendly = {};
+            try {
+                if (Array.isArray(FACTORY_LAYOUT)) {
+                    for (const row of FACTORY_LAYOUT) {
+                        for (const f of row.factories || []) {
+                            const layoutId = f.id || f.name || "";
+                            const display = f.name || layoutId;
+                            nameLookup[display] = layoutId;
+                            // try direct key, but also aggregate variants (color suffixes)
+                            let sum = Number(byId[layoutId] || 0);
+                            for (const k of Object.keys(byId)) {
+                                if (k && layoutId && k.toLowerCase().startsWith((layoutId + "_").toLowerCase())) {
+                                    sum += Number(byId[k] || 0);
+                                }
+                            }
+                            friendly[display] = sum;
+                        }
+                    }
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            return {
+                friendly: friendly,
+                byId: byId,
+                nameLookup: nameLookup,
+                normalizedById: normalizedById,
+            };
+        }
+
+        // Normalisiert einen beliebigen Key (id/name) für Lookup-Vergleiche.
+        // Entfernt Nicht-Alphanumerische Zeichen und wandelt in lowercase.
+        function normalizeKey(value) {
+            const s = String(value ?? "").toLowerCase().trim();
+            return s.replace(/[^a-z0-9_]/g, '');
         }
